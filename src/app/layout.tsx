@@ -25,9 +25,9 @@ const RootLayout = async ({
                 <h1>SinoFlow</h1>
               </Link>
               <div style={{ display: "flex", gap: "1.5rem", fontSize: "0.95rem", fontWeight: 500 }}>
-                <span style={{ cursor: "pointer" }}>所有课程</span>
-                <span style={{ cursor: "pointer" }}>学习路径</span>
-                <span style={{ cursor: "pointer" }}>关于我们</span>
+                <span className="nav-link" style={{ cursor: "pointer" }}>所有课程</span>
+                <span className="nav-link" style={{ cursor: "pointer" }}>学习路径</span>
+                <span className="nav-link" style={{ cursor: "pointer" }}>关于我们</span>
               </div>
             </div>
             <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>

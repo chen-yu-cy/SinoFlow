@@ -13,12 +13,11 @@ interface CourseCardProps {
 
 const CourseCard = ({ id, title, description, price, level, duration }: CourseCardProps) => {
   return (
-    <div style={{
+    <div className="course-card" style={{
       background: "#fff",
       borderRadius: "8px",
       overflow: "hidden",
       boxShadow: "var(--card-shadow)",
-      transition: "transform 0.2s",
       display: "flex",
       flexDirection: "column",
       border: "1px solid var(--border-color)"
@@ -32,9 +31,10 @@ const CourseCard = ({ id, title, description, price, level, duration }: CourseCa
         alignItems: "center",
         justifyContent: "center",
         color: "#adb5bd",
-        fontSize: "0.9rem"
+        fontSize: "0.9rem",
+        overflow: "hidden"
       }}>
-        [ 课程封面图 ]
+        <div style={{ transition: "transform 0.5s" }}>[ 课程封面图 ]</div>
       </div>
 
       <div style={{ padding: "1.25rem", flex: 1, display: "flex", flexDirection: "column" }}>
