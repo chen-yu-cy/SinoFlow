@@ -38,6 +38,17 @@ const CourseCard = ({ id, title, description, price, level, duration, thumbnail,
   const completedText = (t as any).completed || "已完成";
   const lessonsText = (t as any).lessons || "课时";
 
+  const getLevelLabel = () => {
+    if (level === "入门级" || level === "基础级") return (t as any).levelBeginner || level;
+    if (level === "进阶级") return (t as any).levelIntermediate || level;
+    if (level === "高级") return (t as any).levelAdvanced || level;
+    return level;
+  };
+
+  const getDurationLabel = () => {
+    return duration.replace("课时", lessonsText);
+  };
+
   // 根据 3 个等级确定颜色映射逻辑
   const getLevelStyles = () => {
     switch (level) {
@@ -109,10 +120,10 @@ const CourseCard = ({ id, title, description, price, level, duration, thumbnail,
         <div style={{ flex: 1 }}>
           <div style={{ display: "flex", gap: "1rem", marginBottom: "0.75rem" }}>
             <span style={{ fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "0.3rem", padding: "0.2rem 0.6rem", background: levelBg, borderRadius: "4px", color: levelColor, fontWeight: 600 }}>
-              <BarChart size={14} /> {level}
+              <BarChart size={14} /> {getLevelLabel()}
             </span>
             <span style={{ fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "0.3rem", padding: "0.2rem 0.6rem", background: "#fff3cd", borderRadius: "4px", color: "#856404", fontWeight: 600 }}>
-              <Clock size={14} /> {duration}
+              <Clock size={14} /> {getDurationLabel()}
             </span>
           </div>
           <h4 style={{ margin: "0 0 0.75rem 0", fontSize: "1.3rem", color: "var(--foreground-rgb)", fontWeight: "700" }}>{title}</h4>
@@ -198,7 +209,7 @@ const CourseCard = ({ id, title, description, price, level, duration, thumbnail,
             color: levelColor,
             fontWeight: 600
           }}>
-            <BarChart size={12} /> {level}
+            <BarChart size={12} /> {getLevelLabel()}
           </span>
           <span style={{ 
             fontSize: "0.7rem", 
@@ -211,7 +222,7 @@ const CourseCard = ({ id, title, description, price, level, duration, thumbnail,
             color: "#856404",
             fontWeight: 600
           }}>
-            <Clock size={12} /> {duration}
+            <Clock size={12} /> {getDurationLabel()}
           </span>
         </div>
 

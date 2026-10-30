@@ -63,7 +63,12 @@ const HomePage = async () => {
                 priceLabel: t("courseCard.priceLabel"),
                 learnNow: t("courseCard.learnNow"),
                 details: t("courseCard.details"),
-                noThumbnail: t("courseCard.noThumbnail")
+                noThumbnail: t("courseCard.noThumbnail"),
+                completed: t("courseCard.completed"),
+                lessons: t("courseCard.lessons"),
+                levelBeginner: t("courseFilters.levelBeginner"),
+                levelIntermediate: t("courseFilters.levelIntermediate"),
+                levelAdvanced: t("courseFilters.levelAdvanced")
               }}
             />
           ))}

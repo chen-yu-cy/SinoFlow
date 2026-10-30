@@ -42,7 +42,7 @@ const MyCoursesPage = async () => {
     <div>
       <section style={{ marginBottom: "3rem" }}>
         <h2 style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>{t("nav.myCourses")}</h2>
-        <p style={{ color: "#6c757d" }}>您已购买并解锁的所有学习内容。</p>
+        <p style={{ color: "#6c757d" }}>{t("myCourses.subtitle")}</p>
       </section>
 
       {purchasedCourses.length > 0 ? (
@@ -66,7 +66,12 @@ const MyCoursesPage = async () => {
                 priceLabel: t("courseCard.priceLabel"),
                 learnNow: t("courseCard.learnNow"),
                 details: t("courseCard.details"),
-                noThumbnail: t("courseCard.noThumbnail")
+                noThumbnail: t("courseCard.noThumbnail"),
+                completed: t("courseCard.completed"),
+                lessons: t("courseCard.lessons"),
+                levelBeginner: t("courseFilters.levelBeginner"),
+                levelIntermediate: t("courseFilters.levelIntermediate"),
+                levelAdvanced: t("courseFilters.levelAdvanced")
               }}
             />
           ))}
@@ -80,9 +85,9 @@ const MyCoursesPage = async () => {
           border: "1px solid var(--border-color)" 
         }}>
           <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>📚</div>
-          <h3>您还没有购买任何课程</h3>
-          <p style={{ color: "#6c757d", marginBottom: "2rem" }}>探索我们的精选课程，开启您的中文学习之旅。</p>
-          <a href="/" className="btn-primary" style={{ textDecoration: "none" }}>去浏览课程</a>
+          <h3>{t("myCourses.noCourses")}</h3>
+          <p style={{ color: "#6c757d", marginBottom: "2rem" }}>{t("myCourses.noCoursesSubtitle")}</p>
+          <a href="/" className="btn-primary" style={{ textDecoration: "none" }}>{t("myCourses.browseCourses")}</a>
         </div>
       )}
     </div>

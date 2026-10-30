@@ -3,6 +3,7 @@ import CourseCard from "@/components/course/course-card";
 import prisma from "@/lib/db/client";
 import { auth } from "@/lib/auth";
 import CourseFilters from "@/components/course/course-filters";
+import { getTranslation } from "@/lib/i18n";
 
 interface AllCoursesPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -11,6 +12,7 @@ interface AllCoursesPageProps {
 const AllCoursesPage = async ({ searchParams }: AllCoursesPageProps) => {
   const session = await auth();
   const isAdmin = (session?.user as any)?.role === "ADMIN";
+  const { t } = await getTranslation();
 
   const resolvedParams = await searchParams;
   const q = typeof resolvedParams.q === 'string' ? resolvedParams.q : undefined;
@@ -33,15 +35,27 @@ const AllCoursesPage = async ({ searchParams }: AllCoursesPageProps) => {
     orderBy: { createdAt: 'desc' }
   });
 
+  const filterLevels = [
+    { value: "全部", label: t("courseFilters.levelAll") },
+    { value: "入门级", label: t("courseFilters.levelBeginner") },
+    { value: "进阶级", label: t("courseFilters.levelIntermediate") },
+    { value: "高级", label: t("courseFilters.levelAdvanced") }
+  ];
+
   return (
     <div>
       <section style={{ marginBottom: "3rem" }}>
-        <h2 style={{ fontSize: "2.25rem", marginBottom: "0.5rem" }}>所有课程</h2>
-        <p style={{ color: "#6c757d" }}>探索 SinoFlow 完整的课程目录，找到最适合您的学习路径。</p>
+        <h2 style={{ fontSize: "2.25rem", marginBottom: "0.5rem" }}>{t("courses.title")}</h2>
+        <p style={{ color: "#6c757d" }}>{t("courses.subtitle")}</p>
       </section>
 
       {/* 搜索与筛选交互组件 */}
-      <CourseFilters />
+      <CourseFilters 
+        levels={filterLevels}
+        placeholder={t("courseFilters.searchPlaceholder")}
+        filterLabel={t("courseFilters.filterLevel")}
+        resetLabel={t("courseFilters.reset")}
+      />
 
       {courses.length > 0 ? (
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
@@ -57,6 +71,17 @@ const AllCoursesPage = async ({ searchParams }: AllCoursesPageProps) => {
               thumbnail={course.thumbnail}
               layout="list"
               isAdmin={isAdmin}
+              labels={{
+                priceLabel: t("courseCard.priceLabel"),
+                learnNow: t("courseCard.learnNow"),
+                details: t("courseCard.details"),
+                noThumbnail: t("courseCard.noThumbnail"),
+                completed: t("courseCard.completed"),
+                lessons: t("courseCard.lessons"),
+                levelBeginner: t("courseFilters.levelBeginner"),
+                levelIntermediate: t("courseFilters.levelIntermediate"),
+                levelAdvanced: t("courseFilters.levelAdvanced")
+              }}
             />          ))}
         </div>
       ) : (
@@ -68,8 +93,8 @@ const AllCoursesPage = async ({ searchParams }: AllCoursesPageProps) => {
           border: "1px solid var(--border-color)",
           color: "#6c757d"
         }}>
-          <p style={{ fontSize: "1.2rem" }}>没有找到符合条件的课程。</p>
-          <p>请尝试更换搜索词或调整筛选条件。</p>
+          <p style={{ fontSize: "1.2rem" }}>{t("courses.noCourses")}</p>
+          <p>{t("courses.noCoursesSubtitle")}</p>
         </div>
       )}
     </div>

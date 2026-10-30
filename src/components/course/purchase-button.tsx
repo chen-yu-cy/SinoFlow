@@ -7,11 +7,20 @@ import { useRouter } from "next/navigation";
 interface PurchaseButtonProps {
   courseId: string;
   price: number;
+  labels?: {
+    buyNow: string;
+    processing: string;
+  };
 }
 
-const PurchaseButton = ({ courseId, price }: PurchaseButtonProps) => {
+const PurchaseButton = ({ courseId, price, labels }: PurchaseButtonProps) => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const t = labels || {
+    buyNow: "立即购买",
+    processing: "正在处理..."
+  };
 
   const handlePurchase = async () => {
     setLoading(true);
@@ -62,7 +71,7 @@ const PurchaseButton = ({ courseId, price }: PurchaseButtonProps) => {
         opacity: loading ? 0.7 : 1
       }}
     >
-      {loading ? "正在处理..." : `立即购买 (¥${price.toFixed(2)})`}
+      {loading ? t.processing : `${t.buyNow} (¥${price.toFixed(2)})`}
     </button>
   );
 };

@@ -4,14 +4,19 @@ import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, Filter, X } from "lucide-react";
 
-const CourseFilters = () => {
+interface CourseFiltersProps {
+  levels: { value: string; label: string }[];
+  placeholder: string;
+  filterLabel: string;
+  resetLabel: string;
+}
+
+const CourseFilters = ({ levels, placeholder, filterLabel, resetLabel }: CourseFiltersProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   
   const [query, setQuery] = useState(searchParams.get("q") || "");
   const [activeLevel, setActiveLevel] = useState(searchParams.get("level") || "全部");
-
-  const levels = ["全部", "入门级", "进阶级", "高级"];
 
   // Debounced search
   useEffect(() => {
@@ -65,7 +70,7 @@ const CourseFilters = () => {
           <Search size={18} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "#adb5bd" }} />
           <input 
             type="text" 
-            placeholder="搜索课程名称或关键词..." 
+            placeholder={placeholder} 
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             style={{ 
@@ -88,26 +93,26 @@ const CourseFilters = () => {
         {/* Level Selector */}
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
           <div style={{ color: "#6c757d", fontSize: "0.9rem", marginRight: "0.5rem", display: "flex", alignItems: "center", gap: "0.3rem" }}>
-            <Filter size={16} /> 筛选难度:
+            <Filter size={16} /> {filterLabel}
           </div>
-          {levels.map((level) => (
+          {levels.map((lvl) => (
             <button
-              key={level}
-              onClick={() => handleLevelChange(level)}
+              key={lvl.value}
+              onClick={() => handleLevelChange(lvl.value)}
               style={{
                 padding: "0.5rem 1rem",
                 borderRadius: "20px",
                 border: "1px solid",
-                borderColor: activeLevel === level ? "var(--primary)" : "#dee2e6",
-                background: activeLevel === level ? "var(--primary-light)" : "transparent",
-                color: activeLevel === level ? "var(--primary)" : "#6c757d",
+                borderColor: activeLevel === lvl.value ? "var(--primary)" : "#dee2e6",
+                background: activeLevel === lvl.value ? "var(--primary-light)" : "transparent",
+                color: activeLevel === lvl.value ? "var(--primary)" : "#6c757d",
                 fontSize: "0.85rem",
-                fontWeight: activeLevel === level ? "700" : "500",
+                fontWeight: activeLevel === lvl.value ? "700" : "500",
                 cursor: "pointer",
                 transition: "all 0.2s"
               }}
             >
-              {level}
+              {lvl.label}
             </button>
           ))}
           
@@ -116,7 +121,7 @@ const CourseFilters = () => {
               onClick={clearFilters}
               style={{ background: "none", border: "none", color: "var(--primary)", fontSize: "0.85rem", cursor: "pointer", marginLeft: "0.5rem", fontWeight: "600" }}
             >
-              重置
+              {resetLabel}
             </button>
           )}
         </div>

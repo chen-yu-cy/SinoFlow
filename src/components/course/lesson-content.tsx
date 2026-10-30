@@ -26,6 +26,10 @@ interface LessonContentProps {
     resourcesTitle: string;
     noResources: string;
     unlockResources: string;
+    subscribersOnly?: string;
+    unlockDescription?: string;
+    unlockAll?: string;
+    paymentSupport?: string;
   };
 }
 
@@ -37,7 +41,11 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
     progressTitle: "学习进度",
     resourcesTitle: "配套学习资料",
     noResources: "暂无配套学习资料",
-    unlockResources: "请先购买该课程以解锁学习资料"
+    unlockResources: "请先购买该课程以解锁学习资料",
+    subscribersOnly: "此内容仅限订阅学员观看",
+    unlockDescription: "加入我们的学习计划，解锁完整的 HLS 加密课程视频，获得权威报社为您准备的专业教材。",
+    unlockAll: "立即解锁全部内容",
+    paymentSupport: "支持微信支付 / 支付宝"
   };
 
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
@@ -118,7 +126,15 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
               onEnded={handleVideoEnded}
             />
           ) : (
-            <PurchaseNotice price={course.price} />
+            <PurchaseNotice 
+              price={course.price} 
+              labels={{
+                subscribersOnly: t.subscribersOnly,
+                unlockDescription: t.unlockDescription,
+                unlockAll: t.unlockAll,
+                paymentSupport: t.paymentSupport
+              }}
+            />
           )}
         </div>
         

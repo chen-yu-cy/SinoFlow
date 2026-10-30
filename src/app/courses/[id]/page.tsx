@@ -24,6 +24,10 @@ const CourseDetailPage = async ({ params }: CourseDetailPageProps) => {
     resourcesTitle: t("courseDetail.resourcesTitle") || "配套学习资料",
     noResources: t("courseDetail.noResources") || "暂无配套学习资料",
     unlockResources: t("courseDetail.unlockResources") || "请先购买该课程以解锁学习资料",
+    subscribersOnly: t("courseDetail.subscribersOnly") || "此内容仅限订阅学员观看",
+    unlockDescription: t("courseDetail.unlockDescription") || "加入我们的学习计划，解锁完整的 HLS 加密课程视频，获得权威报社为您准备的专业教材。",
+    unlockAll: t("courseDetail.unlockAll") || "立即解锁全部内容",
+    paymentSupport: t("courseDetail.paymentSupport") || "支持微信支付 / 支付宝",
   };
 
   const course = await prisma.course.findUnique({
@@ -77,14 +81,21 @@ const CourseDetailPage = async ({ params }: CourseDetailPageProps) => {
       {!hasFullAccess && (
         <section style={{ marginTop: '2rem' }}>
           <div style={{ padding: '2rem', background: 'var(--primary-light)', borderRadius: '12px', border: '1px solid rgba(200, 16, 46, 0.1)' }}>
-            <h3 style={{ marginBottom: "1.5rem" }}>获取完整课程权限</h3>
+            <h3 style={{ marginBottom: "1.5rem" }}>{t("courseDetail.getAccess") || "获取完整课程权限"}</h3>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
-                <div style={{ fontSize: "0.9rem", color: "var(--primary)", fontWeight: "600", marginBottom: "0.25rem" }}>全额购买</div>
+                <div style={{ fontSize: "0.9rem", color: "var(--primary)", fontWeight: "600", marginBottom: "0.25rem" }}>{t("courseDetail.buyFull") || "全额购买"}</div>
                 <span style={{ color: 'var(--foreground-rgb)', fontWeight: '800', fontSize: '2rem' }}>¥{course.price.toFixed(2)}</span>
               </div>
               <div style={{ width: "240px" }}>
-                <PurchaseButton courseId={course.id} price={course.price} />
+                <PurchaseButton 
+                  courseId={course.id} 
+                  price={course.price} 
+                  labels={{
+                    buyNow: t("courseDetail.buyNow") || "立即购买",
+                    processing: t("courseDetail.processing") || "正在处理..."
+                  }}
+                />
               </div>
             </div>
           </div>

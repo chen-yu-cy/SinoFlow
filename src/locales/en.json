@@ -35,6 +35,36 @@
     "progressTitle": "Progress",
     "resourcesTitle": "Companion Resources",
     "noResources": "No resources available",
-    "unlockResources": "Please purchase this course to unlock learning materials"
+    "unlockResources": "Please purchase this course to unlock learning materials",
+    "getAccess": "Get Full Course Access",
+    "buyFull": "One-time Purchase",
+    "buyNow": "Buy Now",
+    "processing": "Processing...",
+    "subscribersOnly": "This content is for subscribers only",
+    "unlockDescription": "Join our learning plan to unlock the full HLS encrypted course videos and get professional textbooks prepared by the authoritative press.",
+    "unlockAll": "Unlock All Content Now",
+    "paymentSupport": "Supports WeChat Pay / Alipay"
+  },
+  "courses": {
+    "title": "All Courses",
+    "subtitle": "Explore the complete course catalog of SinoFlow to find your ideal learning path.",
+    "noCourses": "No courses found matching the criteria.",
+    "noCoursesSubtitle": "Please try another search term or adjust the filter criteria."
+  },
+  "courseFilters": {
+    "searchPlaceholder": "Search course title or keywords...",
+    "filterLevel": "Difficulty:",
+    "reset": "Reset",
+    "levelAll": "All",
+    "levelBeginner": "Beginner",
+    "levelIntermediate": "Intermediate",
+    "levelAdvanced": "Advanced"
+  },
+  "myCourses": {
+    "title": "My Learning",
+    "subtitle": "All learning contents you have purchased and unlocked.",
+    "noCourses": "You haven't purchased any courses yet",
+    "noCoursesSubtitle": "Explore our featured courses and start your Chinese learning journey.",
+    "browseCourses": "Browse Courses"
   }
 }
