@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db/client";
 import { logger } from "@/lib/logger";
+import { PaymentFactory } from "@/lib/payment/factory";
 
 /**
  * @openapi
@@ -27,7 +28,7 @@ import { logger } from "@/lib/logger";
  *                 example: "order_123"
  *               paymentMethod:
  *                 type: string
- *                 enum: [wechat, alipay]
+ *                 enum: [wechat, alipay, stripe, paypal]
  *                 example: "alipay"
  *     responses:
  *       200:
@@ -66,18 +67,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // 这里通常会调用微信或支付宝的 SDK 来获取预支付信息 (Prepay ID / URL)
-    // 示例：alipay.trade.page.pay 或 wechat.pay.transactions.jsapi
-    
     logger.info({ orderId, paymentMethod, userId: session.user.id }, "准备支付订单");
 
-    // 模拟支付成功（实际流程中，用户会被重定向到支付平台，然后平台回调 callback 路由）
-    // 为了原型演示，我们返回一个模拟的支付 URL
-    const mockPaymentUrl = `/api/payment/callback?orderId=${orderId}`;
+    // 采用工厂模式动态获取支付提供商实例并创建订单支付链接
+    const provider = PaymentFactory.getProvider(paymentMethod);
+    const { paymentUrl } = await provider.createOrder(orderId, order.amount, order.course.title);
 
     return NextResponse.json({ 
       success: true, 
-      paymentUrl: mockPaymentUrl,
+      paymentUrl: paymentUrl,
       message: "支付跳转中..."
     });
 
