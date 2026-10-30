@@ -8,6 +8,8 @@ export async function createCourse(data: {
   title: string;
   description: string;
   price: number;
+  level: string;
+  duration: string;
   lessons: { title: string; videoUrl: string }[];
 }) {
   const session = await auth();
@@ -27,18 +29,19 @@ export async function createCourse(data: {
         title: data.title,
         description: data.description,
         price: data.price,
+        level: data.level,
+        duration: data.duration,
         lessons: {
           create: data.lessons.map((lesson, index) => ({
             title: lesson.title,
             videoUrl: lesson.videoUrl,
             order: index + 1,
-            status: "READY", // 直接使用字符串常量避免 Enum 对象未定义的错误
+            status: "READY",
           })),
         },
       },
     });
 
-    // 清除首页和课程列表页的缓存，确保新课程立即显示
     revalidatePath("/");
     revalidatePath("/courses");
 
@@ -46,5 +49,64 @@ export async function createCourse(data: {
   } catch (error) {
     console.error("创建课程失败:", error);
     return { error: "保存课程失败，请检查数据格式" };
+  }
+}
+
+export async function updateCourse(id: string, data: {
+  title: string;
+  description: string;
+  price: number;
+  level: string;
+  duration: string;
+  lessons: { id?: string; title: string; videoUrl: string }[];
+}) {
+  const session = await auth();
+
+  if (!session?.user || (session.user as any).role !== "ADMIN") {
+    return { error: "未经授权的操作" };
+  }
+
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. 更新课程基本信息
+      await tx.course.update({
+        where: { id },
+        data: {
+          title: data.title,
+          description: data.description,
+          price: data.price,
+          level: data.level,
+          duration: data.duration,
+        },
+      });
+
+      // 2. 章节同步
+      await tx.lesson.deleteMany({ where: { courseId: id } });
+
+      await tx.course.update({
+        where: { id },
+        data: {
+          lessons: {
+            create: data.lessons.map((lesson, index) => ({
+              title: lesson.title,
+              videoUrl: lesson.videoUrl,
+              order: index + 1,
+              status: "READY",
+            })),
+          },
+        },
+      });
+
+      return { success: true };
+    });
+
+    revalidatePath("/");
+    revalidatePath("/courses");
+    revalidatePath(`/courses/${id}`);
+
+    return result;
+  } catch (error) {
+    console.error("更新课程失败:", error);
+    return { error: "更新失败，请检查数据" };
   }
 }
