@@ -49,6 +49,81 @@ describe('Ticket Support System Tests', () => {
       await expect(TicketService.createTicket('u-1', 'user@test.com', '', '描述内容'))
         .rejects.toThrow('工单标题和内容不能为空')
     })
+
+    it('getTickets 应该支持按创建时间 desc 获取全部工单，且留言列表按 asc 排序', async () => {
+      (prisma.supportTicket.findMany as any).mockResolvedValue([
+        { id: 't-1', title: '工单 1', messages: [] }
+      ])
+
+      const result = await TicketService.getTickets()
+      expect(result.length).toBe(1)
+      expect(prisma.supportTicket.findMany).toHaveBeenLastCalledWith({
+        include: {
+          user: {
+            select: { name: true, email: true }
+          },
+          messages: {
+            orderBy: { createdAt: "asc" },
+            include: {
+              sender: {
+                select: { name: true, email: true }
+              }
+            }
+          }
+        },
+        orderBy: { createdAt: "desc" }
+      })
+    })
+
+    it('getUserTickets 应该按创建时间 desc 获取指定用户的工单，且留言列表按 asc 排序', async () => {
+      (prisma.supportTicket.findMany as any).mockResolvedValue([
+        { id: 't-2', title: '工单 2', messages: [] }
+      ])
+
+      const result = await TicketService.getUserTickets('u-2')
+      expect(result.length).toBe(1)
+      expect(prisma.supportTicket.findMany).toHaveBeenLastCalledWith({
+        where: { userId: 'u-2' },
+        include: {
+          messages: {
+            orderBy: { createdAt: "asc" },
+            include: {
+              sender: {
+                select: { name: true, email: true }
+              }
+            }
+          }
+        },
+        orderBy: { createdAt: "desc" }
+      })
+    })
+
+    it('getTicket 应该获取单个工单详情，且留言列表按 asc 排序', async () => {
+      (prisma.supportTicket.findUnique as any).mockResolvedValue({
+        id: 't-3',
+        title: '工单 3',
+        messages: []
+      })
+
+      const result = await TicketService.getTicket('t-3')
+      expect(result?.id).toBe('t-3')
+      expect(prisma.supportTicket.findUnique).toHaveBeenLastCalledWith({
+        where: { id: 't-3' },
+        include: {
+          user: {
+            select: { name: true, email: true }
+          },
+          messages: {
+            orderBy: { createdAt: "asc" },
+            include: {
+              sender: {
+                select: { name: true, email: true }
+              }
+            }
+          }
+        }
+      })
+    })
   })
 
   describe('submitTicketAction Server Action', () => {
