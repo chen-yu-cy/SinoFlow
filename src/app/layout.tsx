@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
-import { BookOpen, Home, LayoutDashboard } from "lucide-react";
+import { BookOpen, Home, LayoutDashboard, HelpCircle } from "lucide-react";
 import UserNav from "@/components/layout/user-nav";
 import { getTranslation } from "@/lib/i18n";
 import { LanguageSelector } from "@/components/layout/language-selector";
@@ -64,6 +64,9 @@ const RootLayout = async ({
                     <LayoutDashboard size={18} strokeWidth={2} /> {t("nav.myCourses")}
                   </Link>
                 )}
+                <Link href="/support" className="nav-link" style={{ display: "flex", alignItems: "center", gap: "0.4rem", textDecoration: "none", color: "inherit" }}>
+                  <HelpCircle size={18} strokeWidth={2} /> {t("nav.support")}
+                </Link>
               </div>
             </div>
             <div style={{ display: "flex", gap: "1.25rem", alignItems: "center" }}>

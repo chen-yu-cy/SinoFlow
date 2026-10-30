@@ -2,7 +2,7 @@ import React from "react";
 import { auth, signOut } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, BookOpen, Users, Settings, LogOut, ShoppingCart } from "lucide-react";
+import { LayoutDashboard, BookOpen, Users, Settings, LogOut, ShoppingCart, LifeBuoy } from "lucide-react";
 
 export default async function AdminLayout({
   children,
@@ -72,6 +72,11 @@ export default async function AdminLayout({
             <li>
               <Link href="/admin/orders" style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "1rem 2rem", color: "#adb5bd", textDecoration: "none" }}>
                 <ShoppingCart size={20} /> 订单管理
+              </Link>
+            </li>
+            <li>
+              <Link href="/admin/tickets" style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "1rem 2rem", color: "#adb5bd", textDecoration: "none" }}>
+                <LifeBuoy size={20} /> 工单管理
               </Link>
             </li>
             <li>

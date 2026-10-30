@@ -18,6 +18,7 @@ model User {
   orders        Order[]
   progresses    LessonProgress[]
   notes         Note[]
+  tickets       SupportTicket[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -125,4 +126,28 @@ model Note {
 
   @@index([userId])
   @@index([lessonId])
+}
+
+model SupportTicket {
+  id         String       @id @default(cuid())
+  userId     String
+  userEmail  String
+  title      String
+  content    String
+  status     TicketStatus @default(PENDING)
+  adminReply String?
+  repliedAt  DateTime?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+enum TicketStatus {
+  PENDING
+  PROCESSING
+  RESOLVED
+  CLOSED
 }

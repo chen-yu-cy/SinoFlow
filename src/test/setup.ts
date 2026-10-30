@@ -61,6 +61,13 @@ vi.mock('@/lib/db/client', () => ({
       findUnique: vi.fn(),
       findMany: vi.fn(),
       delete: vi.fn(),
+    },
+    supportTicket: {
+      create: vi.fn(),
+      findMany: vi.fn(),
+      findUnique: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
     }
   },
 }))
