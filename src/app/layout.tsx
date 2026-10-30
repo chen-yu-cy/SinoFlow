@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
-import { BookOpen, Home, LayoutDashboard } from "lucide-react";
+import { BookOpen, Home, LayoutDashboard, PenTool } from "lucide-react";
 import UserNav from "@/components/layout/user-nav";
 import { getTranslation } from "@/lib/i18n";
 import { LanguageSelector } from "@/components/layout/language-selector";
@@ -58,6 +58,9 @@ const RootLayout = async ({
                 </Link>
                 <Link href="/courses" className="nav-link" style={{ display: "flex", alignItems: "center", gap: "0.4rem", textDecoration: "none", color: "inherit" }}>
                   <BookOpen size={18} strokeWidth={2} /> {t("nav.courses")}
+                </Link>
+                <Link href="/features/notes" className="nav-link" style={{ display: "flex", alignItems: "center", gap: "0.4rem", textDecoration: "none", color: "inherit" }}>
+                  <PenTool size={18} strokeWidth={2} /> 随堂笔记
                 </Link>
                 {session && (
                   <Link href="/my-courses" className="nav-link" style={{ display: "flex", alignItems: "center", gap: "0.4rem", textDecoration: "none", color: "inherit" }}>

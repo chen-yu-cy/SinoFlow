@@ -37,17 +37,60 @@ const HomePage = async () => {
             <Link href="/courses" className="btn-primary" style={{ textDecoration: "none", padding: "0.75rem 2rem", borderRadius: "24px", display: "inline-block" }}>
               {t("home.viewAll")}
             </Link>
-            {!session && (
-              <Link href="/register" className="btn-secondary-outline">
-                {t("nav.register")}
-              </Link>
-            )}
+            <Link href="/features/notes" className="btn-secondary-outline" style={{ textDecoration: "none", padding: "0.6rem 1.8rem", borderRadius: "24px" }}>
+              ⏱️ 了解时间戳笔记
+            </Link>
           </div>
+
+          {/* Marquee 无缝横向滚动条 */}
+          <div className="marquee-container">
+            <div className="marquee-content">
+              <div className="marquee-item">
+                ⏱️ <span className="time">01:45</span> 记录核心句型：“我学汉语快半年了”
+              </div>
+              <div className="marquee-item">
+                ⏱️ <span className="time">04:12</span> 标注四声声调：“半”为去声
+              </div>
+              <div className="marquee-item">
+                ⏱️ <span className="time">09:30</span> 摘录报社社论核心社评词汇
+              </div>
+              <div className="marquee-item">
+                ⏱️ <span className="time">15:20</span> 收藏本章推荐课外阅读材料
+              </div>
+              <div className="marquee-item">
+                ⏱️ <span className="time">22:05</span> 标注汉语考试 HSK 核心词汇
+              </div>
+              {/* 重复一组保证无缝轮播 */}
+              <div className="marquee-item">
+                ⏱️ <span className="time">01:45</span> 记录核心句型：“我学汉语快半年了”
+              </div>
+              <div className="marquee-item">
+                ⏱️ <span className="time">04:12</span> 标注四声声调：“半”为去声
+              </div>
+              <div className="marquee-item">
+                ⏱️ <span className="time">09:30</span> 摘录报社社论核心社评词汇
+              </div>
+              <div className="marquee-item">
+                ⏱️ <span className="time">15:20</span> 收藏本章推荐课外阅读材料
+              </div>
+              <div className="marquee-item">
+                ⏱️ <span className="time">22:05</span> 标注汉语考试 HSK 核心词汇
+              </div>
+            </div>
+          </div>
+
+          {/* 往下滚动微光指示 */}
+          <a href="#featured-courses" className="hero-scroll-prompt" style={{ textDecoration: "none" }}>
+            <span>向下滚动探索</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </a>
         </div>
       </section>
 
       {/* Featured Courses Grid */}
-      <section>
+      <section id="featured-courses">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
           <h3 style={{ fontSize: "1.75rem", margin: 0 }}>{t("home.featuredCourses")}</h3>
           <Link href="/courses" style={{ color: "var(--primary)", textDecoration: "none", fontWeight: 600 }} className="nav-link">
