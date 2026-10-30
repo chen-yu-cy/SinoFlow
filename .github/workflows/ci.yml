@@ -1,0 +1,47 @@
+# FILE: .github/workflows/ci.yml
+name: SinoFlow CI (Test & Build)
+
+on:
+  push:
+    branches:
+      - main
+      - "feat/**"
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-and-build:
+    name: TypeCheck, Unit Tests & Next.js Build
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: "postgresql://devuser:devpassword@localhost:5432/sinoflow_db?schema=public"
+      AUTH_SECRET: "ci-test-secret-key-for-github-actions-32bytes"
+      AUTH_TRUST_HOST: "true"
+      NEXT_TELEMETRY_DISABLED: "1"
+
+    steps:
+      - name: 1. Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 2. Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: 3. Install Dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: 4. Generate Prisma Client
+        run: npx prisma generate
+
+      - name: 5. Run TypeScript Strict Type Check
+        run: npx tsc --noEmit
+
+      - name: 6. Run Vitest Unit Test Suite (131 Tests)
+        run: npm run test
+
+      - name: 7. Verify Next.js Production Standalone Build
+        run: npm run build
