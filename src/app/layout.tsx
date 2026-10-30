@@ -21,14 +21,14 @@ const RootLayout = async ({
     <html lang="zh-CN">
       <body>
         <header>
-          <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+          <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "64px", padding: "0 2rem" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "3rem" }}>
               <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "0.25rem" }}>
                 {/* Balanced Hollow Logo */}
                 <svg width="40" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginLeft: "-5px" }}>
                   <path d="M22.5 11C22.5 8.5 20.5 7 17.5 7H13.5C10.5 7 8.5 8.5 8.5 11C8.5 13.5 10.5 14.5 14 15L18 16C21.5 16.5 23.5 17.5 23.5 20.5C23.5 23.5 21.5 25 18.5 25H14.5C11.5 25 9.5 23.5 9.5 21" stroke="var(--primary)" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <h1 style={{ color: "var(--foreground-rgb)", fontSize: "1.6rem", fontWeight: "900", letterSpacing: "-1px" }}>SinoFlow</h1>
+                <h1 style={{ color: "var(--foreground-rgb)", fontSize: "1.6rem", fontWeight: "900", letterSpacing: "-1px", margin: 0 }}>SinoFlow</h1>
               </Link>
               <div style={{ display: "flex", gap: "2rem", fontSize: "0.95rem", fontWeight: 500 }}>
                 <Link href="/" className="nav-link" style={{ display: "flex", alignItems: "center", gap: "0.4rem", textDecoration: "none", color: "inherit" }}>
@@ -60,11 +60,13 @@ const RootLayout = async ({
                 </>
               )}
             </div>
-          </nav>
+          </div>
         </header>
-        <main>{children}</main>
+        <main className="container">{children}</main>
         <footer>
-          <p>&copy; 2026 SinoFlow. All rights reserved.</p>
+          <div className="container">
+            <p>&copy; 2026 SinoFlow. All rights reserved.</p>
+          </div>
         </footer>
       </body>
     </html>

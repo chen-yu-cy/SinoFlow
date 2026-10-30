@@ -12,6 +12,7 @@
   --accent: #ffc107;
   --border-color: #e9ecef;
   --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+  --max-width: 1200px;
 }
 
 * {
@@ -34,26 +35,22 @@ header {
   position: sticky;
   top: 0;
   z-index: 100;
-  padding: 0.75rem 2rem;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-color);
   box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 
-header h1 {
-  margin: 0;
-  font-size: 1.5rem;
-  color: var(--primary);
-  font-weight: 800;
-  letter-spacing: -0.5px;
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 2rem;
+  width: 100%;
 }
 
 main {
-  max-width: 1200px;
-  margin: 0 auto;
   min-height: calc(100vh - 120px);
-  padding: 2rem;
+  padding: 2rem 0; /* Vertical only, horizontal by container */
 }
 
 footer {
@@ -109,7 +106,7 @@ footer {
 }
 
 /* Input Styles */
-input:focus {
+input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--primary) !important;
   box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.1);
