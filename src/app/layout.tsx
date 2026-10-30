@@ -86,6 +86,7 @@ const RootLayout = async ({
                   translations={{
                     adminPortal: t("userNav.adminPortal"),
                     myLearning: t("userNav.myLearning"),
+                    settings: t("userNav.settings"),
                     logout: t("userNav.logout"),
                     returnAdmin: t("userNav.returnAdmin"),
                   }}

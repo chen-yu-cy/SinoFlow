@@ -26,6 +26,7 @@
   "userNav": {
     "adminPortal": "Admin Dashboard",
     "myLearning": "My Learning",
+    "settings": "Settings",
     "logout": "Logout",
     "returnAdmin": "Return to Admin"
   },
@@ -120,5 +121,23 @@
     "statusProcessing": "Processing",
     "statusResolved": "Resolved",
     "statusClosed": "Closed"
+  },
+  "settings": {
+    "pageTitle": "Account Settings",
+    "pageSubtitle": "Manage your account details and update your secure password.",
+    "labelEmail": "Email Address",
+    "labelName": "Name",
+    "titleChangePassword": "Change Password",
+    "labelCurrentPassword": "Current Password",
+    "labelNewPassword": "New Password",
+    "labelConfirmNewPassword": "Confirm New Password",
+    "placeholderCurrentPassword": "Enter your current password...",
+    "placeholderNewPassword": "Enter at least 6 characters...",
+    "placeholderConfirmNewPassword": "Re-enter new password...",
+    "btnUpdate": "Save Changes",
+    "btnUpdating": "Saving...",
+    "errMismatch": "New passwords do not match.",
+    "errRequired": "All password fields are required.",
+    "successMessage": "Password updated successfully!"
   }
 }

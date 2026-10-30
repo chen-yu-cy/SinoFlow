@@ -26,6 +26,7 @@
   "userNav": {
     "adminPortal": "Panel de administración",
     "myLearning": "Mi aprendizaje",
+    "settings": "Configuración",
     "logout": "Cerrar sesión",
     "returnAdmin": "Volver a Administrador"
   },
@@ -120,5 +121,23 @@
     "statusProcessing": "Procesando",
     "statusResolved": "Resuelto",
     "statusClosed": "Cerrado"
+  },
+  "settings": {
+    "pageTitle": "Configuración de la cuenta",
+    "pageSubtitle": "Gestione los detalles de su cuenta y actualice su contraseña de seguridad.",
+    "labelEmail": "Dirección de correo electrónico",
+    "labelName": "Nombre",
+    "titleChangePassword": "Cambiar contraseña",
+    "labelCurrentPassword": "Contraseña actual",
+    "labelNewPassword": "Nueva contraseña",
+    "labelConfirmNewPassword": "Confirmar nueva contraseña",
+    "placeholderCurrentPassword": "Ingrese su contraseña actual...",
+    "placeholderNewPassword": "Ingrese al menos 6 caracteres...",
+    "placeholderConfirmNewPassword": "Vuelva a ingresar la nueva contraseña...",
+    "btnUpdate": "Guardar cambios",
+    "btnUpdating": "Guardando...",
+    "errMismatch": "Las nuevas contraseñas no coinciden.",
+    "errRequired": "Todos los campos de contraseña son requeridos.",
+    "successMessage": "¡Contraseña actualizada con éxito!"
   }
 }

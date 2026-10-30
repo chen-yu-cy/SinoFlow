@@ -70,5 +70,38 @@ export const UserService = {
     }
 
     return user;
+  },
+
+  /**
+   * 修改用户密码（通用，支持普通用户和管理员）
+   */
+  async updateUserPassword(userId: string, currentPassword: string, newPassword: string) {
+    if (!userId || !currentPassword.trim() || !newPassword.trim()) {
+      throw new Error("所有密码字段均不能为空");
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user || !user.password) {
+      throw new Error("账户不存在或无登录密码");
+    }
+
+    const isValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isValid) {
+      throw new Error("当前密码错误");
+    }
+
+    if (newPassword.length < 6) {
+      throw new Error("新密码长度必须至少为 6 位字符");
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    return await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
   }
 };

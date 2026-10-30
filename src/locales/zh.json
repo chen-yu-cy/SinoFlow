@@ -26,6 +26,7 @@
   "userNav": {
     "adminPortal": "进入管理后台",
     "myLearning": "我的学习",
+    "settings": "个人设置",
     "logout": "退出登录",
     "returnAdmin": "返回管理员账号"
   },
@@ -120,5 +121,23 @@
     "statusProcessing": "处理中",
     "statusResolved": "已解决",
     "statusClosed": "已关闭"
+  },
+  "settings": {
+    "pageTitle": "个人设置",
+    "pageSubtitle": "管理您的账户信息并更新安全密码。",
+    "labelEmail": "电子邮箱",
+    "labelName": "姓名",
+    "titleChangePassword": "修改登录密码",
+    "labelCurrentPassword": "当前密码",
+    "labelNewPassword": "新密码",
+    "labelConfirmNewPassword": "确认新密码",
+    "placeholderCurrentPassword": "请输入您当前使用的密码...",
+    "placeholderNewPassword": "请输入至少6位新密码...",
+    "placeholderConfirmNewPassword": "请再次输入新密码以进行确认...",
+    "btnUpdate": "保存修改",
+    "btnUpdating": "正在保存...",
+    "errMismatch": "两次输入的新密码不一致，请重新输入",
+    "errRequired": "所有密码字段均不能为空",
+    "successMessage": "密码已成功修改！请牢记您的新密码。"
   }
 }

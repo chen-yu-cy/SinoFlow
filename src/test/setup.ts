@@ -23,6 +23,7 @@ vi.mock('@/lib/db/client', () => ({
       findUnique: vi.fn(),
       create: vi.fn(),
       findMany: vi.fn(),
+      update: vi.fn(),
     },
     course: {
       findUnique: vi.fn(),

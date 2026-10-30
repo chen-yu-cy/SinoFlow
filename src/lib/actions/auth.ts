@@ -108,4 +108,24 @@ export async function exitImpersonation() {
   }
 }
 
+/**
+ * 个人设置：修改用户密码 Server Action
+ */
+export async function updateUserPasswordAction(currentPassword: string, newPassword: string) {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { error: "请先登录后再修改密码" };
+  }
+
+  try {
+    await UserService.updateUserPassword(session.user.id, currentPassword, newPassword);
+    logger.info({ userId: session.user.id }, "[Auth Action] 用户修改密码成功");
+    return { success: true };
+  } catch (error: any) {
+    logger.error({ err: error, userId: session.user.id }, "[Auth Action] 修改密码失败");
+    return { error: error.message || "修改密码失败，请稍后再试" };
+  }
+}
+
 

@@ -92,4 +92,49 @@ describe('UserService', () => {
       expect(bcrypt.compare).toHaveBeenCalledWith('correct_pwd', 'hashed_admin')
     })
   })
+
+  describe('updateUserPassword', () => {
+    it('如果参数有缺失，应抛出错误', async () => {
+      await expect(UserService.updateUserPassword('', '123456', 'new_pwd'))
+        .rejects.toThrow('所有密码字段均不能为空')
+    })
+
+    it('如果用户不存在，应抛出错误', async () => {
+      (prisma.user.findUnique as any).mockResolvedValue(null)
+      await expect(UserService.updateUserPassword('u-1', 'current_pwd', 'new_pwd'))
+        .rejects.toThrow('账户不存在或无登录密码')
+    })
+
+    it('如果当前密码匹配失败，应抛出错误', async () => {
+      (prisma.user.findUnique as any).mockResolvedValue({ id: 'u-1', password: 'hashed_pwd' });
+      (bcrypt.compare as any).mockResolvedValue(false)
+      
+      await expect(UserService.updateUserPassword('u-1', 'wrong_current_pwd', 'new_pwd'))
+        .rejects.toThrow('当前密码错误')
+    })
+
+    it('如果新密码长度小于6位，应抛出错误', async () => {
+      (prisma.user.findUnique as any).mockResolvedValue({ id: 'u-1', password: 'hashed_pwd' });
+      (bcrypt.compare as any).mockResolvedValue(true)
+      
+      await expect(UserService.updateUserPassword('u-1', 'correct_pwd', '12345'))
+        .rejects.toThrow('新密码长度必须至少为 6 位字符')
+    })
+
+    it('如果输入全部合法，应哈希新密码并成功更新数据库', async () => {
+      (prisma.user.findUnique as any).mockResolvedValue({ id: 'u-1', password: 'hashed_pwd' });
+      (bcrypt.compare as any).mockResolvedValue(true);
+      (bcrypt.hash as any).mockResolvedValue('new_hashed_pwd');
+      (prisma.user.update as any).mockResolvedValue({ id: 'u-1', email: 'test@example.com' })
+
+      const result = await UserService.updateUserPassword('u-1', 'correct_pwd', 'new_secure_pwd')
+
+      expect(result).toBeDefined()
+      expect(bcrypt.hash).toHaveBeenCalledWith('new_secure_pwd', 10)
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 'u-1' },
+        data: { password: 'new_hashed_pwd' }
+      })
+    })
+  })
 })

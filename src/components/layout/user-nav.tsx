@@ -3,7 +3,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { User, LogOut, Shield, ChevronDown, BookOpen, Loader2 } from "lucide-react";
+import { User, LogOut, Shield, ChevronDown, BookOpen, Loader2, Settings } from "lucide-react";
 import { signOut, signIn } from "next-auth/react";
 import { exitImpersonation } from "@/lib/actions/auth";
 
@@ -17,6 +17,7 @@ interface UserNavProps {
   translations?: {
     adminPortal: string;
     myLearning: string;
+    settings?: string;
     logout: string;
     returnAdmin: string;
   };
@@ -27,11 +28,12 @@ const UserNav = ({ user, translations }: UserNavProps) => {
   const [exiting, setExiting] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const t = translations || {
-    adminPortal: "进入管理后台",
-    myLearning: "我的学习",
-    logout: "退出登录",
-    returnAdmin: "返回管理员账号"
+  const t = {
+    adminPortal: translations?.adminPortal || "进入管理后台",
+    myLearning: translations?.myLearning || "我的学习",
+    settings: translations?.settings || "个人设置",
+    logout: translations?.logout || "退出登录",
+    returnAdmin: translations?.returnAdmin || "返回管理员账号"
   };
 
   // 点击外部关闭菜单
@@ -202,6 +204,22 @@ const UserNav = ({ user, translations }: UserNavProps) => {
               transition: "background 0.2s"
             }} className="dropdown-item-hover">
               <BookOpen size={18} color="#adb5bd" /> {t.myLearning}
+            </div>
+          </Link>
+
+          <Link href="/settings" onClick={() => setIsOpen(false)} style={{ textDecoration: "none" }}>
+            <div style={{ 
+              display: "flex", 
+              alignItems: "center", 
+              gap: "0.75rem", 
+              padding: "0.75rem 1rem", 
+              borderRadius: "8px", 
+              color: "var(--foreground-rgb)", 
+              fontSize: "0.9rem",
+              cursor: "pointer",
+              transition: "background 0.2s"
+            }} className="dropdown-item-hover">
+              <Settings size={18} color="#adb5bd" /> {t.settings}
             </div>
           </Link>
 
