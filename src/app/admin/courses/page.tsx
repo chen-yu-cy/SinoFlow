@@ -3,6 +3,7 @@ import prisma from "@/lib/db/client";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import CourseActions from "@/components/admin/course-actions";
+import CourseFeaturedToggler from "@/components/admin/course-featured-toggler";
 
 const AdminCoursesPage = async () => {
   const courses = await prisma.course.findMany({
@@ -30,6 +31,7 @@ const AdminCoursesPage = async () => {
           <thead>
             <tr style={{ background: "#f8f9fa", borderBottom: "1px solid #dee2e6" }}>
               <th style={{ padding: "1rem 1.5rem", width: "120px" }}>操作</th>
+              <th style={{ padding: "1rem 1.5rem", width: "80px" }}>精选</th>
               <th style={{ padding: "1rem 1.5rem" }}>课程名称</th>
               <th style={{ padding: "1rem 1.5rem" }}>课时数</th>
               <th style={{ padding: "1rem 1.5rem" }}>价格</th>
@@ -41,6 +43,9 @@ const AdminCoursesPage = async () => {
               <tr key={course.id} style={{ borderBottom: "1px solid #f1f3f5" }}>
                 <td style={{ padding: "1.25rem 1.5rem" }}>
                   <CourseActions courseId={course.id} courseTitle={course.title} />
+                </td>
+                <td style={{ padding: "1.25rem 1.5rem" }}>
+                  <CourseFeaturedToggler courseId={course.id} initialFeatured={course.isFeatured} />
                 </td>
                 <td style={{ padding: "1.25rem 1.5rem" }}>
                   <div style={{ fontWeight: "600" }}>{course.title}</div>

@@ -11,10 +11,24 @@ const HomePage = async () => {
   const isAdmin = (session?.user as any)?.role === "ADMIN";
   const { t } = await getTranslation();
 
-  const courses = await prisma.course.findMany({
-    take: 4, // 首页只展示前 4 个精选课程
-    orderBy: { createdAt: 'desc' }
+  // 1. 优先拉取标记为精选的课程
+  const featuredCourses = await prisma.course.findMany({
+    where: { isFeatured: true },
+    orderBy: { createdAt: 'desc' },
+    take: 4
   });
+
+  let courses = [...featuredCourses];
+
+  // 2. 如果不足 4 个，则用最新的非精选课程来补全
+  if (courses.length < 4) {
+    const additionalCourses = await prisma.course.findMany({
+      where: { isFeatured: false },
+      orderBy: { createdAt: 'desc' },
+      take: 4 - courses.length
+    });
+    courses = [...courses, ...additionalCourses];
+  }
 
   return (
     <div>

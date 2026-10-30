@@ -4,6 +4,7 @@
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { CourseService, type CreateCourseInput, type UpdateCourseInput } from "@/lib/services/course.service";
+import prisma from "@/lib/db/client";
 import { logger } from "@/lib/logger";
 
 /**
@@ -85,6 +86,36 @@ export async function deleteCourse(id: string) {
   } catch (error: any) {
     logger.error({ err: error, id }, "Action Error (deleteCourse)");
     return { error: error.message || "删除失败" };
+  }
+}
+
+/**
+ * 切换课程的精选（推荐首页）状态 Action
+ */
+export async function toggleCourseFeaturedAction(courseId: string, isFeatured: boolean) {
+  const session = await auth();
+
+  // 仅允许管理员操作
+  if (!session?.user || (session.user as any).role !== "ADMIN") {
+    return { error: "未经授权的操作" };
+  }
+
+  try {
+    await prisma.course.update({
+      where: { id: courseId },
+      data: { isFeatured },
+    });
+
+    logger.info({ courseId, isFeatured }, "[Course Action] 切换课程精选状态成功");
+
+    revalidatePath("/");
+    revalidatePath("/courses");
+    revalidatePath("/admin/courses");
+
+    return { success: true };
+  } catch (error: any) {
+    logger.error({ err: error, courseId, isFeatured }, "Action Error (toggleCourseFeaturedAction)");
+    return { error: error.message || "更新状态失败" };
   }
 }
 

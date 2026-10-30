@@ -1,5 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { createCourse, updateCourse, deleteCourse } from '@/lib/actions/course'
+import { createCourse, updateCourse, deleteCourse, toggleCourseFeaturedAction } from '@/lib/actions/course'
 import prisma from '@/lib/db/client'
 import { auth } from '@/lib/auth'
 
@@ -86,5 +85,26 @@ describe('createCourse Server Action', () => {
 
     expect(result.success).toBe(true)
     expect(prisma.$transaction).toHaveBeenCalled()
+  })
+
+  describe('toggleCourseFeaturedAction', () => {
+    it('应拒绝非管理员的快速标记精选请求', async () => {
+      (auth as any).mockResolvedValue({ user: { id: 'user-1', role: 'USER' } })
+      const result = await toggleCourseFeaturedAction('c-1', true)
+      expect(result.error).toBe('未经授权的操作')
+    })
+
+    it('管理员应能成功更新课程精选状态', async () => {
+      (auth as any).mockResolvedValue({ user: { id: 'admin-1', role: 'ADMIN' } });
+      (prisma.course.update as any).mockResolvedValue({ id: 'c-1', isFeatured: true })
+
+      const result = await toggleCourseFeaturedAction('c-1', true)
+
+      expect(result.success).toBe(true)
+      expect(prisma.course.update).toHaveBeenCalledWith({
+        where: { id: 'c-1' },
+        data: { isFeatured: true }
+      })
+    })
   })
 })
