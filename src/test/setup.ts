@@ -45,6 +45,11 @@ vi.mock('@/lib/db/client', () => ({
       findMany: vi.fn(() => Promise.resolve([])),
       count: vi.fn(() => Promise.resolve(0)),
       upsert: vi.fn(() => Promise.resolve({})),
+    },
+    resource: {
+      findUnique: vi.fn(),
+      deleteMany: vi.fn(),
+      create: vi.fn(),
     }
   },
 }))

@@ -4,7 +4,7 @@
 import React, { useState } from "react";
 import VideoPlayer from "@/components/course/video-player";
 import PurchaseNotice from "@/components/course/purchase-notice";
-import { PlayCircle, Lock, Info, BookText } from "lucide-react";
+import { PlayCircle, Lock, Info, BookText, FileText, Download } from "lucide-react";
 import { toggleLessonProgressAction } from "@/lib/actions/progress";
 
 interface LessonContentProps {
@@ -14,6 +14,7 @@ interface LessonContentProps {
     description: string;
     price: number;
     lessons: { id: string; title: string; videoUrl: string; order: number; isPreview: boolean }[];
+    resources?: { id: string; title: string; fileUrl: string; fileSize: string | null }[];
   };
   hasFullAccess: boolean;
   initialCompletedLessonIds?: string[];
@@ -22,6 +23,9 @@ interface LessonContentProps {
     introTitle: string;
     curriculumTitle: string;
     progressTitle: string;
+    resourcesTitle: string;
+    noResources: string;
+    unlockResources: string;
   };
 }
 
@@ -31,6 +35,9 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
     introTitle: "课程简介",
     curriculumTitle: "课程目录",
     progressTitle: "学习进度",
+    resourcesTitle: "配套学习资料",
+    noResources: "暂无配套学习资料",
+    unlockResources: "请先购买该课程以解锁学习资料"
   };
 
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
@@ -234,6 +241,86 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
               );
             })}
           </ul>
+
+          {/* 配套学习资料 (Resources) 区域 */}
+          <div style={{ padding: '1.5rem', background: '#fcfcfc', borderTop: '1px solid var(--border-color)' }}>
+            <h3 style={{ margin: "0 0 1rem 0", display: "flex", alignItems: "center", gap: "0.6rem", fontSize: "1.1rem", fontWeight: "700", color: "var(--foreground-rgb)" }}>
+              <FileText size={18} color="var(--primary)" /> {t.resourcesTitle}
+            </h3>
+
+            {(!course.resources || course.resources.length === 0) ? (
+              <p style={{ margin: 0, fontSize: "0.9rem", color: "#868e96", fontStyle: "italic" }}>
+                {t.noResources}
+              </p>
+            ) : (
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                {course.resources.map((res) => {
+                  const downloadUrl = `/api/courses/${course.id}/resources/${res.id}`;
+                  
+                  return (
+                    <li 
+                      key={res.id}
+                      style={{
+                        padding: "0.75rem 1rem",
+                        background: "#fff",
+                        border: "1px solid #e9ecef",
+                        borderRadius: "8px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        opacity: hasFullAccess ? 1 : 0.65,
+                        transition: "all 0.2s ease-in-out",
+                        cursor: hasFullAccess ? "pointer" : "not-allowed"
+                      }}
+                      onMouseEnter={(e) => {
+                        if (hasFullAccess) {
+                          e.currentTarget.style.borderColor = "var(--primary)";
+                          e.currentTarget.style.boxShadow = "0 2px 8px rgba(200, 16, 46, 0.08)";
+                          e.currentTarget.style.transform = "translateY(-1px)";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (hasFullAccess) {
+                          e.currentTarget.style.borderColor = "#e9ecef";
+                          e.currentTarget.style.boxShadow = "none";
+                          e.currentTarget.style.transform = "none";
+                        }
+                      }}
+                      onClick={() => {
+                        if (!hasFullAccess) {
+                          alert(t.unlockResources);
+                        } else {
+                          window.open(downloadUrl, "_blank");
+                        }
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", overflow: "hidden", flex: 1 }}>
+                        <FileText size={20} color={hasFullAccess ? "var(--primary)" : "#adb5bd"} style={{ flexShrink: 0 }} />
+                        <div style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                          <span style={{ fontSize: "0.9rem", fontWeight: "600", color: "#343a40", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {res.title}
+                          </span>
+                          {res.fileSize && (
+                            <span style={{ fontSize: "0.75rem", color: "#868e96", marginTop: "0.15rem" }}>
+                              {res.fileSize}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div style={{ flexShrink: 0, marginLeft: "0.5rem" }}>
+                        {hasFullAccess ? (
+                          <Download size={16} color="var(--primary)" style={{ cursor: "pointer" }} />
+                        ) : (
+                          <Lock size={16} color="#adb5bd" />
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
         </div>
       </aside>
     </div>

@@ -21,12 +21,16 @@ const CourseDetailPage = async ({ params }: CourseDetailPageProps) => {
     introTitle: t("courseDetail.introTitle") || "课程简介",
     curriculumTitle: t("courseDetail.curriculumTitle") || "课程目录",
     progressTitle: t("courseDetail.progressTitle") || "学习进度",
+    resourcesTitle: t("courseDetail.resourcesTitle") || "配套学习资料",
+    noResources: t("courseDetail.noResources") || "暂无配套学习资料",
+    unlockResources: t("courseDetail.unlockResources") || "请先购买该课程以解锁学习资料",
   };
 
   const course = await prisma.course.findUnique({
     where: { id },
     include: { 
-      lessons: { orderBy: { order: 'asc' } }
+      lessons: { orderBy: { order: 'asc' } },
+      resources: true
     }
   });
 

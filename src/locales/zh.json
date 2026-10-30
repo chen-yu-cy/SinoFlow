@@ -32,6 +32,9 @@
     "learningTitle": "正在学习",
     "introTitle": "课程简介",
     "curriculumTitle": "课程目录",
-    "progressTitle": "学习进度"
+    "progressTitle": "学习进度",
+    "resourcesTitle": "配套学习资料",
+    "noResources": "暂无配套学习资料",
+    "unlockResources": "请先购买该课程以解锁学习资料"
   }
 }

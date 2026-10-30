@@ -32,6 +32,9 @@
     "learningTitle": "Learning",
     "introTitle": "Course Introduction",
     "curriculumTitle": "Curriculum",
-    "progressTitle": "Progress"
+    "progressTitle": "Progress",
+    "resourcesTitle": "Companion Resources",
+    "noResources": "No resources available",
+    "unlockResources": "Please purchase this course to unlock learning materials"
   }
 }

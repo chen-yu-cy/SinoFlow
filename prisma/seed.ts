@@ -5,6 +5,7 @@ const prisma = new PrismaClient()
 
 async function main() {
   // 清理旧数据
+  await prisma.resource.deleteMany({})
   await prisma.lesson.deleteMany({})
   await prisma.order.deleteMany({})
   await prisma.course.deleteMany({})
@@ -41,6 +42,11 @@ async function main() {
           { title: '你好与自我介绍', videoUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', order: 1 },
           { title: '数字与日期', videoUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', order: 2 }
         ]
+      },
+      resources: {
+        create: [
+          { title: 'HSK 1 核心词汇表及拼音指南.pdf', fileUrl: '/uploads/resources/hsk1-vocabulary.pdf', fileSize: '120 KB' }
+        ]
       }
     }
   })
@@ -55,6 +61,11 @@ async function main() {
       lessons: {
         create: [
           { title: '商务礼仪概论', videoUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', order: 1 }
+        ]
+      },
+      resources: {
+        create: [
+          { title: '商务常用口语与职场沟通手册.pdf', fileUrl: '/uploads/resources/business-chinese-phrases.pdf', fileSize: '180 KB' }
         ]
       }
     }
