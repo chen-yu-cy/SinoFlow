@@ -52,7 +52,7 @@ describe('Internationalization (i18n) System', () => {
 
       expect(locale).toBe('zh')
       expect(t('nav.home')).toBe('首页')
-      expect(t('home.title')).toBe('“读报学中文，感知新时代” —— 权威媒体官方精读流媒体平台')
+      expect(t('home.title')).toBe('“读报学中文” —— 权威媒体官方汉语精读平台')
     })
 
     it('能够正确检索简单或嵌套翻译属性 (en)', async () => {
@@ -61,7 +61,7 @@ describe('Internationalization (i18n) System', () => {
 
       expect(locale).toBe('en')
       expect(t('nav.home')).toBe('Home')
-      expect(t('home.title')).toBe('"Read the News, Master Chinese" — The Official Media-Backed Close Reading & Media Platform')
+      expect(t('home.title')).toBe('"Read the News, Learn Chinese" — Official News Media Chinese Platform')
     })
 
     it('当查找不存在的 Key 时，应安全返回该 Key 本身作占位符', async () => {
