@@ -47,4 +47,4 @@ RUN mkdir -p /app/public/uploads/videos /app/public/uploads/resources
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "prisma db push --skip-generate && node server.js"]
+CMD ["sh", "-c", "prisma db push --skip-generate && node prisma/seed.mjs && node server.js"]
