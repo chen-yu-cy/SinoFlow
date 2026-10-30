@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { createCourse, updateCourse } from '@/lib/actions/course'
+import { createCourse, updateCourse, deleteCourse } from '@/lib/actions/course'
 import prisma from '@/lib/db/client'
 import { auth } from '@/lib/auth'
 
@@ -76,6 +76,15 @@ describe('createCourse Server Action', () => {
 
     expect(result.success).toBe(true)
     // 验证事务是否被正确调用
+    expect(prisma.$transaction).toHaveBeenCalled()
+  })
+
+  it('管理员应能成功删除课程', async () => {
+    (auth as any).mockResolvedValue({ user: { id: 'admin-1', role: 'ADMIN' } });
+    
+    const result = await deleteCourse('course-to-delete')
+
+    expect(result.success).toBe(true)
     expect(prisma.$transaction).toHaveBeenCalled()
   })
 })

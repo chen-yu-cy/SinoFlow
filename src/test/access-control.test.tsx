@@ -54,7 +54,7 @@ describe('CourseDetailPage Access Control', () => {
     render(Page)
 
     expect(screen.queryByText('此内容仅限订阅学员观看')).toBeNull()
-    expect(screen.getByText('测试课程')).toBeDefined()
+    expect(screen.getByRole('heading', { name: /Lesson 1/i, level: 1 })).toBeDefined()
   })
 
   it('如果用户已购买成功，应显示 VideoPlayer', async () => {
@@ -64,9 +64,9 @@ describe('CourseDetailPage Access Control', () => {
     const Page = await CourseDetailPage({ params: mockParams })
     render(Page)
 
-    // 在这里我们检查 PurchaseNotice 是否消失，以及页面是否正常渲染课程标题
+    // 在这里我们检查 PurchaseNotice 是否消失，以及页面是否正常渲染课时标题
     expect(screen.queryByText('此内容仅限订阅学员观看')).toBeNull()
-    expect(screen.getByText('测试课程')).toBeDefined()
+    expect(screen.getByRole('heading', { name: /Lesson 1/i, level: 1 })).toBeDefined()
   })
 
   it('如果课程不存在，应调用 notFound', async () => {

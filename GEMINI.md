@@ -54,3 +54,9 @@ src/
 │   ├── db/client.ts             # Prisma client singleton
 │   └── payment/                 # WeChat & Alipay SDK integration helpers
 └── types/                       # Shared type definitions
+
+# 项目积压任务 (Backlog)
+- [ ] **高优先级**: 修复课程封面缩略图显示异常问题。
+  - *现象*: 数据库中已有图片路径且文件存在于 `public/uploads`，但前端页面（首页/列表页）依然显示占位符或“暂无封面”。
+  - *尝试过的方案*: 强制动态渲染 (`force-dynamic`)、清理 Next.js 缓存、脚本批量修复数据。
+  - *待调研*: Next.js 15 图片静态资源服务的路径映射问题。

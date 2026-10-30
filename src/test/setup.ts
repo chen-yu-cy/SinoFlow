@@ -7,10 +7,14 @@ vi.mock('@/lib/db/client', () => ({
     $transaction: vi.fn((callback) => callback({
       course: {
         update: vi.fn(),
+        delete: vi.fn(),
       },
       lesson: {
         deleteMany: vi.fn(),
       },
+      order: {
+        deleteMany: vi.fn(),
+      }
     })),
     user: {
       findUnique: vi.fn(),
@@ -22,6 +26,7 @@ vi.mock('@/lib/db/client', () => ({
       findMany: vi.fn(),
       count: vi.fn(),
       create: vi.fn(),
+      delete: vi.fn(),
     },
     order: {
       findFirst: vi.fn(),
@@ -29,6 +34,7 @@ vi.mock('@/lib/db/client', () => ({
       create: vi.fn(),
       update: vi.fn(),
       count: vi.fn(),
+      deleteMany: vi.fn(),
     },
     lesson: {
       deleteMany: vi.fn(),

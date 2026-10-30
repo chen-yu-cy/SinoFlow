@@ -32,7 +32,8 @@ const EditCoursePage = async ({ params }: EditCoursePageProps) => {
     duration: course.duration,
     lessons: course.lessons.map(l => ({
       title: l.title,
-      videoUrl: l.videoUrl
+      videoUrl: l.videoUrl,
+      isPreview: l.isPreview
     }))
   };
 
