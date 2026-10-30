@@ -180,9 +180,9 @@ input:focus, select:focus, textarea:focus {
   background-size: 16px 16px;
   border: 1px solid rgba(44, 62, 80, 0.08);
   border-radius: 24px;
-  padding: 5rem 2rem;
+  padding: 2.5rem 2rem 1.5rem 2rem;
   margin-top: 1rem;
-  margin-bottom: 3.5rem;
+  margin-bottom: 2rem;
   box-shadow: 0 15px 35px rgba(44, 62, 80, 0.03);
 }
 
@@ -238,11 +238,11 @@ input:focus, select:focus, textarea:focus {
 }
 
 .hero-title {
-  font-size: 3.25rem;
+  font-size: 2.75rem;
   line-height: 1.15;
   font-weight: 700;
   color: #1a1e21; /* 偏古典水墨的书写黑 */
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
   letter-spacing: -0.02em;
 }
 
@@ -253,11 +253,11 @@ input:focus, select:focus, textarea:focus {
 }
 
 .hero-subtitle {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   line-height: 1.6;
   color: #5a626a; /* 黛灰色 */
   max-width: 640px;
-  margin: 0 auto 2.5rem auto;
+  margin: 0 auto 1.5rem auto;
 }
 
 .hero-actions {
@@ -296,7 +296,7 @@ input:focus, select:focus, textarea:focus {
   flex-direction: column;
   align-items: center;
   gap: 0.4rem;
-  margin-top: 3.5rem;
+  margin-top: 1.5rem;
   color: #8c9299;
   font-size: 0.8rem;
   font-weight: 600;
@@ -319,8 +319,8 @@ input:focus, select:focus, textarea:focus {
   overflow: hidden;
   width: 100%;
   position: relative;
-  margin-top: 3rem;
-  padding: 1rem 0;
+  margin-top: 1.5rem;
+  padding: 0.75rem 0;
   border-top: 1px dashed rgba(44, 62, 80, 0.08);
   border-bottom: 1px dashed rgba(44, 62, 80, 0.08);
   background: rgba(253, 252, 247, 0.4);
