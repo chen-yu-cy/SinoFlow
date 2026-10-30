@@ -13,6 +13,12 @@ interface LessonData {
   duration?: number | null; // 视频时长(秒)
 }
 
+interface ResourceData {
+  title: string;
+  fileUrl: string;
+  fileSize?: string | null;
+}
+
 interface CourseFormProps {
   initialData?: {
     id: string;
@@ -23,6 +29,7 @@ interface CourseFormProps {
     duration: string;
     thumbnail?: string | null;
     lessons: LessonData[];
+    resources?: ResourceData[];
   };
 }
 
@@ -40,6 +47,7 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
   const [duration, setDuration] = useState(getInitialDuration());
   const [thumbnail, setThumbnail] = useState(initialData?.thumbnail || "");
   const [lessons, setLessons] = useState<LessonData[]>(initialData?.lessons || []);
+  const [resources, setResources] = useState<ResourceData[]>(initialData?.resources || []);
   const [uploading, setUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
@@ -85,12 +93,68 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
     }
   };
 
+  const handleResourceUpload = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      console.log(`[Frontend] 正在上传配套课件: ${file.name}`);
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (!res.ok) throw new Error("课件服务器响应错误");
+      
+      const data = await res.json();
+      console.log("[Frontend] 课件上传成功，服务器返回:", data);
+      
+      if (data.url) {
+        const newResources = [...resources];
+        newResources[index].fileUrl = data.url;
+        
+        // 格式化文件大小展示
+        let formattedSize = "未知大小";
+        if (file.size) {
+          if (file.size > 1024 * 1024) {
+            formattedSize = `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
+          } else {
+            formattedSize = `${(file.size / 1024).toFixed(1)} KB`;
+          }
+        }
+        newResources[index].fileSize = formattedSize;
+        if (!newResources[index].title) {
+          newResources[index].title = file.name;
+        }
+        setResources(newResources);
+      }
+    } catch (err) {
+      console.error("[Frontend] 课件上传异常:", err);
+      alert("课件上传失败");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const removeLesson = (index: number) => {
     const lessonTitle = lessons[index].title || `第 ${index + 1} 章节`;
     if (window.confirm(`确定要移除“${lessonTitle}”吗？`)) {
       const newLessons = [...lessons];
       newLessons.splice(index, 1);
       setLessons(newLessons);
+    }
+  };
+
+  const removeResource = (index: number) => {
+    const resTitle = resources[index].title || `附件 ${index + 1}`;
+    if (window.confirm(`确定要移除学习资料“${resTitle}”吗？`)) {
+      const newResources = [...resources];
+      newResources.splice(index, 1);
+      setResources(newResources);
     }
   };
 
@@ -116,7 +180,8 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
         level,
         duration: durationNum.toString(), // 存入数据库
         thumbnail,
-        lessons
+        lessons,
+        resources
       };
 
       const result = initialData 
@@ -350,6 +415,95 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
           {lessons.length === 0 && (
             <div style={{ textAlign: "center", padding: "4rem", color: "#adb5bd", border: "1px dashed #dee2e6", borderRadius: "12px", background: "#f8f9fa" }}>
               尚未添加任何章节内容
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* 3. 配套学习资料管理卡片 */}
+      <section style={{ background: "#fff", padding: "2rem", borderRadius: "12px", border: "1px solid var(--border-color)", boxShadow: "var(--card-shadow)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
+          <h4 style={{ margin: 0, color: "#212529" }}>3. 配套学习资料管理 (课件/PDF/ZIP 等)</h4>
+          <button 
+            type="button" 
+            onClick={() => setResources([...resources, { title: "", fileUrl: "", fileSize: "" }])} 
+            style={{ background: "var(--primary)", color: "#fff", border: "none", padding: "0.5rem 1.25rem", borderRadius: "6px", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.9rem", fontWeight: "600" }}
+          >
+            <Plus size={18} /> 添加新学习资料
+          </button>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          {/* Table Header */}
+          <div style={{ display: "grid", gridTemplateColumns: "40px 1.5fr 1.5fr 40px", gap: "1.5rem", padding: "0 1.5rem", color: "#adb5bd", fontSize: "0.75rem", fontWeight: "700" }}>
+            <span>#</span>
+            <span>资料名称 / 标题</span>
+            <span>文件上传</span>
+            <span></span>
+          </div>
+
+          {resources.map((res, index) => (
+            <div key={index} style={{ 
+              display: "grid", 
+              gridTemplateColumns: "40px 1.5fr 1.5fr 40px", 
+              gap: "1.5rem", 
+              alignItems: "center", 
+              padding: "1.25rem 1.5rem", 
+              background: "#fff", 
+              border: "1px solid #eee", 
+              borderRadius: "12px",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.02)"
+            }}>
+              <div style={{ fontWeight: "800", color: "#dee2e6", fontSize: "1.2rem" }}>{index + 1}</div>
+              
+              <input 
+                value={res.title} 
+                onChange={(e) => {
+                  const newResources = [...resources];
+                  newResources[index].title = e.target.value;
+                  setResources(newResources);
+                }} 
+                type="text" 
+                placeholder="资料下载显示的标题 (如：第一课配套讲义)" 
+                style={{ width: "100%", padding: "0.7rem", border: "1px solid #eee", borderRadius: "8px", fontSize: "0.9rem" }} 
+                required 
+              />
+
+              <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                <div style={{ position: "relative", flexShrink: 0 }}>
+                  <button type="button" style={{ padding: "0.5rem 1rem", border: "1px solid #ddd", background: "#f8f9fa", borderRadius: "8px", fontSize: "0.85rem", cursor: "pointer", fontWeight: "600" }}>
+                    {res.fileUrl ? "重新选择文件" : "上传文件"}
+                  </button>
+                  <input type="file" onChange={(e) => handleResourceUpload(e, index)} style={{ position: "absolute", top: 0, left: 0, opacity: 0, width: "100%", height: "100%", cursor: "pointer" }} />
+                </div>
+                
+                {res.fileUrl && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem", minWidth: 0 }}>
+                    <div style={{ color: "var(--success)", display: "flex", alignItems: "center", gap: "0.3rem", fontSize: "0.8rem", fontWeight: "700" }}>
+                      <CheckCircle2 size={16} /> 上传成功
+                    </div>
+                    {res.fileSize && (
+                      <span style={{ fontSize: "0.75rem", color: "#868e96" }}>大小: {res.fileSize}</span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <button 
+                type="button" 
+                onClick={() => removeResource(index)} 
+                style={{ background: "none", border: "none", color: "#adb5bd", cursor: "pointer", transition: "color 0.2s" }}
+                onMouseOver={(e) => (e.currentTarget.style.color = "var(--primary)")}
+                onMouseOut={(e) => (e.currentTarget.style.color = "#adb5bd")}
+              >
+                <Trash2 size={20} />
+              </button>
+            </div>
+          ))}
+
+          {resources.length === 0 && (
+            <div style={{ textAlign: "center", padding: "4rem", color: "#adb5bd", border: "1px dashed #dee2e6", borderRadius: "12px", background: "#f8f9fa" }}>
+              尚未添加任何配套学习资料
             </div>
           )}
         </div>

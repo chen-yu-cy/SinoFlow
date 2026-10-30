@@ -15,7 +15,8 @@ const EditCoursePage = async ({ params }: EditCoursePageProps) => {
     include: {
       lessons: {
         orderBy: { order: "asc" }
-      }
+      },
+      resources: true
     }
   });
 
@@ -30,10 +31,17 @@ const EditCoursePage = async ({ params }: EditCoursePageProps) => {
     price: course.price,
     level: course.level,
     duration: course.duration,
+    thumbnail: course.thumbnail,
     lessons: course.lessons.map(l => ({
       title: l.title,
       videoUrl: l.videoUrl,
-      isPreview: l.isPreview
+      isPreview: l.isPreview,
+      duration: l.duration
+    })),
+    resources: course.resources.map(r => ({
+      title: r.title,
+      fileUrl: r.fileUrl,
+      fileSize: r.fileSize
     }))
   };
 

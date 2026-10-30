@@ -14,6 +14,9 @@ vi.mock('@/lib/db/client', () => ({
       },
       order: {
         deleteMany: vi.fn(),
+      },
+      resource: {
+        deleteMany: vi.fn(),
       }
     })),
     user: {

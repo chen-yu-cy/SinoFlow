@@ -11,6 +11,7 @@ export interface CreateCourseInput {
   duration: string;
   thumbnail?: string | null;
   lessons: { title: string; videoUrl: string; isPreview: boolean; duration?: number | null }[];
+  resources?: { title: string; fileUrl: string; fileSize?: string | null }[];
 }
 
 /**
@@ -24,8 +25,8 @@ export interface UpdateCourseInput extends CreateCourseInput {}
  */
 export const CourseService = {
   /**
-   * 创建一个全新的课程及其关联的章节
-   * @param data 包含课程基本信息和章节列表的结构化数据
+   * 创建一个全新的课程及其关联的章节与学习资料
+   * @param data 包含课程基本信息、章节列表和资料的结构化数据
    * @throws 当必填项缺失时抛出 Error
    * @returns 返回新创建的课程数据库实体
    */
@@ -53,13 +54,19 @@ export const CourseService = {
             duration: lesson.duration,
           })),
         },
+        resources: data.resources ? {
+          create: data.resources.map((res) => ({
+            title: res.title,
+            fileUrl: res.fileUrl,
+            fileSize: res.fileSize,
+          })),
+        } : undefined,
       },
     });
   },
 
   /**
-   * 更新现有课程及其关联章节
-   * 注意：采用“全量替换”策略来同步章节列表（先删除该课程下所有章节，再重新创建）。
+   * 更新现有课程及其关联章节和学习资料
    * @param id 课程的唯一 ID (CUID)
    * @param data 更新后的课程数据
    * @returns 包含成功状态的事务执行结果
@@ -81,6 +88,8 @@ export const CourseService = {
 
       // 2. 清理旧章节并注入新章节，确保顺序与 UI 一致
       await tx.lesson.deleteMany({ where: { courseId: id } });
+      // 3. 清理旧资料并注入新资料
+      await tx.resource.deleteMany({ where: { courseId: id } });
 
       return await tx.course.update({
         where: { id },
@@ -95,6 +104,13 @@ export const CourseService = {
               duration: lesson.duration,
             })),
           },
+          resources: data.resources ? {
+            create: data.resources.map((res) => ({
+              title: res.title,
+              fileUrl: res.fileUrl,
+              fileSize: res.fileSize,
+            })),
+          } : undefined,
         },
       });
     });
@@ -102,15 +118,16 @@ export const CourseService = {
 
   /**
    * 级联删除一个课程
-   * 警告：此操作将永久移除课程主体、所有关联章节及学员的购买记录（Order）。
+   * 警告：此操作将永久移除课程主体、所有关联章节、关联资料及学员的购买记录（Order）。
    * @param id 课程的唯一 ID
    */
   async deleteCourse(id: string) {
     return await prisma.$transaction(async (tx) => {
       // 必须手动处理关联删除以确保事务完整性
       await tx.lesson.deleteMany({ where: { courseId: id } });
+      await tx.resource.deleteMany({ where: { courseId: id } });
       await tx.order.deleteMany({ where: { courseId: id } });
       return await tx.course.delete({ where: { id } });
     });
-  }
+  },
 };
