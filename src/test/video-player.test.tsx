@@ -1,6 +1,6 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render } from '@testing-library/react'
+import { render, act } from '@testing-library/react'
 import VideoPlayer from '@/components/course/video-player'
 import Hls from 'hls.js'
 
@@ -76,4 +76,40 @@ describe('VideoPlayer Component', () => {
     
     expect(hlsInstance.destroy).toHaveBeenCalled()
   })
+
+  it('在启用 isLimitedPreview 且播放进度超过限制比例时，应自动暂停并展示试看结束遮罩', async () => {
+    // 渲染带有 isLimitedPreview 和 previewLimitRatio=0.3 的 VideoPlayer
+    const { container } = render(
+      <VideoPlayer url={mockUrl} isLimitedPreview={true} previewLimitRatio={0.3} />
+    )
+
+    const videoElement = container.querySelector('video')
+    expect(videoElement).toBeDefined()
+    if (!videoElement) throw new Error('video element not found')
+
+    // 模拟 video 属性
+    Object.defineProperty(videoElement, 'duration', { value: 100, writable: true })
+    Object.defineProperty(videoElement, 'currentTime', { value: 31, writable: true })
+    
+    const pauseSpy = vi.spyOn(videoElement, 'pause').mockImplementation(() => {})
+
+    // 触发 timeupdate 事件
+    const event = new Event('timeupdate')
+    
+    await act(async () => {
+      videoElement.dispatchEvent(event)
+    })
+
+    // 验证 video 是否被暂停，且 currentTime 被重置为限制时间 (30)
+    expect(pauseSpy).toHaveBeenCalled()
+    expect(videoElement.currentTime).toBe(30)
+
+    // 验证试看结束的遮罩层是否出现在页面上
+    expect(container.textContent).toContain('试看已结束')
+    expect(container.textContent).toContain('仅允许免费试看前 30%')
+
+    pauseSpy.mockRestore()
+  })
 })
+
+

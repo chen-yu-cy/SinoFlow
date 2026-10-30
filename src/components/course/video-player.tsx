@@ -19,9 +19,17 @@ interface VideoPlayerProps {
   url: string;
   autoPlay?: boolean;
   onEnded?: () => void;
+  isLimitedPreview?: boolean;
+  previewLimitRatio?: number; // 默认 0.3 即 30%
 }
 
-const VideoPlayer = ({ url, autoPlay = false, onEnded }: VideoPlayerProps) => {
+const VideoPlayer = ({ 
+  url, 
+  autoPlay = false, 
+  onEnded, 
+  isLimitedPreview = false, 
+  previewLimitRatio = 0.3 
+}: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -36,6 +44,7 @@ const VideoPlayer = ({ url, autoPlay = false, onEnded }: VideoPlayerProps) => {
   const [showControls, setShowControls] = useState(true);
   const [showRateMenu, setShowRateMenu] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [previewFinished, setPreviewFinished] = useState(false);
 
   // 视频源加载逻辑 (兼容 HLS 与 MP4)
   useEffect(() => {
@@ -187,6 +196,20 @@ const VideoPlayer = ({ url, autoPlay = false, onEnded }: VideoPlayerProps) => {
   const handleTimeUpdate = () => {
     const video = videoRef.current;
     if (!video) return;
+
+    // 试看时间限制控制逻辑
+    if (isLimitedPreview && video.duration) {
+      const limitTime = video.duration * previewLimitRatio;
+      if (video.currentTime >= limitTime) {
+        video.pause();
+        video.currentTime = limitTime;
+        setIsPlaying(false);
+        setPreviewFinished(true);
+        setCurrentTime(limitTime);
+        return;
+      }
+    }
+
     setCurrentTime(video.currentTime);
   };
 
@@ -194,12 +217,27 @@ const VideoPlayer = ({ url, autoPlay = false, onEnded }: VideoPlayerProps) => {
     const video = videoRef.current;
     if (!video) return;
     setDuration(video.duration);
+    setPreviewFinished(false); // 重置状态
   };
 
   const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const video = videoRef.current;
     if (!video) return;
-    const seekTime = parseFloat(e.target.value);
+    let seekTime = parseFloat(e.target.value);
+
+    // 试看拖拽限制拦截
+    if (isLimitedPreview && video.duration) {
+      const limitTime = video.duration * previewLimitRatio;
+      if (seekTime >= limitTime) {
+        seekTime = limitTime;
+        setPreviewFinished(true);
+        video.pause();
+        setIsPlaying(false);
+      } else {
+        setPreviewFinished(false);
+      }
+    }
+
     video.currentTime = seekTime;
     setCurrentTime(seekTime);
   };
@@ -301,8 +339,8 @@ const VideoPlayer = ({ url, autoPlay = false, onEnded }: VideoPlayerProps) => {
         }}
       />
 
-      {/* 居中超大播放/暂停按钮遮罩层 (在非播放状态下悬浮显示) */}
-      {!isPlaying && (
+      {/* 居中超大播放/暂停按钮遮罩层 (在非播放状态下悬浮显示，若试看结束则不显示) */}
+      {!isPlaying && !previewFinished && (
         <div 
           onClick={togglePlay}
           style={{
@@ -334,6 +372,68 @@ const VideoPlayer = ({ url, autoPlay = false, onEnded }: VideoPlayerProps) => {
         </div>
       )}
 
+      {/* 试看结束高端水墨微光遮罩层 */}
+      {previewFinished && (
+        <div 
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(20, 23, 26, 0.92)", // 黛墨微温底色
+            backdropFilter: "blur(10px)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#fff",
+            zIndex: 15,
+            padding: "2rem",
+            textAlign: "center"
+          }}
+        >
+          <div style={{ 
+            background: "rgba(200, 16, 46, 0.1)", 
+            color: "var(--primary)", 
+            padding: "0.4rem 1.25rem", 
+            borderRadius: "20px", 
+            border: "1px solid rgba(200, 16, 46, 0.2)",
+            fontSize: "0.85rem",
+            fontWeight: "700",
+            marginBottom: "1.25rem",
+            letterSpacing: "2px"
+          }}>
+            ✦ 试看已结束 ✦
+          </div>
+          <h4 style={{ margin: "0 0 0.75rem 0", fontSize: "1.3rem", fontWeight: "700", color: "#f8f9fa" }}>
+            仅允许免费试看前 {Math.round(previewLimitRatio * 100)}% 章节视频
+          </h4>
+          <p style={{ margin: "0 0 1.5rem 0", color: "#a0a5ab", fontSize: "0.9rem", maxWidth: "380px", lineHeight: "1.5" }}>
+            已购学员可享受 HLS 级别防盗链及全部配套学习资料，助您高效掌握汉语精髓。
+          </p>
+          <button 
+            onClick={() => {
+              // 触发平滑滚动到购买入口
+              const purchaseSection = document.getElementById("purchase-section") || document.querySelector("button.btn-primary");
+              if (purchaseSection) {
+                purchaseSection.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+            className="btn-primary" 
+            style={{ 
+              padding: "0.6rem 2.5rem", 
+              borderRadius: "20px", 
+              fontSize: "0.9rem",
+              fontWeight: "600",
+              boxShadow: "0 6px 15px rgba(200, 16, 46, 0.3)"
+            }}
+          >
+            立即解锁全部章节
+          </button>
+        </div>
+      )}
+
       {/* 毛玻璃控制器面板 */}
       <div 
         style={{
@@ -360,6 +460,56 @@ const VideoPlayer = ({ url, autoPlay = false, onEnded }: VideoPlayerProps) => {
           <div style={{ position: "absolute", left: 0, right: 0, height: "4px", background: "rgba(255,255,255,0.2)", borderRadius: "2px" }} />
           {/* 已学完的红色彩条 */}
           <div style={{ position: "absolute", left: 0, width: `${progressPercent}%`, height: "4px", background: "var(--primary)", borderRadius: "2px" }} />
+          {/* 试看截止线指示标记 */}
+          {isLimitedPreview && (
+            <div 
+              style={{
+                position: "absolute",
+                left: `${previewLimitRatio * 100}%`,
+                width: "4px",
+                height: "10px",
+                background: "rgba(255, 77, 79, 0.9)", // 珊瑚淡红标识试看截止
+                borderRadius: "2px",
+                transform: "translateX(-50%)",
+                zIndex: 6,
+                boxShadow: "0 0 6px rgba(255, 77, 79, 0.6)",
+                cursor: "pointer"
+              }}
+              onMouseEnter={(e) => {
+                const tooltip = e.currentTarget.querySelector(".preview-tooltip") as HTMLDivElement;
+                if (tooltip) tooltip.style.opacity = "1";
+              }}
+              onMouseLeave={(e) => {
+                const tooltip = e.currentTarget.querySelector(".preview-tooltip") as HTMLDivElement;
+                if (tooltip) tooltip.style.opacity = "0";
+              }}
+            >
+              {/* Tooltip 悬浮提示框 */}
+              <div
+                className="preview-tooltip"
+                style={{
+                  position: "absolute",
+                  bottom: "15px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  background: "rgba(20, 23, 26, 0.95)",
+                  color: "#fff",
+                  padding: "4px 8px",
+                  borderRadius: "4px",
+                  fontSize: "11px",
+                  fontWeight: "600",
+                  whiteSpace: "nowrap",
+                  opacity: 0,
+                  transition: "opacity 0.2s ease-in-out",
+                  pointerEvents: "none",
+                  boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
+                  border: "1px solid rgba(255,255,255,0.15)"
+                }}
+              >
+                可试看至 {formatTime(duration * previewLimitRatio)}
+              </div>
+            </div>
+          )}
           {/* 原生滑块 input 覆盖，达到流畅拖拽操作 */}
           <input
             type="range"

@@ -131,6 +131,7 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
               url={currentLesson?.videoUrl || ""} 
               autoPlay={hasInteracted} 
               onEnded={handleVideoEnded}
+              isLimitedPreview={!hasFullAccess && currentLesson?.isPreview}
             />
           ) : (
             <PurchaseNotice 
