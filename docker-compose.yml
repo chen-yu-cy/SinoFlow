@@ -1,8 +1,15 @@
 # FILE: docker-compose.yml
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   db:
     image: postgres:15-alpine
     restart: always
+    logging: *default-logging
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-devuser}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
@@ -22,6 +29,7 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
+    logging: *default-logging
     ports:
       - "3000:3000"
     environment:
@@ -42,6 +50,8 @@ services:
 
   loki:
     image: grafana/loki:2.9.0
+    restart: always
+    logging: *default-logging
     ports:
       - "3100:3100"
     volumes:
@@ -50,6 +60,8 @@ services:
 
   promtail:
     image: grafana/promtail:2.9.0
+    restart: always
+    logging: *default-logging
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
@@ -60,14 +72,20 @@ services:
 
   grafana:
     image: grafana/grafana:latest
+    restart: always
+    logging: *default-logging
     ports:
       - "3001:3000"
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
     depends_on:
       - loki
 
 volumes:
   postgres_data:
   loki_data:
+  grafana_data:
