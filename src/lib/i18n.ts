@@ -2,10 +2,11 @@
 import { cookies } from "next/headers";
 import zh from "@/locales/zh.json";
 import en from "@/locales/en.json";
+import es from "@/locales/es.json";
 
-const dictionaries = { zh, en };
+const dictionaries = { zh, en, es };
 
-export type Locale = "zh" | "en";
+export type Locale = "zh" | "en" | "es";
 
 /**
  * 在服务端获取当前活跃语言
@@ -13,7 +14,9 @@ export type Locale = "zh" | "en";
 export async function getLocale(): Promise<Locale> {
   const cookieStore = await cookies();
   const locale = cookieStore.get("NEXT_LOCALE")?.value || "zh";
-  return (locale === "en" ? "en" : "zh") as Locale;
+  if (locale === "en") return "en";
+  if (locale === "es") return "es";
+  return "zh";
 }
 
 /**

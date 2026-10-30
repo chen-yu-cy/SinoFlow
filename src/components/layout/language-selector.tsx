@@ -52,10 +52,10 @@ export function LanguageSelector({ currentLocale }: { currentLocale: string }) {
         }}
       >
         <Globe size={16} color="#6c757d" />
-        <span>{currentLocale === "en" ? "English" : "中文"}</span>
+        <span>{currentLocale === "en" ? "English" : currentLocale === "es" ? "Español" : "中文"}</span>
         <ChevronDown size={14} style={{ transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s", color: "#adb5bd" }} />
       </button>
-
+ 
       {isOpen && (
         <div style={{
           position: "absolute",
@@ -117,6 +117,29 @@ export function LanguageSelector({ currentLocale }: { currentLocale: string }) {
             }}
           >
             English
+          </button>
+          <button
+            onClick={() => handleSelect("es")}
+            style={{
+              background: currentLocale === "es" ? "var(--primary-light)" : "none",
+              color: currentLocale === "es" ? "var(--primary)" : "#495057",
+              border: "none",
+              borderRadius: "6px",
+              padding: "0.5rem 0.75rem",
+              textAlign: "left",
+              fontSize: "0.85rem",
+              fontWeight: 500,
+              cursor: "pointer",
+              transition: "background 0.2s"
+            }}
+            onMouseEnter={(e) => {
+              if (currentLocale !== "es") e.currentTarget.style.background = "#f8f9fa";
+            }}
+            onMouseLeave={(e) => {
+              if (currentLocale !== "es") e.currentTarget.style.background = "none";
+            }}
+          >
+            Español
           </button>
         </div>
       )}
