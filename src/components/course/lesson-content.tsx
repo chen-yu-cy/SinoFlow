@@ -1,11 +1,12 @@
 // FILE: src/components/course/lesson-content.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import VideoPlayer from "@/components/course/video-player";
 import PurchaseNotice from "@/components/course/purchase-notice";
-import { PlayCircle, Lock, Info, BookText, FileText, Download } from "lucide-react";
+import { PlayCircle, Lock, Info, BookText, FileText, Download, PenTool } from "lucide-react";
 import { toggleLessonProgressAction } from "@/lib/actions/progress";
+import { getNotesAction, createNoteAction, deleteNoteAction } from "@/lib/actions/note";
 
 interface LessonContentProps {
   course: {
@@ -58,7 +59,74 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [completedIds, setCompletedIds] = useState<string[]>(initialCompletedLessonIds);
+  
+  // 笔记相关状态
+  const [activeTab, setActiveTab] = useState<"intro" | "notes">("intro");
+  const [notes, setNotes] = useState<any[]>([]);
+  const [noteContent, setNoteContent] = useState("");
+  const [currentVideoTime, setCurrentVideoTime] = useState(0);
+  const [seekToTime, setSeekToTime] = useState<number | null>(null);
+
   const currentLesson = course.lessons[currentLessonIndex];
+
+  // 监听课时切换，重新加载笔记
+  useEffect(() => {
+    if (currentLesson) {
+      loadNotes();
+    }
+  }, [currentLessonIndex]);
+
+  const loadNotes = async () => {
+    if (!currentLesson || !hasFullAccess) return;
+    try {
+      const res = await getNotesAction(currentLesson.id);
+      if (res.success && res.notes) {
+        setNotes(res.notes);
+      }
+    } catch (err) {
+      console.error("加载笔记失败:", err);
+    }
+  };
+
+  const handleSaveNote = async () => {
+    if (!currentLesson) return;
+    if (!noteContent.trim()) {
+      alert("请输入笔记内容");
+      return;
+    }
+    try {
+      const res = await createNoteAction(currentLesson.id, noteContent, currentVideoTime);
+      if (res.success && res.note) {
+        setNoteContent("");
+        loadNotes();
+      } else if (res.error) {
+        alert(res.error);
+      }
+    } catch (err) {
+      console.error("保存笔记失败:", err);
+    }
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    if (!confirm("确定要删除这条笔记吗？")) return;
+    try {
+      const res = await deleteNoteAction(noteId);
+      if (res.success) {
+        loadNotes();
+      } else if (res.error) {
+        alert(res.error);
+      }
+    } catch (err) {
+      console.error("删除笔记失败:", err);
+    }
+  };
+
+  const formatTime = (timeInSeconds: number) => {
+    if (isNaN(timeInSeconds)) return "00:00";
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = Math.floor(timeInSeconds % 60);
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  };
 
   // A user has access if they have full access OR the current lesson is a preview
   const canViewCurrentLesson = hasFullAccess || currentLesson?.isPreview;
@@ -132,6 +200,9 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
               autoPlay={hasInteracted} 
               onEnded={handleVideoEnded}
               isLimitedPreview={!hasFullAccess && currentLesson?.isPreview}
+              seekToTime={seekToTime}
+              onSeekProcessed={() => setSeekToTime(null)}
+              onTimeUpdate={(time) => setCurrentVideoTime(time)}
             />
           ) : (
             <PurchaseNotice 
@@ -157,12 +228,219 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
           {canViewCurrentLesson ? (currentLesson?.title || course.title) : course.title}
         </h1>
         
-        <div style={{ background: "#fff", padding: "2rem", borderRadius: "12px", border: "1px solid var(--border-color)", boxShadow: "var(--card-shadow)" }}>
-          <h3 style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem" }}>
-            <Info size={20} color="var(--primary)" /> {t.introTitle}
-          </h3>
-          <p style={{ color: '#495057', lineHeight: '1.8', fontSize: "1.05rem" }}>{course.description}</p>
+        {/* Tab 栏切换 */}
+        <div style={{ display: "flex", borderBottom: "2px solid #e9ecef", marginBottom: "1.5rem" }}>
+          <button 
+            onClick={() => setActiveTab("intro")}
+            style={{
+              padding: "0.75rem 1.5rem",
+              background: "none",
+              border: "none",
+              borderBottom: activeTab === "intro" ? "3px solid var(--primary)" : "none",
+              color: activeTab === "intro" ? "var(--primary)" : "#6c757d",
+              fontWeight: "700",
+              cursor: "pointer",
+              fontSize: "1rem",
+              marginBottom: "-2px"
+            }}
+          >
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}>
+              <Info size={18} /> {t.introTitle}
+            </span>
+          </button>
+          <button 
+            onClick={() => setActiveTab("notes")}
+            style={{
+              padding: "0.75rem 1.5rem",
+              background: "none",
+              border: "none",
+              borderBottom: activeTab === "notes" ? "3px solid var(--primary)" : "none",
+              color: activeTab === "notes" ? "var(--primary)" : "#6c757d",
+              fontWeight: "700",
+              cursor: "pointer",
+              fontSize: "1rem",
+              marginBottom: "-2px"
+            }}
+          >
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}>
+              <PenTool size={18} /> 我的笔记 {!hasFullAccess ? "🔒" : `(${notes.length})`}
+            </span>
+          </button>
         </div>
+
+        {/* Tab 内容区 */}
+        {activeTab === "intro" ? (
+          <div style={{ background: "#fff", padding: "2rem", borderRadius: "12px", border: "1px solid var(--border-color)", boxShadow: "var(--card-shadow)" }}>
+            <h3 style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem", marginTop: 0 }}>
+              <Info size={20} color="var(--primary)" /> {t.introTitle}
+            </h3>
+            <p style={{ color: '#495057', lineHeight: '1.8', fontSize: "1.05rem", margin: 0 }}>{course.description}</p>
+          </div>
+        ) : (
+          <div style={{ background: "#fff", padding: "2rem", borderRadius: "12px", border: "1px solid var(--border-color)", boxShadow: "var(--card-shadow)" }}>
+            {!hasFullAccess ? (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "2.5rem 1rem" }}>
+                <div style={{ 
+                  background: "rgba(200, 16, 46, 0.06)", 
+                  color: "var(--primary)", 
+                  padding: "1rem", 
+                  borderRadius: "50%", 
+                  marginBottom: "1.25rem",
+                  display: "inline-flex",
+                  boxShadow: "0 4px 12px rgba(200, 16, 46, 0.1)"
+                }}>
+                  <Lock size={32} />
+                </div>
+                <h4 style={{ margin: "0 0 0.75rem 0", fontSize: "1.3rem", fontWeight: "800", color: "#212529" }}>
+                  专属随堂笔记功能
+                </h4>
+                <p style={{ margin: "0 0 1.5rem 0", color: "#6c757d", fontSize: "0.95rem", maxWidth: "420px", lineHeight: "1.6" }}>
+                  购买该课程后即可解锁时间戳记笔记特权！支持在播放至任意时间一键截取记录，点击时间戳快速定位跳转视频，为您定制最高效的复习通路。
+                </p>
+                <button 
+                  onClick={() => {
+                    const purchaseSection = document.getElementById("purchase-section") || document.querySelector("button.btn-primary");
+                    if (purchaseSection) {
+                      purchaseSection.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                  className="btn-primary" 
+                  style={{ 
+                    padding: "0.6rem 2.25rem", 
+                    borderRadius: "20px", 
+                    fontSize: "0.9rem",
+                    fontWeight: "600",
+                    boxShadow: "0 6px 15px rgba(200, 16, 46, 0.25)"
+                  }}
+                >
+                  立即购买解锁完整特权
+                </button>
+              </div>
+            ) : (
+              <>
+                <h3 style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem", marginTop: 0 }}>
+                  <PenTool size={20} color="var(--primary)" /> 学习笔记
+                </h3>
+                
+                {/* 笔记编辑卡片 */}
+                <div style={{ background: "#f8f9fa", padding: "1.25rem", borderRadius: "8px", border: "1px solid #e9ecef", marginBottom: "1.5rem" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
+                    <span style={{ fontSize: "0.9rem", color: "#495057", fontWeight: "600" }}>
+                      记录时间戳: <span style={{ color: "var(--primary)", fontFamily: "monospace", fontSize: "1rem" }}>{formatTime(currentVideoTime)}</span>
+                    </span>
+                    <span style={{ fontSize: "0.8rem", color: "#6c757d" }}>
+                      (视频播放时会自动追踪当前时间点)
+                    </span>
+                  </div>
+                  <textarea
+                    placeholder="在此记录本课时的知识点、心得或疑问..."
+                    value={noteContent}
+                    onChange={(e) => setNoteContent(e.target.value)}
+                    style={{
+                      width: "100%",
+                      minHeight: "100px",
+                      padding: "0.75rem",
+                      borderRadius: "6px",
+                      border: "1px solid #ced4da",
+                      outline: "none",
+                      fontSize: "0.95rem",
+                      resize: "vertical",
+                      marginBottom: "0.75rem",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <button
+                      onClick={handleSaveNote}
+                      style={{
+                        background: "var(--primary)",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "20px",
+                        padding: "0.5rem 1.75rem",
+                        fontSize: "0.9rem",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        boxShadow: "0 4px 10px rgba(200, 16, 46, 0.2)",
+                        transition: "all 0.2s"
+                      }}
+                    >
+                      保存笔记
+                    </button>
+                  </div>
+                </div>
+
+                {/* 笔记列表展示 */}
+                {notes.length === 0 ? (
+                  <p style={{ textAlign: "center", color: "#868e96", fontStyle: "italic", margin: "2rem 0" }}>
+                    暂无本节笔记，开始在上方写下你的第一条笔记吧！
+                  </p>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                    {notes.map((note) => (
+                      <div 
+                        key={note.id}
+                        style={{
+                          padding: "1rem 1.25rem",
+                          borderRadius: "8px",
+                          border: "1px solid #e9ecef",
+                          background: "#fff",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "flex-start",
+                          gap: "1.5rem"
+                        }}
+                      >
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", flex: 1 }}>
+                          <span 
+                            onClick={() => setSeekToTime(note.timestamp)}
+                            style={{
+                              fontSize: "0.85rem",
+                              color: "var(--primary)",
+                              fontWeight: "700",
+                              fontFamily: "monospace",
+                              background: "rgba(200, 16, 46, 0.06)",
+                              padding: "0.2rem 0.6rem",
+                              borderRadius: "4px",
+                              alignSelf: "flex-start",
+                              cursor: "pointer",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "0.25rem"
+                            }}
+                            title="点击跳转到视频时间"
+                          >
+                            ⏱️ {formatTime(note.timestamp)}
+                          </span>
+                          <p style={{ margin: 0, fontSize: "0.95rem", color: "#343a40", whiteSpace: "pre-wrap", lineHeight: "1.6" }}>
+                            {note.content}
+                          </p>
+                        </div>
+                        <button 
+                          onClick={() => handleDeleteNote(note.id)}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            color: "#adb5bd",
+                            cursor: "pointer",
+                            padding: 0,
+                            fontSize: "0.85rem",
+                            fontWeight: "600",
+                            transition: "color 0.2s"
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.color = "var(--primary)"}
+                          onMouseLeave={(e) => e.currentTarget.style.color = "#adb5bd"}
+                        >
+                          删除
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Sidebar: Lesson List */}

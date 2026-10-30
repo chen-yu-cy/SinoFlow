@@ -21,6 +21,9 @@ interface VideoPlayerProps {
   onEnded?: () => void;
   isLimitedPreview?: boolean;
   previewLimitRatio?: number; // 默认 0.3 即 30%
+  seekToTime?: number | null;
+  onSeekProcessed?: () => void;
+  onTimeUpdate?: (time: number) => void;
 }
 
 const VideoPlayer = ({ 
@@ -28,7 +31,10 @@ const VideoPlayer = ({
   autoPlay = false, 
   onEnded, 
   isLimitedPreview = false, 
-  previewLimitRatio = 0.3 
+  previewLimitRatio = 0.3,
+  seekToTime = null,
+  onSeekProcessed,
+  onTimeUpdate
 }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -88,6 +94,29 @@ const VideoPlayer = ({
       };
     }
   }, [url, autoPlay]);
+
+  // 外部 Seek 跳转控制监听
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (seekToTime !== undefined && seekToTime !== null) {
+      let targetTime = seekToTime;
+      if (isLimitedPreview && video.duration) {
+        const limitTime = video.duration * previewLimitRatio;
+        if (targetTime >= limitTime) {
+          targetTime = limitTime;
+          setPreviewFinished(true);
+          video.pause();
+          setIsPlaying(false);
+        } else {
+          setPreviewFinished(false);
+        }
+      }
+      video.currentTime = targetTime;
+      setCurrentTime(targetTime);
+      onSeekProcessed?.();
+    }
+  }, [seekToTime, isLimitedPreview, previewLimitRatio, onSeekProcessed]);
 
   // 全屏状态改变监听
   useEffect(() => {
@@ -211,6 +240,7 @@ const VideoPlayer = ({
     }
 
     setCurrentTime(video.currentTime);
+    onTimeUpdate?.(video.currentTime);
   };
 
   const handleLoadedMetadata = () => {
