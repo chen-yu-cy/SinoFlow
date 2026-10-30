@@ -1,46 +1,26 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/db/client";
-import { OrderStatus } from "@prisma/client";
+import { OrderService } from "@/lib/services/order.service";
 
 /**
  * @openapi
  * /api/payment/callback:
  *   post:
  *     summary: Payment gateway webhook listener
- *     description: Receives asynchronous payment results from WeChat/Alipay. Requires raw body verification.
- *     responses:
- *       200:
- *         description: Callback processed successfully
+ *     description: Receives asynchronous payment results from WeChat/Alipay.
  *   get:
  *     summary: Mock payment completion (Development only)
  *     description: Manually trigger a successful payment for testing purposes.
- *     parameters:
- *       - in: query
- *         name: orderId
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Order updated to SUCCESS and redirected to success page
  */
+
 export async function POST(req: Request) {
   try {
-    // 微信/支付宝的回调通常需要读取原始 Body 进行签名校验
     const rawBody = await req.text();
-    
-    // 这里应该是解析 XML (微信) 或 JSON (支付宝) 的逻辑
-    // 以及签名验证 logic
-    
-    console.log("收到支付平台回调:", rawBody);
+    console.log("收到支付平台回调 (Webhook):", rawBody);
 
-    // 示例解析（实际需要根据具体 SDK 处理）
-    // 假设我们从回调中获取到了订单 ID 和支付状态
-    // const { out_trade_no, trade_status } = parseCallback(rawBody);
-    
-    // 为了原型演示，我们添加一个专门用于模拟成功的回调逻辑
-    return NextResponse.json({ message: "Mock callback received" });
+    // 逻辑：验证签名 -> 解析数据 -> 调用 Service
+    // await OrderService.completeOrder(parsedOrderId, parsedPaymentId);
 
+    return NextResponse.json({ message: "Webhook received" });
   } catch (error) {
     console.error("Payment callback error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -57,13 +37,8 @@ export async function GET(req: Request) {
   }
 
   try {
-    await prisma.order.update({
-      where: { id: orderId },
-      data: { 
-        status: OrderStatus.SUCCESS,
-        paymentId: `MOCK_PAY_${Date.now()}`
-      }
-    });
+    // 调用业务服务层完成订单状态更新
+    await OrderService.completeOrder(orderId, `MOCK_PAY_${Date.now()}`);
 
     return new Response(`
       <html lang="zh-CN">
@@ -79,6 +54,7 @@ export async function GET(req: Request) {
       </html>
     `, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
   } catch (error) {
+    console.error("Callback API Error:", error);
     return NextResponse.json({ error: "Failed to update order" }, { status: 500 });
   }
 }

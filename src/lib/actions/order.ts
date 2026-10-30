@@ -1,8 +1,12 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import prisma from "@/lib/db/client";
-import { OrderStatus } from "@prisma/client";
+import { OrderService } from "@/lib/services/order.service";
+
+/**
+ * Server Actions for Orders
+ * 职责：用户身份校验、权限守卫、调用业务服务
+ */
 
 export async function createOrder(courseId: string) {
   const session = await auth();
@@ -11,40 +15,14 @@ export async function createOrder(courseId: string) {
     return { error: "请先登录后再进行购买" };
   }
 
-  const course = await prisma.course.findUnique({
-    where: { id: courseId },
-  });
-
-  if (!course) {
-    return { error: "课程不存在" };
-  }
-
-  // 检查是否已经购买过且支付成功
-  const existingOrder = await prisma.order.findFirst({
-    where: {
-      userId: session.user.id,
-      courseId: courseId,
-      status: OrderStatus.SUCCESS,
-    },
-  });
-
-  if (existingOrder) {
-    return { error: "您已购买过此课程", alreadyOwned: true };
-  }
-
   try {
-    const order = await prisma.order.create({
-      data: {
-        userId: session.user.id,
-        courseId: courseId,
-        amount: course.price,
-        status: OrderStatus.PENDING,
-      },
-    });
-
+    const order = await OrderService.createOrder(session.user.id, courseId);
     return { success: true, orderId: order.id };
-  } catch (error) {
-    console.error("创建订单失败:", error);
-    return { error: "创建订单失败，请稍后再试" };
+  } catch (error: any) {
+    if (error.alreadyOwned) {
+      return { error: error.message, alreadyOwned: true };
+    }
+    console.error("Action Error (createOrder):", error);
+    return { error: error.message || "创建订单失败，请稍后再试" };
   }
 }
