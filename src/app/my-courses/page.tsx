@@ -10,6 +10,7 @@ const MyCoursesPage = async () => {
 
   if (!session?.user) {
     redirect("/login");
+    return null;
   }
 
   // 获取用户已成功支付的订单及其关联的课程

@@ -22,6 +22,7 @@ const CourseDetailPage = async ({ params }: CourseDetailPageProps) => {
 
   if (!course) {
     notFound();
+    return null; // Ensure subsequent code doesn't execute in tests
   }
 
   // 检查当前用户是否已购买
