@@ -1,12 +1,12 @@
+// FILE: src/lib/actions/auth.ts
 "use server";
 
-import bcrypt from "bcryptjs";
-import prisma from "@/lib/db/client";
 import { auth } from "@/lib/auth";
+import { UserService } from "@/lib/services/user.service";
 
 /**
  * 身份验证与用户管理 Server Actions
- * 职责：处理用户注册、密码二次校验等安全敏感逻辑。
+ * 职责：作为 Web 前端的入口层，处理 HTTP/Action 副作用，权限验证，并调用 Service 核心层。
  */
 
 /**
@@ -14,43 +14,20 @@ import { auth } from "@/lib/auth";
  * @param formData 包含 name, email, password 的表单对象
  */
 export async function registerUser(formData: FormData) {
-  console.log("[Auth] 开始处理注册请求...");
+  console.log("[Auth Action] 开始处理注册请求...");
   
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  // 1. 基础数据验证
-  if (!email || !password) {
-    return { error: "邮箱和密码不能为空" };
-  }
-
-  // 2. 查重校验
-  const existingUser = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  if (existingUser) {
-    return { error: "该邮箱已被注册" };
-  }
-
-  // 3. 密码加盐哈希（安全性核心）
-  const hashedPassword = await bcrypt.hash(password, 10);
-
   try {
-    // 4. 写入数据库
-    await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-      },
-    });
-    console.log("[Auth] 用户注册成功:", email);
+    // 委托给 Service 层处理注册逻辑
+    await UserService.registerUser({ name, email, password });
+    console.log("[Auth Action] 用户注册成功:", email);
     return { success: true };
-  } catch (error) {
-    console.error("[Auth] 数据库写入错误:", error);
-    return { error: "注册失败，请稍后再试" };
+  } catch (error: any) {
+    console.error("[Auth Action] 注册错误:", error);
+    return { error: error.message || "注册失败，请稍后再试" };
   }
 }
 
@@ -62,26 +39,18 @@ export async function registerUser(formData: FormData) {
 export async function verifyAdminPassword(password: string) {
   const session = await auth();
 
-  // 1. 第一层防御：校验 Session 中的 Role
+  // 第一层防御：校验 Session 中的 Role 权限
   if (!session?.user || (session.user as any).role !== "ADMIN") {
     return { error: "未经授权" };
   }
 
-  // 2. 获取数据库中最新的管理员信息
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email as string },
-  });
-
-  if (!user || !user.password) {
-    return { error: "管理员账号异常" };
+  try {
+    // 委托给 Service 层执行密码指纹对比
+    await UserService.verifyUserPassword(session.user.email as string, password);
+    return { success: true };
+  } catch (error: any) {
+    console.error("[Auth Action] 密码对比校验失败:", error);
+    return { error: error.message || "验证失败" };
   }
-
-  // 3. 执行指纹对比
-  const isValid = await bcrypt.compare(password, user.password);
-  
-  if (!isValid) {
-    return { error: "管理员密码错误" };
-  }
-
-  return { success: true };
 }
+
