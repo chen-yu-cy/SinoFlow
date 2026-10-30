@@ -17,7 +17,21 @@ export default async function AdminLayout({
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#f8f9fa" }}>
+    /* 
+       使用 fixed 定位和极高 z-index 彻底覆盖公共前台布局
+       这样可以确保后台是一个独立的、不受干扰的工作空间
+    */
+    <div style={{ 
+      position: "fixed", 
+      top: 0, 
+      left: 0, 
+      width: "100vw", 
+      height: "100vh", 
+      zIndex: 5000, 
+      background: "#f8f9fa",
+      overflow: "hidden", // 内部自己处理滚动
+      display: "flex"
+    }}>
       {/* Admin Sidebar */}
       <aside style={{ 
         width: "260px", 
@@ -25,8 +39,9 @@ export default async function AdminLayout({
         color: "#fff", 
         display: "flex", 
         flexDirection: "column",
-        position: "fixed",
-        height: "100vh"
+        height: "100vh",
+        flexShrink: 0,
+        boxShadow: "4px 0 10px rgba(0,0,0,0.05)"
       }}>
         <div style={{ padding: "2rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
           <Link href="/" style={{ textDecoration: "none", color: "#fff", display: "flex", alignItems: "center", gap: "0.5rem" }}>
@@ -92,16 +107,35 @@ export default async function AdminLayout({
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <main style={{ flex: 1, marginLeft: "260px", padding: "2rem" }}>
-        <header style={{ marginBottom: "2rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2 style={{ margin: 0 }}>管理后台</h2>
+      {/* Main Content Area - 自带独立滚动条 */}
+      <div style={{ flex: 1, height: "100vh", overflowY: "auto", position: "relative" }}>
+        {/* 内容区固定的 Header */}
+        <header style={{ 
+          display: "flex", 
+          justifyContent: "space-between", 
+          alignItems: "center",
+          position: "sticky",
+          top: 0,
+          background: "rgba(248, 249, 250, 0.98)", // 几乎不透明，防止透视
+          backdropFilter: "blur(10px)",
+          padding: "1.5rem 2.5rem",
+          zIndex: 100, // 高于主体内容
+          borderBottom: "1px solid #eee"
+        }}>
+          <h2 style={{ margin: 0, fontSize: "1.25rem", fontWeight: "700" }}>管理系统 / Overview</h2>
           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <span style={{ fontSize: "0.9rem", color: "#6c757d" }}>{session.user.email}</span>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: "0.85rem", fontWeight: "700" }}>{session.user.name}</div>
+              <div style={{ fontSize: "0.75rem", color: "#adb5bd" }}>{session.user.email}</div>
+            </div>
           </div>
         </header>
-        {children}
-      </main>
+
+        {/* 实际页面内容 */}
+        <main style={{ padding: "2.5rem" }}>
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

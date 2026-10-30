@@ -31,11 +31,11 @@ const CourseActions = ({ courseId, courseTitle }: CourseActionsProps) => {
       setShowConfirm(false);
     }
   };
-
-  return (
-    <>
-      <div style={{ display: "flex", gap: "1rem", justifyContent: "flex-end", alignItems: "center" }}>
-        <Link href={`/courses/${courseId}`} target="_blank" title="预览" style={{ display: "flex", alignItems: "center" }}>
+return (
+  <>
+    <div style={{ display: "flex", gap: "1rem", justifyContent: "flex-start", alignItems: "center" }}>
+      <Link href={`/courses/${courseId}`} target="_blank" title="预览" style={{ display: "flex", alignItems: "center" }}>
+...
           <ExternalLink size={18} color="#6c757d" />
         </Link>
         <Link href={`/admin/courses/${courseId}/edit`} title="编辑" style={{ display: "flex", alignItems: "center" }}>
