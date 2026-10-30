@@ -55,4 +55,57 @@ export async function verifyAdminPassword(password: string) {
   }
 }
 
+/**
+ * 模拟登录其他用户 Action
+ * @param targetEmail 目标用户邮箱
+ */
+export async function impersonateUser(targetEmail: string) {
+  const session = await auth();
+
+  // 安全检查：只有管理员有权执行此操作
+  if (!session?.user || (session.user as any).role !== "ADMIN") {
+    return { error: "未经授权" };
+  }
+
+  try {
+    const { generateImpersonationToken } = await import("@/lib/auth-impersonate");
+    const token = generateImpersonationToken(targetEmail, session.user.email as string);
+    logger.info(
+      { adminEmail: session.user.email, targetEmail },
+      "[Auth Action] 管理员生成了模拟登录 Token"
+    );
+    return { success: true, token };
+  } catch (error: any) {
+    logger.error({ err: error, targetEmail }, "[Auth Action] 生成模拟登录 Token 失败");
+    return { error: "模拟登录请求失败，请稍后再试" };
+  }
+}
+
+/**
+ * 退出模拟登录并返回管理员账号 Action
+ */
+export async function exitImpersonation() {
+  const session = await auth();
+
+  // 安全检查：只有当前为模拟登录状态时才允许执行
+  const impersonatorEmail = (session?.user as any)?.impersonatorEmail;
+  if (!session?.user || !impersonatorEmail) {
+    return { error: "当前非模拟登录状态" };
+  }
+
+  try {
+    const { generateImpersonationToken } = await import("@/lib/auth-impersonate");
+    // 生成原管理员重新登录的 Token
+    const token = generateImpersonationToken(impersonatorEmail, "");
+    logger.info(
+      { impersonatorEmail, targetEmail: session.user.email },
+      "[Auth Action] 模拟登录退出，生成管理员返回 Token"
+    );
+    return { success: true, token, adminEmail: impersonatorEmail };
+  } catch (error: any) {
+    logger.error({ err: error }, "[Auth Action] 退出模拟登录失败");
+    return { error: "退出模拟登录失败，请稍后再试" };
+  }
+}
+
 

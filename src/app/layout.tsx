@@ -49,7 +49,8 @@ const RootLayout = async ({
                 <UserNav user={{ 
                   name: session.user?.name, 
                   email: session.user?.email, 
-                  role: (session.user as any).role 
+                  role: (session.user as any).role,
+                  impersonatorEmail: (session.user as any).impersonatorEmail || null
                 }} />
               ) : (
                 <>

@@ -1,20 +1,24 @@
+// FILE: src/components/layout/user-nav.tsx
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { User, LogOut, Shield, ChevronDown, BookOpen } from "lucide-react";
-import { signOut } from "next-auth/react";
+import { User, LogOut, Shield, ChevronDown, BookOpen, Loader2 } from "lucide-react";
+import { signOut, signIn } from "next-auth/react";
+import { exitImpersonation } from "@/lib/actions/auth";
 
 interface UserNavProps {
   user: {
     name?: string | null;
     email?: string | null;
     role?: string;
+    impersonatorEmail?: string | null;
   };
 }
 
 const UserNav = ({ user }: UserNavProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [exiting, setExiting] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // 点击外部关闭菜单
@@ -28,6 +32,32 @@ const UserNav = ({ user }: UserNavProps) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // 退出模拟登录，返回原管理员账号
+  const handleExitImpersonation = async () => {
+    setExiting(true);
+    try {
+      const res = await exitImpersonation();
+      if (res.error) {
+        alert(res.error);
+        setExiting(false);
+        return;
+      }
+
+      if (res.success && res.token && res.adminEmail) {
+        // 使用返回 Token 重新登录为原管理员
+        await signIn("credentials", {
+          email: res.adminEmail,
+          token: res.token,
+          callbackUrl: "/admin/users",
+          redirect: true,
+        });
+      }
+    } catch (err) {
+      alert("退出模拟登录异常");
+      setExiting(false);
+    }
+  };
+
   return (
     <div style={{ position: "relative" }} ref={dropdownRef}>
       <button 
@@ -37,19 +67,41 @@ const UserNav = ({ user }: UserNavProps) => {
           alignItems: "center", 
           gap: "0.5rem", 
           padding: "0.4rem 0.8rem", 
-          background: isOpen ? "#e9ecef" : "#f1f3f5", 
+          background: user.impersonatorEmail ? "#fff9db" : (isOpen ? "#e9ecef" : "#f1f3f5"), 
           borderRadius: "20px",
-          border: "none",
+          border: user.impersonatorEmail ? "1px solid #ffe3e3" : "none",
           cursor: "pointer",
           transition: "all 0.2s",
           outline: "none"
         }}
       >
-        <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "var(--primary)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
+        <div style={{ 
+          width: "24px", 
+          height: "24px", 
+          borderRadius: "50%", 
+          background: user.impersonatorEmail ? "#f59f00" : "var(--primary)", 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center", 
+          color: "#fff" 
+        }}>
           <User size={14} />
         </div>
-        <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--foreground-rgb)" }}>
+        <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--foreground-rgb)", display: "flex", alignItems: "center", gap: "0.3rem" }}>
           {user.name?.split(' ')[0] || "学员"}
+          {user.impersonatorEmail && (
+            <span style={{ 
+              fontSize: "0.7rem", 
+              background: "#fff9db", 
+              color: "#f59f00", 
+              padding: "0.1rem 0.4rem", 
+              borderRadius: "10px", 
+              border: "1px solid #ffe066",
+              fontWeight: "bold"
+            }}>
+              模拟中
+            </span>
+          )}
         </span>
         <ChevronDown size={14} style={{ transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s", color: "#adb5bd" }} />
       </button>
@@ -72,10 +124,40 @@ const UserNav = ({ user }: UserNavProps) => {
           <div style={{ padding: "0.75rem 1rem", borderBottom: "1px solid #f1f3f5", marginBottom: "0.5rem" }}>
             <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--foreground-rgb)" }}>{user.name}</div>
             <div style={{ fontSize: "0.75rem", color: "#adb5bd", overflow: "hidden", textOverflow: "ellipsis" }}>{user.email}</div>
+            {user.impersonatorEmail && (
+              <div style={{ fontSize: "0.7rem", color: "#f59f00", marginTop: "0.25rem", fontWeight: "500" }}>
+                原管理员: {user.impersonatorEmail}
+              </div>
+            )}
           </div>
 
+          {/* Impersonation Exit */}
+          {user.impersonatorEmail && (
+            <div 
+              onClick={exiting ? undefined : handleExitImpersonation}
+              style={{ 
+                display: "flex", 
+                alignItems: "center", 
+                gap: "0.75rem", 
+                padding: "0.75rem 1rem", 
+                borderRadius: "8px", 
+                color: "#f59f00", 
+                fontWeight: 600,
+                fontSize: "0.9rem",
+                cursor: "pointer",
+                background: "#fff9db",
+                marginBottom: "0.5rem",
+                transition: "opacity 0.2s"
+              }} 
+              className="dropdown-item"
+            >
+              {exiting ? <Loader2 size={18} className="animate-spin" /> : <LogOut size={18} />}
+              返回管理员账号
+            </div>
+          )}
+
           {/* Admin Entry */}
-          {user.role === "ADMIN" && (
+          {user.role === "ADMIN" && !user.impersonatorEmail && (
             <Link href="/admin" target="_blank" onClick={() => setIsOpen(false)} style={{ textDecoration: "none" }}>
               <div style={{ 
                 display: "flex", 

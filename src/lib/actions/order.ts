@@ -37,3 +37,29 @@ export async function createOrder(courseId: string) {
   }
 }
 
+/**
+ * 撤销用户课程授权 Action (管理员专用)
+ * @param email 目标用户注册邮箱
+ * @param courseId 目标课程 ID
+ */
+export async function revokeCourseAccess(email: string, courseId: string) {
+  const session = await auth();
+
+  // 安全检查：仅允许管理员角色操作
+  if (!session?.user || (session.user as any).role !== "ADMIN") {
+    return { error: "未经授权" };
+  }
+
+  try {
+    const deletedCount = await OrderService.revokeUserAccess(email, courseId);
+    logger.info(
+      { adminEmail: session.user.email, userEmail: email, courseId, deletedCount },
+      "[Order Action] 管理员成功撤销了用户的课程访问权限"
+    );
+    return { success: true, deletedCount };
+  } catch (error: any) {
+    logger.error({ err: error, email, courseId }, "[Order Action] 撤销课程授权失败");
+    return { error: error.message || "撤销访问权限失败，请稍后再试" };
+  }
+}
+
