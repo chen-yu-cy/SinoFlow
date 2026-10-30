@@ -6,7 +6,7 @@ import { BookOpen, Home, LayoutDashboard } from "lucide-react";
 import UserNav from "@/components/layout/user-nav";
 import { getTranslation } from "@/lib/i18n";
 import { LanguageSelector } from "@/components/layout/language-selector";
-import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans, Playfair_Display } from "next/font/google";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -18,6 +18,12 @@ const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-plus-jakarta",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-playfair",
 });
 
 export const metadata: Metadata = {
@@ -34,7 +40,7 @@ const RootLayout = async ({
   const { t, locale } = await getTranslation();
 
   return (
-    <html lang={locale} className={`${inter.variable} ${plusJakarta.variable}`}>
+    <html lang={locale} className={`${inter.variable} ${plusJakarta.variable} ${playfair.variable}`}>
       <body>
         <header>
           <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "64px", padding: "0 2rem" }}>

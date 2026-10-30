@@ -18,19 +18,32 @@ const HomePage = async () => {
 
   return (
     <div>
-      {/* Hero Section */}
-      <section style={{ 
-        padding: "4rem 0", 
-        textAlign: "center", 
-        borderBottom: "1px solid var(--border-color)",
-        marginBottom: "3rem"
-      }}>
-        <h2 style={{ fontSize: "2.5rem", marginBottom: "1rem", color: "var(--foreground-rgb)" }}>
-          {t("home.title")}
-        </h2>
-        <p style={{ fontSize: "1.2rem", color: "#6c757d", maxWidth: "700px", margin: "0 auto" }}>
-          {t("home.subtitle")}
-        </p>
+      {/* Hero Section with Ambient Mesh Gradients */}
+      <section className="hero-gradient-wrapper">
+        <div className="hero-bg-glow-1"></div>
+        <div className="hero-bg-glow-2"></div>
+        
+        <div className="hero-content">
+          <div className="hero-badge">
+            <span>✦</span> {t("home.authorityTitle")} <span>✦</span>
+          </div>
+          <h2 className="hero-title font-serif-zh-en">
+            {t("home.title")}
+          </h2>
+          <p className="hero-subtitle">
+            {t("home.subtitle")}
+          </p>
+          <div className="hero-actions">
+            <Link href="/courses" className="btn-primary" style={{ textDecoration: "none", padding: "0.75rem 2rem", borderRadius: "24px", display: "inline-block" }}>
+              {t("home.viewAll")}
+            </Link>
+            {!session && (
+              <Link href="/register" className="btn-secondary-outline">
+                {t("nav.register")}
+              </Link>
+            )}
+          </div>
+        </div>
       </section>
 
       {/* Featured Courses Grid */}
