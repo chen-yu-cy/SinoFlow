@@ -1,56 +1,31 @@
-"use client";
+import React from "react";
+import { getTranslation } from "@/lib/i18n";
+import { AuthModal } from "@/components/auth/auth-modal";
 
-import React, { useState } from "react";
-import { registerUser } from "@/lib/actions/auth";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+const RegisterPage = async () => {
+  const { t } = await getTranslation();
 
-const RegisterPage = () => {
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("正在提交注册表单...");
-    const formData = new FormData(e.currentTarget);
-    try {
-      const result = await registerUser(formData);
-      console.log("注册结果:", result);
-      if (result.error) {
-        setError(result.error);
-      } else {
-        router.push("/login");
-      }
-    } catch (err) {
-      console.error("提交表单时发生异常:", err);
-      setError("网络或系统错误，请稍后再试");
-    }
+  const translations = {
+    loginTitle: t("auth.loginTitle") || "登录 SinoFlow",
+    emailLabel: t("auth.emailLabel") || "电子邮箱",
+    passwordLabel: t("auth.passwordLabel") || "密码",
+    loginButton: t("auth.loginButton") || "登录",
+    noAccount: t("auth.noAccount") || "还没有账号？",
+    registerLink: t("auth.registerLink") || "立即注册",
+    loginError: t("auth.loginError") || "邮箱或密码错误",
+    emailPlaceholder: t("auth.emailPlaceholder") || "请输入您的邮箱...",
+    passwordPlaceholder: t("auth.passwordPlaceholder") || "请输入您的密码...",
+    closeButton: t("auth.closeButton") || "关闭",
+    registerTitle: t("auth.registerTitle") || "创建账号",
+    nameLabel: t("auth.nameLabel") || "姓名",
+    namePlaceholder: t("auth.namePlaceholder") || "请输入您的姓名...",
+    registerButton: t("auth.registerButton") || "立即注册",
+    haveAccount: t("auth.haveAccount") || "已有账号？",
+    loginLink: t("auth.loginLink") || "立即登录",
+    registerSuccess: t("auth.registerSuccess") || "注册成功，现在可以登录啦！",
   };
 
-  return (
-    <div style={{ maxWidth: "400px", margin: "4rem auto", padding: "2rem", background: "#fff", borderRadius: "8px", boxShadow: "var(--card-shadow)" }}>
-      <h2 style={{ textAlign: "center", marginBottom: "2rem" }}>创建账号</h2>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <div>
-          <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem" }}>姓名</label>
-          <input name="name" type="text" style={{ width: "100%", padding: "0.75rem", borderRadius: "4px", border: "1px solid var(--border-color)" }} required />
-        </div>
-        <div>
-          <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem" }}>邮箱</label>
-          <input name="email" type="email" style={{ width: "100%", padding: "0.75rem", borderRadius: "4px", border: "1px solid var(--border-color)" }} required />
-        </div>
-        <div>
-          <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem" }}>密码</label>
-          <input name="password" type="password" style={{ width: "100%", padding: "0.75rem", borderRadius: "4px", border: "1px solid var(--border-color)" }} required />
-        </div>
-        {error && <p style={{ color: "var(--primary)", fontSize: "0.85rem", margin: 0 }}>{error}</p>}
-        <button type="submit" className="btn-primary" style={{ padding: "0.75rem", marginTop: "1rem" }}>立即注册</button>
-      </form>
-      <p style={{ textAlign: "center", marginTop: "1.5rem", fontSize: "0.9rem" }}>
-        已有账号？ <Link href="/login" style={{ color: "var(--primary)", fontWeight: 600 }}>立即登录</Link>
-      </p>
-    </div>
-  );
+  return <AuthModal initialMode="register" translations={translations} />;
 };
 
 export default RegisterPage;

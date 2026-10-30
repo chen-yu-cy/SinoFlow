@@ -66,5 +66,24 @@
     "noCourses": "You haven't purchased any courses yet",
     "noCoursesSubtitle": "Explore our featured courses and start your Chinese learning journey.",
     "browseCourses": "Browse Courses"
+  },
+  "auth": {
+    "loginTitle": "Login to SinoFlow",
+    "emailLabel": "Email Address",
+    "passwordLabel": "Password",
+    "loginButton": "Login",
+    "noAccount": "Don't have an account?",
+    "registerLink": "Register Now",
+    "loginError": "Invalid email or password",
+    "emailPlaceholder": "Enter your email...",
+    "passwordPlaceholder": "Enter your password...",
+    "closeButton": "Close",
+    "registerTitle": "Create Account",
+    "nameLabel": "Full Name",
+    "namePlaceholder": "Enter your name...",
+    "registerButton": "Register",
+    "haveAccount": "Already have an account?",
+    "loginLink": "Login Now",
+    "registerSuccess": "Registered successfully! You can login now."
   }
 }

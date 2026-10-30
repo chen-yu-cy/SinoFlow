@@ -66,5 +66,24 @@
     "noCourses": "您还没有购买任何课程",
     "noCoursesSubtitle": "探索我们的精选课程，开启您的中文学习之旅。",
     "browseCourses": "去浏览课程"
+  },
+  "auth": {
+    "loginTitle": "登录 SinoFlow",
+    "emailLabel": "电子邮箱",
+    "passwordLabel": "密码",
+    "loginButton": "登录",
+    "noAccount": "还没有账号？",
+    "registerLink": "立即注册",
+    "loginError": "邮箱或密码错误",
+    "emailPlaceholder": "请输入您的邮箱...",
+    "passwordPlaceholder": "请输入您的密码...",
+    "closeButton": "关闭",
+    "registerTitle": "创建账号",
+    "nameLabel": "姓名",
+    "namePlaceholder": "请输入您的姓名...",
+    "registerButton": "立即注册",
+    "haveAccount": "已有账号？",
+    "loginLink": "立即登录",
+    "registerSuccess": "注册成功，现在可以登录啦！"
   }
 }

@@ -79,7 +79,7 @@ const RootLayout = async ({
                 />
               ) : (
                 <>
-                  <Link href="/login" style={{ fontSize: "0.95rem", fontWeight: 500, color: "var(--secondary)", textDecoration: "none" }}>{t("nav.login")}</Link>
+                  <Link href="/login" className="nav-link" style={{ fontSize: "0.95rem", fontWeight: 500, textDecoration: "none" }}>{t("nav.login")}</Link>
                   <Link href="/register">
                     <button className="btn-primary" style={{ padding: "0.5rem 1.5rem", borderRadius: "20px" }}>{t("nav.register")}</button>
                   </Link>
