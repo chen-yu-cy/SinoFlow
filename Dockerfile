@@ -15,6 +15,9 @@ FROM node:20-alpine AS builder
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
+ARG GIT_SHA="local"
+ENV NEXT_PUBLIC_GIT_SHA=${GIT_SHA}
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
@@ -28,10 +31,13 @@ RUN apk add --no-cache ffmpeg openssl
 
 WORKDIR /app
 
+ARG GIT_SHA="local"
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+ENV NEXT_PUBLIC_GIT_SHA=${GIT_SHA}
+ENV GIT_SHA=${GIT_SHA}
 
 # Copy standalone build output and static assets
 COPY --from=builder /app/public ./public

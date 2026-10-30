@@ -116,8 +116,17 @@ set +a
 # ==============================================================================
 # 3. 启动 Docker Compose 全栈服务 & 自动清理旧悬空镜像
 # ==============================================================================
-echo "🐳 正在构建并启动 Docker 容器集群 (Caddy + Next.js + PostgreSQL + Loki + Grafana)..."
-$DOCKER_CMD compose up -d --build
+if [ "$1" = "--pull" ]; then
+  echo "☁️  正在从 GitHub Container Registry (ghcr.io) 拉取最新预构建镜像并启动..."
+  $DOCKER_CMD compose pull app
+  $DOCKER_CMD compose up -d --no-build
+else
+  if command -v git >/dev/null 2>&1 && git rev-parse --short HEAD >/dev/null 2>&1; then
+    export GIT_SHA=$(git rev-parse --short HEAD)
+  fi
+  echo "🐳 正在本地构建并启动 Docker 容器集群 (Caddy + Next.js + PostgreSQL + Loki + Grafana)..."
+  $DOCKER_CMD compose up -d --build
+fi
 
 echo "🧹 正在自动清理旧版本悬空 Docker 镜像缓存 (docker image prune)..."
 $DOCKER_CMD image prune -f >/dev/null 2>&1 || true

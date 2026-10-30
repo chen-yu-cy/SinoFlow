@@ -4,6 +4,7 @@ import { auth, signOut } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { LayoutDashboard, BookOpen, Users, Settings, LogOut, ShoppingCart, LifeBuoy } from "lucide-react";
+import { getAppVersionInfo } from "@/lib/version";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,7 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
+  const { displayVersion } = getAppVersionInfo();
   
   // 严格的权限校验
   if (!session?.user || (session.user as any).role !== "ADMIN") {
@@ -112,11 +114,14 @@ export default async function AdminLayout({
           </ul>
         </nav>
 
-        <div style={{ padding: "1.5rem 2rem", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+        <div style={{ padding: "1.5rem 2rem", borderTop: "1px solid rgba(255,255,255,0.1)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", color: "#6c757d", fontSize: "0.85rem" }}>
             <div style={{ width: "8px", height: "8px", background: "#28a745", borderRadius: "50%" }}></div>
             管理员在线
           </div>
+          <span style={{ fontSize: "0.75rem", color: "#868e96", fontFamily: "monospace", background: "rgba(255,255,255,0.06)", padding: "0.2rem 0.5rem", borderRadius: "4px" }} title="当前系统版本与构建 Commit">
+            {displayVersion}
+          </span>
         </div>
       </aside>
 
