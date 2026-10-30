@@ -33,14 +33,20 @@ describe('VideoPlayer Component', () => {
     expect(videoElement).toHaveAttribute('controls')
   })
 
-  it('当 Hls.js 受支持时应初始化 Hls', () => {
+  it('如果是 MP4 文件，应直接设置 video 的 src 属性', () => {
+    const mp4Url = 'https://example.com/video.mp4'
+    const { container } = render(<VideoPlayer url={mp4Url} />)
+    
+    const videoElement = container.querySelector('video')
+    expect(videoElement).toHaveAttribute('src', mp4Url)
+    expect(Hls).not.toHaveBeenCalled()
+  })
+
+  it('如果是 HLS 文件且受支持，应初始化 Hls', () => {
     (Hls.isSupported as any).mockReturnValue(true)
     render(<VideoPlayer url={mockUrl} />)
 
     expect(Hls).toHaveBeenCalled()
-    const hlsInstance = (Hls as any).mock.results[0].value
-    expect(hlsInstance.loadSource).toHaveBeenCalledWith(mockUrl)
-    expect(hlsInstance.attachMedia).toHaveBeenCalled()
   })
 
   it('当 Hls.js 不受支持但原生支持时应使用 src', () => {

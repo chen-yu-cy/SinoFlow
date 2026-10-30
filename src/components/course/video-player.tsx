@@ -14,27 +14,29 @@ const VideoPlayer = ({ url }: VideoPlayerProps) => {
     const video = videoRef.current;
     if (!video || !url) return;
 
-    let hls: Hls | null = null;
+    // 清理之前的状态
+    video.pause();
+    video.removeAttribute('src');
+    video.load();
 
-    if (Hls.isSupported()) {
-      hls = new Hls({
-        // Optional: Add HLS configuration here for encryption/HLS patterns
-      });
-      hls.loadSource(url);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        // video.play(); // Auto-play is often blocked by browsers
-      });
-    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      // For Safari and iOS browsers which support HLS natively
+    const isHLS = url.toLowerCase().endsWith('.m3u8') || url.includes('application/vnd.apple.mpegurl');
+
+    if (isHLS) {
+      let hls: Hls | null = null;
+      if (Hls.isSupported()) {
+        hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = url;
+      }
+      return () => {
+        if (hls) hls.destroy();
+      };
+    } else {
+      // 处理普通 MP4 或其他原生支持的格式
       video.src = url;
     }
-
-    return () => {
-      if (hls) {
-        hls.destroy();
-      }
-    };
   }, [url]);
 
   return (
