@@ -1,8 +1,8 @@
 // FILE: src/app/admin/tickets/page.tsx
 import React from "react";
-import prisma from "@/lib/db/client";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { TicketService } from "@/lib/services/ticket.service";
 import { TicketTable, type TicketWithDetails } from "@/components/admin/ticket-table";
 
 const AdminTicketsPage = async () => {
@@ -11,18 +11,8 @@ const AdminTicketsPage = async () => {
     redirect("/login");
   }
 
-  // 查询所有工单，包含关联的用户信息
-  const tickets = await prisma.supportTicket.findMany({
-    include: {
-      user: {
-        select: {
-          name: true,
-          email: true,
-        }
-      }
-    },
-    orderBy: { createdAt: "desc" }
-  });
+  // 使用 TicketService 获取所有工单，已包含 messages 历史记录
+  const tickets = await TicketService.getTickets();
 
   // 序列化以传递给客户端组件
   const serializedTickets: TicketWithDetails[] = tickets.map((ticket) => ({
@@ -32,9 +22,18 @@ const AdminTicketsPage = async () => {
     title: ticket.title,
     content: ticket.content,
     status: ticket.status,
-    adminReply: ticket.adminReply,
-    repliedAt: ticket.repliedAt ? ticket.repliedAt.toISOString() : null,
     createdAt: ticket.createdAt.toISOString(),
+    messages: ticket.messages.map((m) => ({
+      id: m.id,
+      senderId: m.senderId,
+      senderRole: m.senderRole,
+      content: m.content,
+      createdAt: m.createdAt.toISOString(),
+      sender: m.sender ? {
+        name: m.sender.name,
+        email: m.sender.email,
+      } : null,
+    })),
     user: ticket.user ? {
       name: ticket.user.name,
       email: ticket.user.email,

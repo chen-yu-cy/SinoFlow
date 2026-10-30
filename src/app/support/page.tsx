@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { TicketService } from "@/lib/services/ticket.service";
 import { SupportPortal } from "@/components/support-portal";
 
+import { getTranslation } from "@/lib/i18n";
+
 const SupportPage = async () => {
   const session = await auth();
 
@@ -12,6 +14,9 @@ const SupportPage = async () => {
   if (!session?.user || !session.user.id) {
     redirect("/login?callbackUrl=/support");
   }
+
+  const { t, dict } = await getTranslation();
+  const supportTranslations = (dict as any).support || {};
 
   // 服务端拉取学员个人的历史工单
   const tickets = await TicketService.getUserTickets(session.user.id);
@@ -22,9 +27,18 @@ const SupportPage = async () => {
     title: t.title,
     content: t.content,
     status: t.status,
-    adminReply: t.adminReply,
-    repliedAt: t.repliedAt ? t.repliedAt.toISOString() : null,
     createdAt: t.createdAt.toISOString(),
+    messages: t.messages.map((m) => ({
+      id: m.id,
+      senderId: m.senderId,
+      senderRole: m.senderRole,
+      content: m.content,
+      createdAt: m.createdAt.toISOString(),
+      sender: m.sender ? {
+        name: m.sender.name,
+        email: m.sender.email,
+      } : null,
+    })),
   }));
 
   return (
@@ -42,14 +56,18 @@ const SupportPage = async () => {
           HELP & SUPPORT
         </span>
         <h2 style={{ fontSize: "2rem", fontWeight: "800", marginTop: "0.75rem", marginBottom: "0.5rem" }}>
-          联系客户服务与工单中心
+          {t("support.pageTitle")}
         </h2>
         <p style={{ color: "var(--secondary)", fontSize: "0.95rem", margin: "0 auto", maxWidth: "600px" }}>
-          遇到任何学习问题、系统故障或退款需求？请在下方提交工单，您可以实时查询工单处理状态及官方的文字回复。
+          {t("support.pageSubtitle")}
         </p>
       </div>
 
-      <SupportPortal userEmail={session.user.email || ""} initialTickets={serializedTickets} />
+      <SupportPortal 
+        userEmail={session.user.email || ""} 
+        initialTickets={serializedTickets} 
+        translations={supportTranslations}
+      />
     </div>
   );
 };

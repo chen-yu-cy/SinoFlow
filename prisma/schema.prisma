@@ -19,6 +19,7 @@ model User {
   progresses    LessonProgress[]
   notes         Note[]
   tickets       SupportTicket[]
+  ticketMessages SupportTicketMessage[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -129,20 +130,34 @@ model Note {
 }
 
 model SupportTicket {
-  id         String       @id @default(cuid())
+  id         String                 @id @default(cuid())
   userId     String
   userEmail  String
   title      String
   content    String
-  status     TicketStatus @default(PENDING)
-  adminReply String?
-  repliedAt  DateTime?
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  status     TicketStatus           @default(PENDING)
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @updatedAt
+  messages   SupportTicketMessage[]
 
-  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model SupportTicketMessage {
+  id        String        @id @default(cuid())
+  ticketId  String
+  senderId  String
+  senderRole Role
+  content   String
+  createdAt DateTime      @default(now())
+
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender    User          @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([senderId])
 }
 
 enum TicketStatus {

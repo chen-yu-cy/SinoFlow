@@ -359,4 +359,20 @@ input:focus, select:focus, textarea:focus {
   font-weight: 700;
 }
 
+.support-nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #6c757d;
+  padding: 0.4rem;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.support-nav-icon:hover {
+  color: var(--primary) !important;
+  background: #f8f9fa;
+}
+
 

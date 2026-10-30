@@ -2,9 +2,21 @@
 "use client";
 
 import React, { useState } from "react";
-import { TicketStatus } from "@prisma/client";
-import { Search, Calendar, User, Mail, LifeBuoy, AlertCircle, Info, RefreshCw } from "lucide-react";
-import { updateTicketStatusAction } from "@/lib/actions/ticket";
+import { TicketStatus, Role } from "@prisma/client";
+import { Search, Calendar, Mail, LifeBuoy, AlertCircle, RefreshCw, X, CheckCircle } from "lucide-react";
+import { updateTicketStatusAction, addMessageAction } from "@/lib/actions/ticket";
+
+export interface TicketMessageDetails {
+  id: string;
+  senderId: string;
+  senderRole: Role;
+  content: string;
+  createdAt: string;
+  sender: {
+    name: string | null;
+    email: string | null;
+  } | null;
+}
 
 export interface TicketWithDetails {
   id: string;
@@ -13,9 +25,8 @@ export interface TicketWithDetails {
   title: string;
   content: string;
   status: TicketStatus;
-  adminReply: string | null;
-  repliedAt: string | null;
   createdAt: string;
+  messages: TicketMessageDetails[];
   user: {
     name: string | null;
     email: string | null;
@@ -33,6 +44,22 @@ export const TicketTable = ({ initialTickets }: TicketTableProps) => {
   const [updatingTicketId, setUpdatingTicketId] = useState<string | null>(null);
   const [selectedTicket, setSelectedTicket] = useState<TicketWithDetails | null>(null);
   const [replyText, setReplyText] = useState("");
+
+  // 自定义通知与确认弹框状态
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  } | null>(null);
+
+  // 触发 Toast 通知
+  const triggerToast = (message: string, type: "success" | "error" = "success") => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 3000);
+  };
 
   // 过滤逻辑
   const filteredTickets = tickets.filter((ticket) => {
@@ -54,56 +81,76 @@ export const TicketTable = ({ initialTickets }: TicketTableProps) => {
     return matchesSearch && matchesStatus;
   });
 
-  // 选择工单时的辅助器
+  // 选择工单
   const handleSelectTicket = (ticket: TicketWithDetails) => {
     setSelectedTicket(ticket);
-    setReplyText(ticket.adminReply || "");
+    setReplyText("");
   };
 
-  // 更新工单状态（保留历史回复）
+  // 仅更新工单状态
   const handleStatusChange = async (ticketId: string, newStatus: TicketStatus) => {
     setUpdatingTicketId(ticketId);
     try {
       const res = await updateTicketStatusAction(ticketId, newStatus);
       if (res.error) {
-        alert(res.error);
+        triggerToast(res.error, "error");
       } else {
         // 同步更新本地状态
-        setTickets(tickets.map((t) => (t.id === ticketId ? { ...t, status: newStatus } : t)));
-        // 如果当前选中查看的工单正是更新的，同步它
+        const updated = tickets.map((t) => (t.id === ticketId ? { ...t, status: newStatus } : t));
+        setTickets(updated);
+        
         if (selectedTicket && selectedTicket.id === ticketId) {
-          setSelectedTicket({ ...selectedTicket, status: newStatus });
+          setSelectedTicket(updated.find((t) => t.id === ticketId) || null);
         }
+        triggerToast("工单状态已成功更新！", "success");
       }
     } catch (err) {
-      alert("更新工单状态失败，请重试");
+      triggerToast("更新工单状态失败，请重试", "error");
     } finally {
       setUpdatingTicketId(null);
     }
   };
 
-  // 提交官方回复
+  // 提交官方留言回复（如果原本是“待处理”，自动变为“处理中”）
   const handleSendReply = async () => {
-    if (!selectedTicket) return;
+    if (!selectedTicket || !replyText.trim()) return;
     setUpdatingTicketId(selectedTicket.id);
 
-    // 默认在回复时将工单变更为“已解决”状态（如果之前是待处理或处理中）
-    const targetStatus = selectedTicket.status === "PENDING" || selectedTicket.status === "PROCESSING"
-      ? "RESOLVED"
-      : selectedTicket.status;
+    const targetStatus = selectedTicket.status === "PENDING" ? TicketStatus.PROCESSING : undefined;
 
     try {
-      const res = await updateTicketStatusAction(selectedTicket.id, targetStatus, replyText);
+      const res = await addMessageAction(selectedTicket.id, replyText, targetStatus);
       if (res.error) {
-        alert(res.error);
-      } else {
-        // 同步状态更新
-        setTickets(tickets.map((t) => t.id === selectedTicket.id ? { ...t, status: targetStatus, adminReply: replyText } : t));
-        setSelectedTicket({ ...selectedTicket, status: targetStatus, adminReply: replyText });
-        alert("官方回复成功提交并发布！");
+        triggerToast(res.error, "error");
+      } else if (res.success && res.message) {
+        const newMsg: TicketMessageDetails = {
+          id: res.message.id,
+          senderId: res.message.senderId,
+          senderRole: res.message.senderRole as Role,
+          content: res.message.content,
+          createdAt: res.message.createdAt,
+          sender: res.message.sender,
+        };
+
+        // 更新状态并追加留言
+        const updatedTickets = tickets.map((t) => {
+          if (t.id === selectedTicket.id) {
+            return {
+              ...t,
+              status: targetStatus || t.status,
+              messages: [...t.messages, newMsg],
+            };
+          }
+          return t;
+        });
+
+        setTickets(updatedTickets);
+        setSelectedTicket(updatedTickets.find((t) => t.id === selectedTicket.id) || null);
+        setReplyText("");
+        triggerToast("回复留言已成功发送并同步！", "success");
       }
     } catch (err) {
-      alert("提交回复失败，请重试");
+      triggerToast("发送回复留言失败，请重试", "error");
     } finally {
       setUpdatingTicketId(null);
     }
@@ -170,10 +217,10 @@ export const TicketTable = ({ initialTickets }: TicketTableProps) => {
       </div>
 
       <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start", flexWrap: "wrap" }}>
-        {/* 左侧列表 */}
+        {/* 全宽工单列表 */}
         <div style={{
           flex: 1,
-          minWidth: "400px",
+          width: "100%",
           background: "#fff",
           borderRadius: "12px",
           boxShadow: "var(--card-shadow)",
@@ -183,17 +230,16 @@ export const TicketTable = ({ initialTickets }: TicketTableProps) => {
             <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
               <thead>
                 <tr style={{ background: "#f8f9fa", borderBottom: "1px solid #dee2e6" }}>
-                  <th style={{ padding: "1rem 1.5rem", color: "#495057", fontWeight: "600" }}>工单</th>
+                  <th style={{ padding: "1rem 1.5rem", color: "#495057", fontWeight: "600" }}>工单主题</th>
                   <th style={{ padding: "1rem 1.5rem", color: "#495057", fontWeight: "600" }}>提交学员</th>
                   <th style={{ padding: "1rem 1.5rem", color: "#495057", fontWeight: "600" }}>工单状态</th>
                   <th style={{ padding: "1rem 1.5rem", color: "#495057", fontWeight: "600" }}>创建时间</th>
-                  <th style={{ padding: "1rem 1.5rem", textAlign: "right", color: "#495057", fontWeight: "600" }}>快捷操作</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredTickets.length === 0 ? (
                   <tr>
-                    <td colSpan={5} style={{ textAlign: "center", padding: "3rem", color: "#868e96" }}>
+                    <td colSpan={4} style={{ textAlign: "center", padding: "3rem", color: "#868e96" }}>
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
                         <AlertCircle size={32} color="#adb5bd" />
                         <span>暂无符合条件的工单记录</span>
@@ -224,7 +270,7 @@ export const TicketTable = ({ initialTickets }: TicketTableProps) => {
                     >
                       <td style={{ padding: "1.25rem 1.5rem" }}>
                         <div style={{ fontWeight: "600", fontSize: "0.9rem", color: "#212529" }}>{ticket.title}</div>
-                        <div style={{ fontSize: "0.8rem", color: "#868e96", marginTop: "0.25rem", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden", maxWidth: "250px" }}>
+                        <div style={{ fontSize: "0.8rem", color: "#868e96", marginTop: "0.25rem", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden", maxWidth: "400px" }}>
                           {ticket.content}
                         </div>
                       </td>
@@ -241,26 +287,6 @@ export const TicketTable = ({ initialTickets }: TicketTableProps) => {
                           {new Date(ticket.createdAt).toLocaleDateString("zh-CN")}
                         </div>
                       </td>
-                      <td style={{ padding: "1.25rem 1.5rem", textAlign: "right" }} onClick={(e) => e.stopPropagation()}>
-                        <select
-                          value={ticket.status}
-                          disabled={updatingTicketId === ticket.id}
-                          onChange={(e) => handleStatusChange(ticket.id, e.target.value as TicketStatus)}
-                          style={{
-                            padding: "0.25rem 0.5rem",
-                            borderRadius: "4px",
-                            border: "1px solid #dee2e6",
-                            fontSize: "0.8rem",
-                            outline: "none",
-                            cursor: "pointer"
-                          }}
-                        >
-                          <option value="PENDING">待处理</option>
-                          <option value="PROCESSING">处理中</option>
-                          <option value="RESOLVED">已解决</option>
-                          <option value="CLOSED">已关闭</option>
-                        </select>
-                      </td>
                     </tr>
                   ))
                 )}
@@ -269,131 +295,345 @@ export const TicketTable = ({ initialTickets }: TicketTableProps) => {
           </div>
         </div>
 
-        {/* 右侧工单详情卡片 */}
+        {/* 弹出式工单会话详情弹窗 (Popup Modal) */}
         {selectedTicket && (
-          <div style={{
-            width: "380px",
-            background: "#fff",
-            borderRadius: "12px",
-            boxShadow: "var(--card-shadow)",
-            padding: "1.5rem",
-            position: "sticky",
-            top: "90px"
-          }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem", paddingBottom: "0.75rem", borderBottom: "1px solid #eee" }}>
-              <h4 style={{ margin: 0, fontSize: "1rem", fontWeight: "700", display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                <LifeBuoy size={16} color="var(--primary)" /> 工单详情
-              </h4>
-              <button
-                onClick={() => setSelectedTicket(null)}
-                style={{ border: "none", background: "none", fontSize: "0.8rem", color: "#adb5bd", cursor: "pointer" }}
-              >
-                关闭
-              </button>
-            </div>
-
-            <div style={{ marginBottom: "1rem" }}>
-              <div style={{ fontSize: "0.75rem", color: "#adb5bd" }}>工单编号</div>
-              <div style={{ fontSize: "0.8rem", fontFamily: "monospace", color: "#495057" }}>{selectedTicket.id}</div>
-            </div>
-
-            <div style={{ marginBottom: "1rem" }}>
-              <div style={{ fontSize: "0.75rem", color: "#adb5bd" }}>主题</div>
-              <div style={{ fontSize: "0.95rem", fontWeight: "700", color: "#212529" }}>{selectedTicket.title}</div>
-            </div>
-
-            <div style={{ marginBottom: "1.25rem" }}>
-              <div style={{ fontSize: "0.75rem", color: "#adb5bd" }}>提交学员</div>
-              <div style={{ fontSize: "0.85rem", fontWeight: "600", color: "#495057", marginTop: "0.25rem" }}>
-                {selectedTicket.user?.name || "未填写姓名"}
-              </div>
-              <div style={{ fontSize: "0.8rem", color: "#868e96", display: "flex", alignItems: "center", gap: "0.25rem", marginTop: "0.1rem" }}>
-                <Mail size={12} /> {selectedTicket.userEmail}
-              </div>
-            </div>
-
-            <div style={{ marginBottom: "1.25rem" }}>
-              <div style={{ fontSize: "0.75rem", color: "#adb5bd", marginBottom: "0.4rem" }}>详细问题描述</div>
-              <div style={{
-                fontSize: "0.85rem",
-                color: "#212529",
-                background: "#f8f9fa",
-                padding: "0.75rem",
-                borderRadius: "6px",
-                whiteSpace: "pre-wrap",
-                lineHeight: "1.6",
-                maxHeight: "150px",
+          <div 
+            onClick={() => setSelectedTicket(null)}
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: "rgba(0, 0, 0, 0.4)",
+              backdropFilter: "blur(5px)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 999,
+              padding: "1rem"
+            }}
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: "100%",
+                maxWidth: "600px",
+                background: "#fff",
+                borderRadius: "16px",
+                boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15)",
+                padding: "2rem",
+                maxHeight: "90vh",
                 overflowY: "auto",
-                border: "1px solid #e9ecef"
-              }}>
-                {selectedTicket.content}
-              </div>
-            </div>
+                display: "flex",
+                flexDirection: "column",
+                position: "relative"
+              }}
+            >
+              {/* 弹窗头部 */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", paddingBottom: "1rem", borderBottom: "1px solid #eee" }}>
+                <h4 style={{ margin: 0, fontSize: "1.1rem", fontWeight: "700", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                  <LifeBuoy size={20} color="var(--primary)" /> 工单会话详情
+                </h4>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", flexWrap: "wrap" }}>
+                  {/* 标记为已解决按钮 */}
+                  {(selectedTicket.status === "PENDING" || selectedTicket.status === "PROCESSING") && (
+                    <button
+                      onClick={() => {
+                        setConfirmModal({
+                          title: "标记解决",
+                          message: "确定要将此工单标记为已解决吗？",
+                          onConfirm: () => handleStatusChange(selectedTicket.id, "RESOLVED")
+                        });
+                      }}
+                      disabled={updatingTicketId === selectedTicket.id}
+                      style={{
+                        border: "1px solid #28a745",
+                        background: "#fff",
+                        fontSize: "0.75rem",
+                        padding: "0.25rem 0.5rem",
+                        borderRadius: "4px",
+                        color: "#28a745",
+                        cursor: "pointer",
+                        fontWeight: "500"
+                      }}
+                    >
+                      解决工单
+                    </button>
+                  )}
 
-            <div style={{ marginBottom: "1.25rem" }}>
-              <div style={{ fontSize: "0.75rem", color: "#adb5bd", marginBottom: "0.5rem" }}>工单处理状态</div>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <select
-                  value={selectedTicket.status}
-                  onChange={(e) => handleStatusChange(selectedTicket.id, e.target.value as TicketStatus)}
-                  style={{
-                    flex: 1,
-                    padding: "0.5rem",
-                    borderRadius: "6px",
-                    border: "1px solid #dee2e6",
-                    fontSize: "0.85rem",
-                    outline: "none",
-                    cursor: "pointer"
-                  }}
-                >
-                  <option value="PENDING">待处理</option>
-                  <option value="PROCESSING">处理中</option>
-                  <option value="RESOLVED">已解决</option>
-                  <option value="CLOSED">已关闭</option>
-                </select>
-                {updatingTicketId === selectedTicket.id && (
-                  <RefreshCw size={16} className="animate-spin" color="#adb5bd" />
-                )}
-              </div>
-            </div>
+                  {/* 关闭工单按钮 */}
+                  {selectedTicket.status !== "CLOSED" && (
+                    <button
+                      onClick={() => {
+                        setConfirmModal({
+                          title: "关闭工单",
+                          message: "确定要关闭此工单吗？关闭后学员将无法继续追加追问留言。",
+                          onConfirm: () => handleStatusChange(selectedTicket.id, "CLOSED")
+                        });
+                      }}
+                      disabled={updatingTicketId === selectedTicket.id}
+                      style={{
+                        border: "1px solid #dee2e6",
+                        background: "#fff",
+                        fontSize: "0.75rem",
+                        padding: "0.25rem 0.5rem",
+                        borderRadius: "4px",
+                        color: "#e03131",
+                        cursor: "pointer"
+                      }}
+                    >
+                      关闭工单
+                    </button>
+                  )}
 
-            <div style={{ borderTop: "1px solid #eee", paddingTop: "1rem" }}>
-              <div style={{ fontSize: "0.75rem", color: "#adb5bd", marginBottom: "0.4rem" }}>管理员官方回复</div>
-              <textarea
-                placeholder="在此输入您的回复答复内容..."
-                value={replyText}
-                onChange={(e) => setReplyText(e.target.value)}
-                disabled={updatingTicketId === selectedTicket.id}
-                rows={4}
-                style={{
-                  width: "100%",
-                  padding: "0.5rem 0.75rem",
-                  borderRadius: "6px",
-                  border: "1px solid #dee2e6",
-                  fontSize: "0.85rem",
-                  outline: "none",
-                  resize: "vertical",
-                  fontFamily: "inherit",
-                  marginBottom: "0.75rem"
-                }}
-              />
-              <button
-                onClick={handleSendReply}
-                disabled={updatingTicketId === selectedTicket.id || !replyText.trim()}
-                className="btn-primary"
-                style={{
-                  width: "100%",
-                  padding: "0.6rem",
-                  fontSize: "0.85rem",
-                  borderRadius: "6px"
-                }}
-              >
-                {updatingTicketId === selectedTicket.id ? "正在提交..." : "发布回复并标记为已解决"}
-              </button>
+                  {/* 重新开启按钮 */}
+                  {(selectedTicket.status === "RESOLVED" || selectedTicket.status === "CLOSED") && (
+                    <button
+                      onClick={() => {
+                        setConfirmModal({
+                          title: "重新开启工单",
+                          message: "确定要重新开启此工单进行处理吗？",
+                          onConfirm: () => handleStatusChange(selectedTicket.id, "PROCESSING")
+                        });
+                      }}
+                      disabled={updatingTicketId === selectedTicket.id}
+                      style={{
+                        border: "1px solid #dee2e6",
+                        background: "#fff",
+                        fontSize: "0.75rem",
+                        padding: "0.25rem 0.5rem",
+                        borderRadius: "4px",
+                        color: "#1c7ed6",
+                        cursor: "pointer"
+                      }}
+                    >
+                      重新开启
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => setSelectedTicket(null)}
+                    style={{ border: "none", background: "none", padding: "0.25rem", cursor: "pointer", display: "flex", alignItems: "center", color: "#adb5bd" }}
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+
+              {/* 编号与状态 */}
+              <div style={{ marginBottom: "1rem", display: "flex", justifyContent: "space-between", fontSize: "0.85rem" }}>
+                <div>
+                  <span style={{ color: "#adb5bd" }}>工单编号: </span>
+                  <span style={{ fontFamily: "monospace", color: "#495057", fontWeight: "600" }}>{selectedTicket.id}</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                  {updatingTicketId === selectedTicket.id && (
+                    <RefreshCw size={12} className="animate-spin" color="#adb5bd" />
+                  )}
+                  {getStatusBadge(selectedTicket.status)}
+                </div>
+              </div>
+
+              {/* 主题 */}
+              <div style={{ marginBottom: "1rem" }}>
+                <div style={{ fontSize: "0.75rem", color: "#adb5bd" }}>工单主题</div>
+                <div style={{ fontSize: "1rem", fontWeight: "700", color: "#212529", marginTop: "0.15rem" }}>{selectedTicket.title}</div>
+              </div>
+
+              {/* 提交人 */}
+              <div style={{ marginBottom: "1.25rem", fontSize: "0.85rem", color: "#495057" }}>
+                <span style={{ color: "#adb5bd" }}>提交学员: </span>
+                <strong>{selectedTicket.user?.name || "未填写姓名"}</strong> ({selectedTicket.userEmail})
+              </div>
+
+              {/* 对话历史时间线 (弹窗里给予更宽的高度以获得更顺畅的阅读体验) */}
+              <div style={{ marginBottom: "1.5rem" }}>
+                <div style={{ fontSize: "0.75rem", color: "#adb5bd", marginBottom: "0.5rem" }}>历史沟通记录</div>
+                <div style={{
+                  maxHeight: "350px",
+                  overflowY: "auto",
+                  border: "1px solid #e9ecef",
+                  borderRadius: "10px",
+                  padding: "1rem",
+                  background: "#fafbfc",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.75rem"
+                }}>
+                  {selectedTicket.messages.map((msg) => {
+                    const isMessageFromAdmin = msg.senderRole === Role.ADMIN;
+                    return (
+                      <div 
+                        key={msg.id} 
+                        style={{
+                          alignSelf: isMessageFromAdmin ? "flex-end" : "flex-start",
+                          maxWidth: "85%",
+                          background: isMessageFromAdmin ? "rgba(200, 16, 46, 0.05)" : "#fff",
+                          border: isMessageFromAdmin ? "1px solid rgba(200, 16, 46, 0.1)" : "1px solid #e9ecef",
+                          padding: "0.6rem 0.9rem",
+                          borderRadius: "8px",
+                          fontSize: "0.85rem",
+                          lineHeight: "1.6",
+                          boxShadow: "0 1px 3px rgba(0,0,0,0.02)"
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: "1.5rem", fontSize: "0.7rem", color: "#adb5bd", marginBottom: "0.3rem" }}>
+                          <span style={{ fontWeight: "700", color: isMessageFromAdmin ? "var(--primary)" : "#6c757d" }}>
+                            {isMessageFromAdmin ? "官方客服" : (msg.sender?.name || "学员")}
+                          </span>
+                          <span>{new Date(msg.createdAt).toLocaleDateString("zh-CN") + " " + new Date(msg.createdAt).toLocaleTimeString("zh-CN", { hour12: false })}</span>
+                        </div>
+                        <div style={{ whiteSpace: "pre-wrap", color: "#212529" }}>{msg.content}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 回复发送区 */}
+              {selectedTicket.status !== "CLOSED" ? (
+                <div style={{ borderTop: "1px solid #eee", paddingTop: "1.25rem" }}>
+                  <div style={{ fontSize: "0.75rem", color: "#adb5bd", marginBottom: "0.5rem" }}>追加留言回复</div>
+                  <textarea
+                    placeholder="在此输入您回复解答学员的留言..."
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    disabled={updatingTicketId === selectedTicket.id}
+                    rows={4}
+                    style={{
+                      width: "100%",
+                      padding: "0.75rem",
+                      borderRadius: "8px",
+                      border: "1px solid #dee2e6",
+                      fontSize: "0.9rem",
+                      outline: "none",
+                      resize: "none",
+                      fontFamily: "inherit",
+                      marginBottom: "1rem",
+                      transition: "border-color 0.2s"
+                    }}
+                  />
+                  
+                  <button
+                    onClick={handleSendReply}
+                    disabled={updatingTicketId === selectedTicket.id || !replyText.trim()}
+                    className="btn-primary"
+                    style={{
+                      width: "100%",
+                      padding: "0.75rem",
+                      fontSize: "0.9rem",
+                      borderRadius: "8px",
+                      fontWeight: "600"
+                    }}
+                  >
+                    {updatingTicketId === selectedTicket.id ? "正在提交..." : "发布回复留言"}
+                  </button>
+                </div>
+              ) : (
+                <div style={{ borderTop: "1px solid #eee", paddingTop: "1.25rem", textAlign: "center", fontSize: "0.85rem", color: "#868e96" }}>
+                  🔒 该工单已被官方标记为“已关闭”，无法进行回复。如需继续回复，请点击右上角“重新开启”工单。
+                </div>
+              )}
             </div>
           </div>
         )}
       </div>
+
+      {/* 漂亮的高级 Toast 提示 */}
+      {toast && (
+        <div style={{
+          position: "fixed",
+          top: "20px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          background: toast.type === "success" ? "#e6f4ea" : "#fff5f5",
+          border: `1px solid ${toast.type === "success" ? "#51cf66" : "#ff8787"}`,
+          color: toast.type === "success" ? "#2b8a3e" : "#c92a2a",
+          padding: "0.85rem 1.75rem",
+          borderRadius: "8px",
+          boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
+          zIndex: 10000,
+          display: "flex",
+          alignItems: "center",
+          gap: "0.6rem",
+          fontSize: "0.9rem",
+          fontWeight: "600",
+          pointerEvents: "none"
+        }}>
+          {toast.type === "success" ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
+          <span>{toast.message}</span>
+        </div>
+      )}
+
+      {/* 高级自定义确认弹窗 (Confirm Modal) */}
+      {confirmModal && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "rgba(0, 0, 0, 0.4)",
+          backdropFilter: "blur(4px)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 10000,
+          padding: "1rem"
+        }}>
+          <div style={{
+            background: "#fff",
+            borderRadius: "14px",
+            boxShadow: "0 15px 35px rgba(0,0,0,0.2)",
+            padding: "2rem",
+            width: "100%",
+            maxWidth: "380px",
+            textAlign: "center"
+          }}>
+            <h4 style={{ margin: "0 0 0.75rem 0", fontSize: "1.1rem", fontWeight: "700", color: "#212529" }}>
+              {confirmModal.title}
+            </h4>
+            <p style={{ margin: "0 0 1.75rem 0", fontSize: "0.88rem", color: "#495057", lineHeight: "1.5" }}>
+              {confirmModal.message}
+            </p>
+            <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center" }}>
+              <button
+                onClick={() => setConfirmModal(null)}
+                style={{
+                  border: "1px solid #dee2e6",
+                  background: "#fff",
+                  color: "#495057",
+                  padding: "0.6rem 1.25rem",
+                  borderRadius: "8px",
+                  fontSize: "0.85rem",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                  flex: 1
+                }}
+              >
+                取消
+              </button>
+              <button
+                onClick={() => {
+                  confirmModal.onConfirm();
+                  setConfirmModal(null);
+                }}
+                className="btn-primary"
+                style={{
+                  padding: "0.6rem 1.25rem",
+                  borderRadius: "8px",
+                  fontSize: "0.85rem",
+                  fontWeight: "600",
+                  flex: 1
+                }}
+              >
+                确定
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

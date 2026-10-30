@@ -64,12 +64,16 @@ const RootLayout = async ({
                     <LayoutDashboard size={18} strokeWidth={2} /> {t("nav.myCourses")}
                   </Link>
                 )}
-                <Link href="/support" className="nav-link" style={{ display: "flex", alignItems: "center", gap: "0.4rem", textDecoration: "none", color: "inherit" }}>
-                  <HelpCircle size={18} strokeWidth={2} /> {t("nav.support")}
-                </Link>
               </div>
             </div>
             <div style={{ display: "flex", gap: "1.25rem", alignItems: "center" }}>
+              <Link 
+                href="/support" 
+                title={t("nav.support") || "帮助与支持"}
+                className="support-nav-icon"
+              >
+                <HelpCircle size={20} strokeWidth={2} />
+              </Link>
               <LanguageSelector currentLocale={locale} />
               {session ? (
                 <UserNav 
