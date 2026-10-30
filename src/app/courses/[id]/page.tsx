@@ -1,8 +1,11 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/db/client";
+import { auth } from "@/lib/auth";
 import VideoPlayer from "@/components/course/video-player";
 import PurchaseButton from "@/components/course/purchase-button";
+import PurchaseNotice from "@/components/course/purchase-notice";
+import { OrderStatus } from "@prisma/client";
 
 interface CourseDetailPageProps {
   params: Promise<{ id: string }>;
@@ -10,6 +13,7 @@ interface CourseDetailPageProps {
 
 const CourseDetailPage = async ({ params }: CourseDetailPageProps) => {
   const { id } = await params;
+  const session = await auth();
 
   const course = await prisma.course.findUnique({
     where: { id },
@@ -20,12 +24,29 @@ const CourseDetailPage = async ({ params }: CourseDetailPageProps) => {
     notFound();
   }
 
+  // 检查当前用户是否已购买
+  let isPurchased = false;
+  if (session?.user?.id) {
+    const order = await prisma.order.findFirst({
+      where: {
+        userId: session.user.id,
+        courseId: id,
+        status: OrderStatus.SUCCESS
+      }
+    });
+    isPurchased = !!order;
+  }
+
   return (
     <div className="course-detail-container">
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '2rem' }}>
         {/* Main Content: Video and Description */}
         <section>
-          <VideoPlayer url={course.lessons[0]?.videoUrl || ""} />
+          {isPurchased ? (
+            <VideoPlayer url={course.lessons[0]?.videoUrl || ""} />
+          ) : (
+            <PurchaseNotice price={course.price} />
+          )}
           <h1 style={{ marginTop: '1.5rem' }}>{course.title}</h1>
           <p style={{ color: '#666', lineHeight: '1.6' }}>{course.description}</p>
           
