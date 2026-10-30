@@ -3,6 +3,10 @@ import { auth } from "@/lib/auth";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import ffmpeg from "fluent-ffmpeg";
+import { exec } from "child_process";
+import { promisify } from "util";
+
+const execPromise = promisify(exec);
 
 export async function POST(req: Request) {
   try {
@@ -27,32 +31,30 @@ export async function POST(req: Request) {
     const videoFileName = `${timestamp}-${cleanFileName}`;
     const uploadDir = path.join(process.cwd(), "public/uploads");
     
-    // 确保目录存在
     await mkdir(uploadDir, { recursive: true });
 
     const videoPath = path.join(uploadDir, videoFileName);
     await writeFile(videoPath, buffer);
     const videoUrl = `/uploads/${videoFileName}`;
 
-    // 2. 使用 FFmpeg 提取缩略图
+    // 2. 使用原生 FFmpeg 命令提取缩略图 (比 fluent-ffmpeg 更直接可靠)
     const thumbnailFileName = `${timestamp}-thumb.jpg`;
     const thumbnailPath = path.join(uploadDir, thumbnailFileName);
     const thumbnailUrl = `/uploads/${thumbnailFileName}`;
 
-    await new Promise((resolve, reject) => {
-      ffmpeg(videoPath)
-        .screenshots({
-          count: 1,
-          timemarks: ['1'], // 截取第 1 秒
-          filename: thumbnailFileName,
-          folder: uploadDir,
-          size: '640x?' // 自动保持比例，宽度 640px
-        })
-        .on('end', resolve)
-        .on('error', reject);
-    });
-
-    console.log(`视频已处理: ${videoUrl}, 封面已提取: ${thumbnailUrl}`);
+    try {
+      // -ss 1: 跳过第 1 秒
+      // -vframes 1: 取 1 帧
+      // -q:v 2: 高质量控制
+      const ffmpegCmd = `ffmpeg -i "${videoPath}" -ss 00:00:01 -vframes 1 -q:v 2 "${thumbnailPath}"`;
+      console.log(`[FFmpeg] 执行命令: ${ffmpegCmd}`);
+      
+      await execPromise(ffmpegCmd);
+      console.log(`[FFmpeg] 封面提取成功: ${thumbnailUrl}`);
+    } catch (ffmpegErr) {
+      console.error("[FFmpeg] 封面提取失败:", ffmpegErr);
+      // 封面失败不应中断视频上传，可以返回空封面
+    }
 
     return NextResponse.json({ 
       success: true, 
