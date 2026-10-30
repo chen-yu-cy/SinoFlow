@@ -1,3 +1,4 @@
+// FILE: src/components/course/course-card.tsx
 import React from "react";
 import Link from "next/link";
 import { BarChart, Clock, ChevronRight, BookOpen, Edit } from "lucide-react";
@@ -12,18 +13,35 @@ interface CourseCardProps {
   thumbnail?: string;
   layout?: "grid" | "list";
   isAdmin?: boolean;
+  labels?: {
+    priceLabel: string;
+    learnNow: string;
+    details: string;
+    noThumbnail: string;
+  };
 }
 
-const CourseCard = ({ id, title, description, price, level, duration, thumbnail, layout = "grid", isAdmin }: CourseCardProps) => {
+const CourseCard = ({ id, title, description, price, level, duration, thumbnail, layout = "grid", isAdmin, labels }: CourseCardProps) => {
+  const t = labels || {
+    priceLabel: "课程价格",
+    learnNow: "立即学习",
+    details: "详情",
+    noThumbnail: "暂无封面"
+  };
+
   // 根据 3 个等级确定颜色映射逻辑
   const getLevelStyles = () => {
     switch (level) {
       case "入门级":
       case "基础级":
+      case "Elementary":
+      case "Beginner":
         return { bg: "var(--success-light)", color: "var(--success)" };
       case "进阶级":
+      case "Intermediate":
         return { bg: "var(--warning-light)", color: "var(--warning)" };
       case "高级":
+      case "Advanced":
         return { bg: "var(--primary-light)", color: "var(--primary)" };
       default:
         return { bg: "#f1f3f5", color: "#495057" };
@@ -74,7 +92,7 @@ const CourseCard = ({ id, title, description, price, level, duration, thumbnail,
           ) : (
             <>
               <BookOpen size={32} strokeWidth={1} style={{ marginBottom: "0.5rem" }} />
-              <div>暂无封面</div>
+              <div>{t.noThumbnail}</div>
             </>
           )}
         </div>
@@ -102,12 +120,12 @@ const CourseCard = ({ id, title, description, price, level, duration, thumbnail,
           gap: "1.25rem"
         }}>
           <div>
-            <div style={{ fontSize: "0.8rem", color: "#adb5bd", marginBottom: "0.2rem" }}>课程价格</div>
+            <div style={{ fontSize: "0.8rem", color: "#adb5bd", marginBottom: "0.2rem" }}>{t.priceLabel}</div>
             <span style={{ fontSize: "1.75rem", fontWeight: "800", color: "var(--primary)" }}>¥{price.toFixed(2)}</span>
           </div>
           <Link href={`/courses/${id}`} style={{ width: "100%" }}>
             <button className="btn-primary" style={{ width: "100%", padding: "0.75rem", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
-              立即学习 <ChevronRight size={18} />
+              {t.learnNow} <ChevronRight size={18} />
             </button>
           </Link>
         </div>
@@ -153,7 +171,7 @@ const CourseCard = ({ id, title, description, price, level, duration, thumbnail,
         ) : (
           <>
             <BookOpen size={40} strokeWidth={1} style={{ marginBottom: "0.5rem" }} />
-            <div>暂无封面</div>
+            <div>{t.noThumbnail}</div>
           </>
         )}
       </div>
@@ -215,7 +233,7 @@ const CourseCard = ({ id, title, description, price, level, duration, thumbnail,
           </span>
           <Link href={`/courses/${id}`}>
             <button className="btn-primary" style={{ padding: "0.5rem 1.25rem", borderRadius: "6px", fontSize: "0.9rem" }}>
-              详情
+              {t.details}
             </button>
           </Link>
         </div>

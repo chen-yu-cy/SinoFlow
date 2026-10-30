@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "home": "首页",
+    "courses": "所有课程",
+    "myCourses": "我的学习",
+    "login": "登录",
+    "register": "免费注册"
+  },
+  "home": {
+    "title": "开启您的中文学习之旅",
+    "subtitle": "源自权威报社的优质内容，结合加密流媒体技术，为您提供沉浸式、高品质的语言学习体验。",
+    "featuredCourses": "精选课程",
+    "viewAll": "查看全部",
+    "authorityTitle": "权威背书",
+    "authorityDesc": "由国家级报社专业团队编写教材，确保语言表达的准确性与时代性。"
+  },
+  "courseCard": {
+    "priceLabel": "课程价格",
+    "learnNow": "立即学习",
+    "details": "详情",
+    "noThumbnail": "暂无封面"
+  },
+  "userNav": {
+    "adminPortal": "进入管理后台",
+    "myLearning": "我的学习",
+    "logout": "退出登录",
+    "returnAdmin": "返回管理员账号"
+  }
+}

@@ -14,12 +14,25 @@ interface UserNavProps {
     role?: string;
     impersonatorEmail?: string | null;
   };
+  translations?: {
+    adminPortal: string;
+    myLearning: string;
+    logout: string;
+    returnAdmin: string;
+  };
 }
 
-const UserNav = ({ user }: UserNavProps) => {
+const UserNav = ({ user, translations }: UserNavProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [exiting, setExiting] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const t = translations || {
+    adminPortal: "进入管理后台",
+    myLearning: "我的学习",
+    logout: "退出登录",
+    returnAdmin: "返回管理员账号"
+  };
 
   // 点击外部关闭菜单
   useEffect(() => {
@@ -152,7 +165,7 @@ const UserNav = ({ user }: UserNavProps) => {
               className="dropdown-item"
             >
               {exiting ? <Loader2 size={18} className="animate-spin" /> : <LogOut size={18} />}
-              返回管理员账号
+              {t.returnAdmin}
             </div>
           )}
 
@@ -171,7 +184,7 @@ const UserNav = ({ user }: UserNavProps) => {
                 cursor: "pointer",
                 background: "var(--primary-light)"
               }} className="dropdown-item">
-                <Shield size={18} /> 进入管理后台
+                <Shield size={18} /> {t.adminPortal}
               </div>
             </Link>
           )}
@@ -188,7 +201,7 @@ const UserNav = ({ user }: UserNavProps) => {
               cursor: "pointer",
               transition: "background 0.2s"
             }} className="dropdown-item-hover">
-              <BookOpen size={18} color="#adb5bd" /> 我的学习
+              <BookOpen size={18} color="#adb5bd" /> {t.myLearning}
             </div>
           </Link>
 
@@ -208,7 +221,7 @@ const UserNav = ({ user }: UserNavProps) => {
             }}
             className="dropdown-item-hover"
           >
-            <LogOut size={18} /> 退出登录
+            <LogOut size={18} /> {t.logout}
           </div>
 
           <style jsx>{`

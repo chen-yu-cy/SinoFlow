@@ -1,9 +1,12 @@
+// FILE: src/app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
 import { BookOpen, Home, LayoutDashboard } from "lucide-react";
 import UserNav from "@/components/layout/user-nav";
+import { getTranslation } from "@/lib/i18n";
+import { LanguageSelector } from "@/components/layout/language-selector";
 
 export const metadata: Metadata = {
   title: "SinoFlow - Chinese Language Learning",
@@ -16,9 +19,10 @@ const RootLayout = async ({
   children: React.ReactNode;
 }>) => {
   const session = await auth();
+  const { t, locale } = await getTranslation();
 
   return (
-    <html lang="zh-CN">
+    <html lang={locale}>
       <body>
         <header>
           <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "64px", padding: "0 2rem" }}>
@@ -32,31 +36,40 @@ const RootLayout = async ({
               </Link>
               <div style={{ display: "flex", gap: "2rem", fontSize: "0.95rem", fontWeight: 500 }}>
                 <Link href="/" className="nav-link" style={{ display: "flex", alignItems: "center", gap: "0.4rem", textDecoration: "none", color: "inherit" }}>
-                  <Home size={18} strokeWidth={2} /> 首页
+                  <Home size={18} strokeWidth={2} /> {t("nav.home")}
                 </Link>
                 <Link href="/courses" className="nav-link" style={{ display: "flex", alignItems: "center", gap: "0.4rem", textDecoration: "none", color: "inherit" }}>
-                  <BookOpen size={18} strokeWidth={2} /> 所有课程
+                  <BookOpen size={18} strokeWidth={2} /> {t("nav.courses")}
                 </Link>
                 {session && (
                   <Link href="/my-courses" className="nav-link" style={{ display: "flex", alignItems: "center", gap: "0.4rem", textDecoration: "none", color: "inherit" }}>
-                    <LayoutDashboard size={18} strokeWidth={2} /> 我的学习
+                    <LayoutDashboard size={18} strokeWidth={2} /> {t("nav.myCourses")}
                   </Link>
                 )}
               </div>
             </div>
             <div style={{ display: "flex", gap: "1.25rem", alignItems: "center" }}>
+              <LanguageSelector currentLocale={locale} />
               {session ? (
-                <UserNav user={{ 
-                  name: session.user?.name, 
-                  email: session.user?.email, 
-                  role: (session.user as any).role,
-                  impersonatorEmail: (session.user as any).impersonatorEmail || null
-                }} />
+                <UserNav 
+                  user={{ 
+                    name: session.user?.name, 
+                    email: session.user?.email, 
+                    role: (session.user as any).role,
+                    impersonatorEmail: (session.user as any).impersonatorEmail || null
+                  }} 
+                  translations={{
+                    adminPortal: t("userNav.adminPortal"),
+                    myLearning: t("userNav.myLearning"),
+                    logout: t("userNav.logout"),
+                    returnAdmin: t("userNav.returnAdmin"),
+                  }}
+                />
               ) : (
                 <>
-                  <Link href="/login" style={{ fontSize: "0.95rem", fontWeight: 500, color: "var(--secondary)", textDecoration: "none" }}>登录</Link>
+                  <Link href="/login" style={{ fontSize: "0.95rem", fontWeight: 500, color: "var(--secondary)", textDecoration: "none" }}>{t("nav.login")}</Link>
                   <Link href="/register">
-                    <button className="btn-primary" style={{ padding: "0.5rem 1.5rem", borderRadius: "20px" }}>免费注册</button>
+                    <button className="btn-primary" style={{ padding: "0.5rem 1.5rem", borderRadius: "20px" }}>{t("nav.register")}</button>
                   </Link>
                 </>
               )}
