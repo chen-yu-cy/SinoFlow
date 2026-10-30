@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { BarChart, Clock, ChevronRight, BookOpen } from "lucide-react";
 
 interface CourseCardProps {
   id: string;
@@ -17,53 +18,64 @@ const CourseCard = ({ id, title, description, price, level, duration, layout = "
     return (
       <div className="course-card" style={{
         background: "#fff",
-        borderRadius: "8px",
+        borderRadius: "12px",
         overflow: "hidden",
         boxShadow: "var(--card-shadow)",
         display: "flex",
         border: "1px solid var(--border-color)",
-        padding: "1rem",
-        gap: "1.5rem",
+        padding: "1.25rem",
+        gap: "2rem",
         alignItems: "center"
       }}>
         {/* Thumbnail Placeholder */}
         <div style={{
           width: "240px",
           height: "135px",
-          background: "#f0f0f0",
-          borderRadius: "4px",
+          background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+          borderRadius: "8px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           color: "#adb5bd",
           fontSize: "0.8rem",
-          flexShrink: 0
+          flexShrink: 0,
+          border: "1px solid #eee"
         }}>
-          <div>[ 课程封面 ]</div>
+          <BookOpen size={32} strokeWidth={1} style={{ marginBottom: "0.5rem" }} />
+          <div>预览图</div>
         </div>
 
         <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
-            <span style={{ fontSize: "0.7rem", padding: "0.15rem 0.4rem", background: "#e9ecef", borderRadius: "4px", color: "#495057", fontWeight: 600 }}>{level}</span>
-            <span style={{ fontSize: "0.7rem", padding: "0.15rem 0.4rem", background: "#fff3cd", borderRadius: "4px", color: "#856404", fontWeight: 600 }}>{duration}</span>
+          <div style={{ display: "flex", gap: "1rem", marginBottom: "0.75rem" }}>
+            <span style={{ fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "0.3rem", padding: "0.2rem 0.6rem", background: "var(--success-light)", borderRadius: "4px", color: "var(--success)", fontWeight: 600 }}>
+              <BarChart size={14} /> {level}
+            </span>
+            <span style={{ fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "0.3rem", padding: "0.2rem 0.6rem", background: "#fff3cd", borderRadius: "4px", color: "#856404", fontWeight: 600 }}>
+              <Clock size={14} /> {duration}
+            </span>
           </div>
-          <h4 style={{ margin: "0 0 0.5rem 0", fontSize: "1.2rem", color: "var(--foreground-rgb)" }}>{title}</h4>
-          <p style={{ margin: "0", fontSize: "0.9rem", color: "#6c757d", lineHeight: "1.5" }}>{description}</p>
+          <h4 style={{ margin: "0 0 0.75rem 0", fontSize: "1.3rem", color: "var(--foreground-rgb)", fontWeight: "700" }}>{title}</h4>
+          <p style={{ margin: "0", fontSize: "0.95rem", color: "#6c757d", lineHeight: "1.6" }}>{description}</p>
         </div>
 
         <div style={{ 
-          width: "180px", 
+          width: "200px", 
           borderLeft: "1px solid #eee", 
-          paddingLeft: "1.5rem",
+          paddingLeft: "2rem",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          gap: "1rem"
+          alignItems: "flex-start",
+          gap: "1.25rem"
         }}>
-          <span style={{ fontSize: "1.4rem", fontWeight: "bold", color: "var(--primary)" }}>¥{price.toFixed(2)}</span>
+          <div>
+            <div style={{ fontSize: "0.8rem", color: "#adb5bd", marginBottom: "0.2rem" }}>课程价格</div>
+            <span style={{ fontSize: "1.75rem", fontWeight: "800", color: "var(--primary)" }}>¥{price.toFixed(2)}</span>
+          </div>
           <Link href={`/courses/${id}`} style={{ width: "100%" }}>
-            <button className="btn-primary" style={{ width: "100%", padding: "0.6rem" }}>查看详情</button>
+            <button className="btn-primary" style={{ width: "100%", padding: "0.75rem", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+              立即学习 <ChevronRight size={18} />
+            </button>
           </Link>
         </div>
       </div>
@@ -74,7 +86,7 @@ const CourseCard = ({ id, title, description, price, level, duration, layout = "
   return (
     <div className="course-card" style={{
       background: "#fff",
-      borderRadius: "8px",
+      borderRadius: "12px",
       overflow: "hidden",
       boxShadow: "var(--card-shadow)",
       display: "flex",
@@ -85,51 +97,60 @@ const CourseCard = ({ id, title, description, price, level, duration, layout = "
       <div style={{
         width: "100%",
         aspectRatio: "16/9",
-        background: "#f0f0f0",
+        background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         color: "#adb5bd",
         fontSize: "0.9rem",
-        overflow: "hidden"
+        overflow: "hidden",
+        borderBottom: "1px solid #f1f3f5"
       }}>
-        <div style={{ transition: "transform 0.5s" }}>[ 课程封面图 ]</div>
+        <BookOpen size={40} strokeWidth={1} style={{ marginBottom: "0.5rem" }} />
+        <div style={{ transition: "transform 0.5s" }}>课程封面</div>
       </div>
 
-      <div style={{ padding: "1.25rem", flex: 1, display: "flex", flexDirection: "column" }}>
-        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.75rem" }}>
+      <div style={{ padding: "1.5rem", flex: 1, display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1rem" }}>
           <span style={{ 
             fontSize: "0.7rem", 
+            display: "flex",
+            alignItems: "center",
+            gap: "0.3rem",
             padding: "0.2rem 0.5rem", 
-            background: "#e9ecef", 
+            background: "var(--success-light)", 
             borderRadius: "4px",
-            color: "#495057",
+            color: "var(--success)",
             fontWeight: 600
           }}>
-            {level}
+            <BarChart size={12} /> {level}
           </span>
           <span style={{ 
             fontSize: "0.7rem", 
+            display: "flex",
+            alignItems: "center",
+            gap: "0.3rem",
             padding: "0.2rem 0.5rem", 
             background: "#fff3cd", 
             borderRadius: "4px",
             color: "#856404",
             fontWeight: 600
           }}>
-            {duration}
+            <Clock size={12} /> {duration}
           </span>
         </div>
 
-        <h4 style={{ margin: "0 0 0.5rem 0", fontSize: "1.1rem" }}>{title}</h4>
+        <h4 style={{ margin: "0 0 0.75rem 0", fontSize: "1.15rem", fontWeight: "700" }}>{title}</h4>
         <p style={{ 
-          margin: "0 0 1.25rem 0", 
+          margin: "0 0 1.5rem 0", 
           fontSize: "0.85rem", 
           color: "#6c757d", 
           display: "-webkit-box", 
           WebkitLineClamp: 2, 
           WebkitBoxOrient: "vertical", 
           overflow: "hidden",
-          lineHeight: "1.4"
+          lineHeight: "1.5"
         }}>
           {description}
         </p>
@@ -139,15 +160,15 @@ const CourseCard = ({ id, title, description, price, level, duration, layout = "
           display: "flex", 
           justifyContent: "space-between", 
           alignItems: "center",
-          paddingTop: "1rem",
+          paddingTop: "1.25rem",
           borderTop: "1px solid #f8f9fa"
         }}>
-          <span style={{ fontSize: "1.2rem", fontWeight: "bold", color: "var(--primary)" }}>
+          <span style={{ fontSize: "1.4rem", fontWeight: "800", color: "var(--primary)" }}>
             ¥{price.toFixed(2)}
           </span>
           <Link href={`/courses/${id}`}>
-            <button className="btn-primary" style={{ padding: "0.4rem 1rem", fontSize: "0.85rem" }}>
-              查看详情
+            <button className="btn-primary" style={{ padding: "0.5rem 1.25rem", borderRadius: "6px", fontSize: "0.9rem" }}>
+              详情
             </button>
           </Link>
         </div>

@@ -6,6 +6,7 @@ import VideoPlayer from "@/components/course/video-player";
 import PurchaseButton from "@/components/course/purchase-button";
 import PurchaseNotice from "@/components/course/purchase-notice";
 import { OrderStatus } from "@prisma/client";
+import { PlayCircle, Lock, Info, BookText } from "lucide-react";
 
 interface CourseDetailPageProps {
   params: Promise<{ id: string }>;
@@ -40,55 +41,86 @@ const CourseDetailPage = async ({ params }: CourseDetailPageProps) => {
 
   return (
     <div className="course-detail-container">
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '3rem' }}>
         {/* Main Content: Video and Description */}
         <section>
-          {isPurchased ? (
-            <VideoPlayer url={course.lessons[0]?.videoUrl || ""} />
-          ) : (
-            <PurchaseNotice price={course.price} />
-          )}
-          <h1 style={{ marginTop: '1.5rem' }}>{course.title}</h1>
-          <p style={{ color: '#666', lineHeight: '1.6' }}>{course.description}</p>
+          <div style={{ marginBottom: "2rem" }}>
+            {isPurchased ? (
+              <VideoPlayer url={course.lessons[0]?.videoUrl || ""} />
+            ) : (
+              <PurchaseNotice price={course.price} />
+            )}
+          </div>
           
-          <div style={{ marginTop: '2rem', padding: '1.5rem', background: '#f9f9f9', borderRadius: '8px' }}>
-            <h3>关于本课程</h3>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <p>价格: <span style={{ color: 'var(--primary)', fontWeight: 'bold', fontSize: '1.2rem' }}>¥{course.price.toFixed(2)}</span></p>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", color: "var(--primary)", marginBottom: "1rem" }}>
+            <BookText size={24} />
+            <span style={{ fontWeight: "700", fontSize: "1.1rem", textTransform: "uppercase", letterSpacing: "1px" }}>Course Detail</span>
+          </div>
+
+          <h1 style={{ fontSize: "2.5rem", marginBottom: "1.5rem", fontWeight: "800" }}>{course.title}</h1>
+          
+          <div style={{ background: "#fff", padding: "2rem", borderRadius: "12px", border: "1px solid var(--border-color)", boxShadow: "var(--card-shadow)" }}>
+            <h3 style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem" }}>
+              <Info size={20} color="var(--primary)" /> 课程简介
+            </h3>
+            <p style={{ color: '#495057', lineHeight: '1.8', fontSize: "1.05rem" }}>{course.description}</p>
+          </div>
+          
+          <div style={{ marginTop: '2rem', padding: '2rem', background: 'var(--primary-light)', borderRadius: '12px', border: '1px solid rgba(200, 16, 46, 0.1)' }}>
+            <h3 style={{ marginBottom: "1.5rem" }}>获取课程权限</h3>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <div style={{ fontSize: "0.9rem", color: "var(--primary)", fontWeight: "600", marginBottom: "0.25rem" }}>全额购买</div>
+                <span style={{ color: 'var(--foreground-rgb)', fontWeight: '800', fontSize: '2rem' }}>¥{course.price.toFixed(2)}</span>
+              </div>
+              <div style={{ width: "240px" }}>
+                <PurchaseButton courseId={course.id} price={course.price} />
+              </div>
             </div>
-            <PurchaseButton courseId={course.id} price={course.price} />
           </div>
         </section>
 
         {/* Sidebar: Lesson List */}
         <aside>
-          <div style={{ border: '1px solid #eaeaea', borderRadius: '8px', overflow: 'hidden' }}>
-            <div style={{ padding: '1rem', background: '#fafafa', borderBottom: '1px solid #eaeaea' }}>
-              <h3 style={{ margin: 0 }}>课程目录</h3>
+          <div style={{ background: "#fff", border: '1px solid var(--border-color)', borderRadius: '12px', overflow: 'hidden', boxShadow: "var(--card-shadow)", position: "sticky", top: "100px" }}>
+            <div style={{ padding: '1.25rem 1.5rem', background: '#f8f9fa', borderBottom: '1px solid var(--border-color)' }}>
+              <h3 style={{ margin: 0, display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                <PlayCircle size={20} /> 课程目录
+              </h3>
             </div>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              {course.lessons.map((lesson) => (
+              {course.lessons.map((lesson, index) => (
                 <li key={lesson.id} style={{ 
-                  padding: '1rem', 
-                  borderBottom: '1px solid #eaeaea', 
+                  padding: '1.25rem 1.5rem', 
+                  borderBottom: index === course.lessons.length - 1 ? 'none' : '1px solid #f1f3f5', 
                   cursor: 'pointer',
                   display: 'flex',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  justifyContent: "space-between",
+                  transition: "background 0.2s"
                 }}>
-                  <span style={{ 
-                    width: '24px', 
-                    height: '24px', 
-                    borderRadius: '50%', 
-                    background: '#eee', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    marginRight: '0.8rem',
-                    fontSize: '0.8rem'
-                  }}>
-                    {lesson.order}
-                  </span>
-                  <span style={{ fontSize: '0.9rem' }}>{lesson.title}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <span style={{ 
+                      width: '28px', 
+                      height: '28px', 
+                      borderRadius: '50%', 
+                      background: isPurchased ? 'var(--primary-light)' : '#f1f3f5', 
+                      color: isPurchased ? 'var(--primary)' : '#adb5bd',
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      fontSize: '0.85rem',
+                      fontWeight: "700"
+                    }}>
+                      {lesson.order}
+                    </span>
+                    <span style={{ fontSize: '1rem', fontWeight: "500" }}>{lesson.title}</span>
+                  </div>
+                  {isPurchased ? (
+                    <PlayCircle size={18} color="#adb5bd" />
+                  ) : (
+                    <Lock size={16} color="#adb5bd" />
+                  )}
                 </li>
               ))}
             </ul>

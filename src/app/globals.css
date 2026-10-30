@@ -1,12 +1,15 @@
 :root {
   --foreground-rgb: 33, 37, 41;
   --background-start-rgb: 255, 255, 255;
-  --background-end-rgb: 248, 249, 250;
-  --primary: #c8102e; /* 经典的中国红/报刊红 */
+  --background-end-rgb: 250, 251, 252;
+  --primary: #c8102e; /* 报刊红 */
+  --primary-light: #fbebed;
+  --success: #28a745;
+  --success-light: #e6f4ea;
   --secondary: #6c757d;
   --accent: #ffc107;
-  --border-color: #dee2e6;
-  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --border-color: #e9ecef;
+  --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 * {
@@ -15,7 +18,10 @@
 
 body {
   color: var(--foreground-rgb);
-  background: var(--background-end-rgb);
+  /* Subtle paper-like texture */
+  background-color: var(--background-end-rgb);
+  background-image: radial-gradient(#dee2e6 0.5px, transparent 0.5px);
+  background-size: 24px 24px;
   margin: 0;
   font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans CN", sans-serif;
   line-height: 1.5;
@@ -27,12 +33,10 @@ header {
   top: 0;
   z-index: 100;
   padding: 0.75rem 2rem;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  border-bottom: 2px solid var(--primary);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 
 header h1 {
