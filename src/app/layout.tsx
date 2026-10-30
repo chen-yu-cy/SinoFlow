@@ -1,4 +1,3 @@
-// FILE: src/app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
 import { auth } from "@/lib/auth";
@@ -7,6 +6,19 @@ import { BookOpen, Home, LayoutDashboard } from "lucide-react";
 import UserNav from "@/components/layout/user-nav";
 import { getTranslation } from "@/lib/i18n";
 import { LanguageSelector } from "@/components/layout/language-selector";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-plus-jakarta",
+});
 
 export const metadata: Metadata = {
   title: "SinoFlow - Chinese Language Learning",
@@ -22,7 +34,7 @@ const RootLayout = async ({
   const { t, locale } = await getTranslation();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} className={`${inter.variable} ${plusJakarta.variable}`}>
       <body>
         <header>
           <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "64px", padding: "0 2rem" }}>
