@@ -53,6 +53,7 @@ const HomePage = async () => {
               price={course.price}
               level={course.level}
               duration={course.duration}
+              thumbnail={course.thumbnail}
               layout="grid"
               isAdmin={isAdmin}
             />

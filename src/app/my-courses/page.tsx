@@ -51,6 +51,7 @@ const MyCoursesPage = async () => {
               price={course.price}
               level={course.level}
               duration={course.duration}
+              thumbnail={course.thumbnail}
             />
           ))}
         </div>

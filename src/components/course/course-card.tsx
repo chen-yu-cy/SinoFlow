@@ -14,7 +14,7 @@ interface CourseCardProps {
   isAdmin?: boolean;
 }
 
-const CourseCard = ({ id, title, description, price, level, duration, layout = "grid", isAdmin }: CourseCardProps) => {
+const CourseCard = ({ id, title, description, price, level, duration, thumbnail, layout = "grid", isAdmin }: CourseCardProps) => {
   // 根据 3 个等级确定颜色映射逻辑
   const getLevelStyles = () => {
     switch (level) {
@@ -53,7 +53,7 @@ const CourseCard = ({ id, title, description, price, level, duration, layout = "
           </Link>
         )}
 
-        {/* Thumbnail Placeholder */}
+        {/* Thumbnail */}
         <div style={{
           width: "240px",
           height: "135px",
@@ -66,10 +66,17 @@ const CourseCard = ({ id, title, description, price, level, duration, layout = "
           color: "#adb5bd",
           fontSize: "0.8rem",
           flexShrink: 0,
-          border: "1px solid #eee"
+          border: "1px solid #eee",
+          overflow: "hidden"
         }}>
-          <BookOpen size={32} strokeWidth={1} style={{ marginBottom: "0.5rem" }} />
-          <div>预览图</div>
+          {thumbnail ? (
+            <img src={thumbnail} alt={title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          ) : (
+            <>
+              <BookOpen size={32} strokeWidth={1} style={{ marginBottom: "0.5rem" }} />
+              <div>暂无封面</div>
+            </>
+          )}
         </div>
 
         <div style={{ flex: 1 }}>
@@ -127,7 +134,7 @@ const CourseCard = ({ id, title, description, price, level, duration, layout = "
         </Link>
       )}
 
-      {/* Thumbnail Placeholder */}
+      {/* Thumbnail */}
       <div style={{
         width: "100%",
         aspectRatio: "16/9",
@@ -141,8 +148,14 @@ const CourseCard = ({ id, title, description, price, level, duration, layout = "
         overflow: "hidden",
         borderBottom: "1px solid #f1f3f5"
       }}>
-        <BookOpen size={40} strokeWidth={1} style={{ marginBottom: "0.5rem" }} />
-        <div style={{ transition: "transform 0.5s" }}>课程封面</div>
+        {thumbnail ? (
+          <img src={thumbnail} alt={title} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.5s" }} className="card-image" />
+        ) : (
+          <>
+            <BookOpen size={40} strokeWidth={1} style={{ marginBottom: "0.5rem" }} />
+            <div>暂无封面</div>
+          </>
+        )}
       </div>
 
       <div style={{ padding: "1.5rem", flex: 1, display: "flex", flexDirection: "column" }}>
