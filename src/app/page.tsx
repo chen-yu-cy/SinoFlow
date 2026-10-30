@@ -1,9 +1,11 @@
 import React from "react";
-import CourseList from "@/components/course/course-list";
+import CourseCard from "@/components/course/course-card";
 import prisma from "@/lib/db/client";
+import Link from "next/link";
 
 const HomePage = async () => {
   const courses = await prisma.course.findMany({
+    take: 4, // 首页只展示前 4 个精选课程
     orderBy: { createdAt: 'desc' }
   });
 
@@ -23,10 +25,34 @@ const HomePage = async () => {
           源自权威报社的优质内容，结合加密流媒体技术，为您提供沉浸式、高品质的语言学习体验。
         </p>
       </section>
-      
-      {/* Featured Courses with Layout Toggle */}
+
+      {/* Featured Courses Grid */}
       <section>
-        <CourseList initialCourses={courses} />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
+          <h3 style={{ fontSize: "1.75rem", margin: 0 }}>精选课程</h3>
+          <Link href="/courses" style={{ color: "var(--primary)", textDecoration: "none", fontWeight: 600 }} className="nav-link">
+            查看全部 &rarr;
+          </Link>
+        </div>
+
+        <div style={{ 
+          display: "grid", 
+          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", 
+          gap: "2rem" 
+        }}>
+          {courses.map(course => (
+            <CourseCard 
+              key={course.id} 
+              id={course.id}
+              title={course.title}
+              description={course.description}
+              price={course.price}
+              level="基础级"
+              duration="20 课时"
+              layout="grid"
+            />
+          ))}
+        </div>
       </section>
 
       {/* Trust Banner */}

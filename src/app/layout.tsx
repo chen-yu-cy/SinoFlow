@@ -25,7 +25,7 @@ const RootLayout = async ({
                 <h1>SinoFlow</h1>
               </Link>
               <div style={{ display: "flex", gap: "1.5rem", fontSize: "0.95rem", fontWeight: 500 }}>
-                <Link href="/" className="nav-link" style={{ cursor: "pointer", textDecoration: "none", color: "inherit" }}>所有课程</Link>
+                <Link href="/courses" className="nav-link" style={{ cursor: "pointer", textDecoration: "none", color: "inherit" }}>所有课程</Link>
                 {session && (
                   <Link href="/my-courses" className="nav-link" style={{ cursor: "pointer", textDecoration: "none", color: "inherit" }}>我的课程</Link>
                 )}
