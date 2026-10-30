@@ -10,6 +10,7 @@ interface LessonData {
   videoUrl: string;
   isPreview: boolean;
   thumbnail?: string; // 用于前端展示生成的缩略图
+  duration?: number | null; // 视频时长(秒)
 }
 
 interface CourseFormProps {
@@ -61,6 +62,7 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
         const newLessons = [...lessons];
         newLessons[index].videoUrl = data.url;
         newLessons[index].thumbnail = data.thumbnail; // 将生成的缩略图存入章节
+        newLessons[index].duration = data.duration;   // 保存获取到的视频时长
         setLessons(newLessons);
         
         // 逻辑：如果课程当前没有封面，自动使用第一个上传成功的视频封面

@@ -13,7 +13,7 @@ interface LessonContentProps {
     title: string;
     description: string;
     price: number;
-    lessons: { id: string; title: string; videoUrl: string; order: number; isPreview: boolean }[];
+    lessons: { id: string; title: string; videoUrl: string; order: number; isPreview: boolean; duration?: number | null }[];
     resources?: { id: string; title: string; fileUrl: string; fileSize: string | null }[];
   };
   hasFullAccess: boolean;
@@ -32,6 +32,13 @@ interface LessonContentProps {
     paymentSupport?: string;
   };
 }
+
+const formatLessonDuration = (seconds?: number | null) => {
+  if (!seconds) return "";
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+};
 
 const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], labels }: LessonContentProps) => {
   const t = labels || {
@@ -237,26 +244,43 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                     </span>
                     
                     <span style={{ 
-                      fontSize: '1rem', 
+                      fontSize: '0.95rem', 
                       fontWeight: isActive ? "700" : "500",
                       color: isActive ? "var(--primary)" : "var(--foreground-rgb)",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
-                      whiteSpace: "nowrap"
+                      whiteSpace: "nowrap",
+                      flex: 1
                     }}>
                       {lesson.title}
                     </span>
                   </div>
                   
-                  {isLocked ? (
-                    <Lock size={16} color="#adb5bd" style={{ flexShrink: 0, marginLeft: "1rem" }} />
-                  ) : (
-                    lesson.isPreview && !hasFullAccess ? (
-                      <span style={{ fontSize: "0.7rem", color: "var(--success)", fontWeight: "bold", border: "1px solid var(--success)", padding: "0.1rem 0.4rem", borderRadius: "4px", flexShrink: 0, marginLeft: "1rem" }}>试看</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexShrink: 0, marginLeft: "1rem" }}>
+                    {lesson.duration && (
+                      <span style={{ 
+                        fontSize: "0.75rem", 
+                        color: "#8c9299",
+                        background: "#f1f3f5",
+                        padding: "0.15rem 0.45rem",
+                        borderRadius: "12px",
+                        fontWeight: "600",
+                        fontFamily: "monospace"
+                      }}>
+                        {formatLessonDuration(lesson.duration)}
+                      </span>
+                    )}
+
+                    {isLocked ? (
+                      <Lock size={16} color="#adb5bd" />
                     ) : (
-                      <PlayCircle size={18} color={isActive ? "var(--primary)" : "#adb5bd"} style={{ flexShrink: 0, marginLeft: "1rem" }} />
-                    )
-                  )}
+                      lesson.isPreview && !hasFullAccess ? (
+                        <span style={{ fontSize: "0.7rem", color: "var(--success)", fontWeight: "bold", border: "1px solid var(--success)", padding: "0.1rem 0.4rem", borderRadius: "4px" }}>试看</span>
+                      ) : (
+                        <PlayCircle size={18} color={isActive ? "var(--primary)" : "#adb5bd"} />
+                      )
+                    )}
+                  </div>
                 </li>
               );
             })}

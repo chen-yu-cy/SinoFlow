@@ -57,10 +57,26 @@ export async function POST(req: Request) {
       // 封面失败不应中断视频上传，可以返回空封面
     }
 
+    // 3. 使用 ffprobe 获取视频时长(秒)
+    let videoDuration: number | null = null;
+    try {
+      const ffprobeCmd = `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${videoPath}"`;
+      logger.info({ ffprobeCmd }, "[ffprobe] 执行获取时长命令");
+      const { stdout } = await execPromise(ffprobeCmd);
+      const parsedDuration = parseFloat(stdout.trim());
+      if (!isNaN(parsedDuration)) {
+        videoDuration = Math.round(parsedDuration);
+        logger.info({ videoDuration }, "[ffprobe] 获取时长成功");
+      }
+    } catch (ffprobeErr) {
+      logger.error({ err: ffprobeErr, videoPath }, "[ffprobe] 获取时长失败");
+    }
+
     return NextResponse.json({ 
       success: true, 
       url: videoUrl,
       thumbnail: thumbnailUrl,
+      duration: videoDuration,
       name: file.name
     });
 

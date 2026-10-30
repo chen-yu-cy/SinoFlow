@@ -46,6 +46,7 @@ model Lesson {
   title     String
   videoUrl  String
   order     Int
+  duration  Int?         // 视频时长(秒数)
   status    LessonStatus @default(READY)
   isPreview Boolean      @default(false)
   courseId  String

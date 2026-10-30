@@ -10,7 +10,7 @@ export interface CreateCourseInput {
   level: string;
   duration: string;
   thumbnail?: string | null;
-  lessons: { title: string; videoUrl: string; isPreview: boolean }[];
+  lessons: { title: string; videoUrl: string; isPreview: boolean; duration?: number | null }[];
 }
 
 /**
@@ -50,6 +50,7 @@ export const CourseService = {
             order: index + 1,
             status: "READY",
             isPreview: lesson.isPreview,
+            duration: lesson.duration,
           })),
         },
       },
@@ -91,6 +92,7 @@ export const CourseService = {
               order: index + 1,
               status: "READY",
               isPreview: lesson.isPreview,
+              duration: lesson.duration,
             })),
           },
         },
