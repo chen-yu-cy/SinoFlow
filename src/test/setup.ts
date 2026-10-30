@@ -4,6 +4,7 @@ import { vi } from 'vitest'
 // Mock Prisma
 vi.mock('@/lib/db/client', () => ({
   default: {
+    $queryRaw: vi.fn(),
     $transaction: vi.fn((callback) => callback({
       course: {
         update: vi.fn(),

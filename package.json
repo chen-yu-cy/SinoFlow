@@ -8,6 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
+    "db:seed": "node prisma/seed.mjs",
+    "db:reset": "node prisma/seed.mjs --reset",
+    "db:backup": "bash scripts/backup.sh",
+    "docker:deploy": "bash scripts/deploy.sh",
     "postinstall": "prisma generate",
     "prepare": "husky"
   },
@@ -17,7 +21,7 @@
     ]
   },
   "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "seed": "node prisma/seed.mjs"
   },
   "dependencies": {
     "@prisma/client": "^5.21.1",

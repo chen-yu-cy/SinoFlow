@@ -1,19 +1,83 @@
 # FILE: docker-compose.yml
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
+  caddy:
+    image: caddy:2-alpine
+    restart: always
+    logging: *default-logging
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN_NAME: ${DOMAIN_NAME:-:80}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
   db:
     image: postgres:15-alpine
     restart: always
+    logging: *default-logging
     environment:
-      POSTGRES_USER: devuser
-      POSTGRES_PASSWORD: devpassword
-      POSTGRES_DB: sinoflow_db
+      POSTGRES_USER: ${POSTGRES_USER:-devuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
+      POSTGRES_DB: ${POSTGRES_DB:-sinoflow_db}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-devuser} -d ${POSTGRES_DB:-sinoflow_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: ${APP_IMAGE:-ghcr.io/chen-yu-cy/sinoflow:latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        GIT_SHA: ${GIT_SHA:-local}
+    restart: always
+    logging: *default-logging
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-devuser}:${POSTGRES_PASSWORD:-devpassword}@db:5432/${POSTGRES_DB:-sinoflow_db}?schema=public"
+      AUTH_SECRET: ${AUTH_SECRET:-R5vh0RA9bh9lTjZb8S2hpAtsHLCOY4kScJGKarxnahQ=}
+      AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@sinoflow.cn}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin1234}
+      ADMIN_NAME: ${ADMIN_NAME:-Administrator}
+      SUPPORT_EMAIL: ${SUPPORT_EMAIL:-support@sinoflow.com}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      NODE_ENV: production
+    volumes:
+      - ./public/uploads:/app/public/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
   loki:
     image: grafana/loki:2.9.0
+    restart: always
+    logging: *default-logging
     ports:
       - "3100:3100"
     volumes:
@@ -22,6 +86,8 @@ services:
 
   promtail:
     image: grafana/promtail:2.9.0
+    restart: always
+    logging: *default-logging
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
@@ -32,11 +98,22 @@ services:
 
   grafana:
     image: grafana/grafana:latest
+    restart: always
+    logging: *default-logging
     ports:
       - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
     depends_on:
       - loki
 
 volumes:
   postgres_data:
   loki_data:
+  grafana_data:
+  caddy_data:
+  caddy_config:

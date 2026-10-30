@@ -1,0 +1,20 @@
+# FILE: .dockerignore
+Dockerfile
+.dockerignore
+node_modules
+npm-debug.log
+README.md
+.next
+.git
+.env
+.env.*
+*.mp4
+*.pdf
+coverage
+.husky
+backups
+public/uploads/*
+!public/uploads/resources
+public/uploads/resources/*
+!public/uploads/resources/*.pdf
+

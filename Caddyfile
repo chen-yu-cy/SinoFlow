@@ -1,0 +1,7 @@
+# FILE: Caddyfile
+{$DOMAIN_NAME::80} {
+  request_body {
+    max_size 500MB
+  }
+  reverse_proxy app:3000
+}
