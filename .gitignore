@@ -40,3 +40,7 @@ next-env.d.ts
 # media
 *.mp4
 
+# database backups
+/backups/
+
+

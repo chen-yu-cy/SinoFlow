@@ -12,6 +12,7 @@ README.md
 *.pdf
 coverage
 .husky
+backups
 public/uploads/*
 !public/uploads/resources
 public/uploads/resources/*

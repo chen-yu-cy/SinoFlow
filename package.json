@@ -10,6 +10,7 @@
     "test": "vitest run",
     "db:seed": "node prisma/seed.mjs",
     "db:reset": "node prisma/seed.mjs --reset",
+    "db:backup": "bash scripts/backup.sh",
     "docker:deploy": "bash scripts/deploy.sh",
     "postinstall": "prisma generate",
     "prepare": "husky"

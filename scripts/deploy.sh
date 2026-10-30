@@ -2,6 +2,9 @@
 # FILE: scripts/deploy.sh
 set -e
 
+PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$PROJECT_DIR"
+
 echo "🚀 [SinoFlow] 开始一键 Docker 自动化部署检查..."
 
 # ==============================================================================
@@ -93,6 +96,9 @@ GRAFANA_ADMIN_PASSWORD="admin"
 # 5. 客服工单通知邮箱与日志级别配置
 SUPPORT_EMAIL="support@sinoflow.com"
 LOG_LEVEL="info"
+
+# 6. Caddy 域名与自动 HTTPS 配置 (默认 :80 支持 IP 直接访问；绑定域名后改为如 sinoflow.com 即可自动开启 HTTPS)
+DOMAIN_NAME=":80"
 EOF
 
   echo "✅ 已自动创建 .env 配置文件（并生成了随机 AUTH_SECRET）！"
@@ -108,10 +114,24 @@ source .env
 set +a
 
 # ==============================================================================
-# 3. 启动 Docker Compose 全栈服务
+# 3. 启动 Docker Compose 全栈服务 & 自动清理旧悬空镜像
 # ==============================================================================
-echo "🐳 正在构建并启动 Docker 容器集群 (PostgreSQL + Next.js + Loki + Grafana)..."
+echo "🐳 正在构建并启动 Docker 容器集群 (Caddy + Next.js + PostgreSQL + Loki + Grafana)..."
 $DOCKER_CMD compose up -d --build
+
+echo "🧹 正在自动清理旧版本悬空 Docker 镜像缓存 (docker image prune)..."
+$DOCKER_CMD image prune -f >/dev/null 2>&1 || true
+
+# ==============================================================================
+# 4. Linux 服务器自动配置每日凌晨 3:00 数据库定时备份 Cron (幂等)
+# ==============================================================================
+if [ "$(uname -s)" = "Linux" ] && command -v crontab >/dev/null 2>&1; then
+  CRON_JOB="0 3 * * * ${PROJECT_DIR}/scripts/backup.sh >> ${PROJECT_DIR}/backups/cron.log 2>&1"
+  if ! (crontab -l 2>/dev/null | grep -Fq "${PROJECT_DIR}/scripts/backup.sh"); then
+    (crontab -l 2>/dev/null || true; echo "$CRON_JOB") | crontab -
+    echo "⏰ 已自动配置每日凌晨 03:00 数据库自动备份定时任务 (保留最近 7 天)"
+  fi
+fi
 
 # 自动探测公网 IP（如果在云服务器上则显示公网 IP，否则显示 localhost）
 PUBLIC_HOST="localhost"
@@ -126,11 +146,14 @@ echo ""
 echo "=============================================================================="
 echo "🎉 SinoFlow 全栈部署已就绪！"
 echo "------------------------------------------------------------------------------"
-echo "🌐 网站主地址:       http://${PUBLIC_HOST}:3000"
-echo "🔑 管理员后台:       http://${PUBLIC_HOST}:3000/admin"
-echo "   ├─ 管理员邮箱:    ${ADMIN_EMAIL:-admin@sinoflow.cn}"
-echo "   └─ 初始密码:      ${ADMIN_PASSWORD:-admin1234}"
-echo "📊 Grafana 监控台:   http://${PUBLIC_HOST}:3001"
-echo "   ├─ 监控台账号:    ${GRAFANA_ADMIN_USER:-admin}"
-echo "   └─ 监控台密码:    ${GRAFANA_ADMIN_PASSWORD:-admin}"
+echo "🌐 网站主地址 (80端口): http://${PUBLIC_HOST}"
+echo "🌐 备用直连地址:        http://${PUBLIC_HOST}:3000"
+echo "💓 健康检查接口:        http://${PUBLIC_HOST}/api/health"
+echo "🔑 管理员后台:          http://${PUBLIC_HOST}/admin"
+echo "   ├─ 管理员邮箱:       ${ADMIN_EMAIL:-admin@sinoflow.cn}"
+echo "   └─ 初始密码:         ${ADMIN_PASSWORD:-admin1234}"
+echo "📊 Grafana 监控台:      http://${PUBLIC_HOST}:3001"
+echo "   ├─ 监控台账号:       ${GRAFANA_ADMIN_USER:-admin}"
+echo "   └─ 监控台密码:       ${GRAFANA_ADMIN_PASSWORD:-admin}"
+echo "💾 手动备份数据库:      npm run db:backup"
 echo "=============================================================================="
