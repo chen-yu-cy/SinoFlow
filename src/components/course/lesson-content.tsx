@@ -122,12 +122,16 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
           )}
         </div>
         
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", color: "var(--primary)", marginBottom: "1rem" }}>
-          <BookText size={24} />
-          <span style={{ fontWeight: "700", fontSize: "1.1rem", textTransform: "uppercase", letterSpacing: "1px" }}>{t.learningTitle}</span>
-        </div>
+        {canViewCurrentLesson && (
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", color: "var(--primary)", marginBottom: "1rem" }}>
+            <BookText size={24} />
+            <span style={{ fontWeight: "700", fontSize: "1.1rem", textTransform: "uppercase", letterSpacing: "1px" }}>{t.learningTitle}</span>
+          </div>
+        )}
 
-        <h1 style={{ fontSize: "2.5rem", marginBottom: "1.5rem", fontWeight: "800" }}>{currentLesson?.title || course.title}</h1>
+        <h1 style={{ fontSize: "2.5rem", marginBottom: "1.5rem", fontWeight: "800" }}>
+          {canViewCurrentLesson ? (currentLesson?.title || course.title) : course.title}
+        </h1>
         
         <div style={{ background: "#fff", padding: "2rem", borderRadius: "12px", border: "1px solid var(--border-color)", boxShadow: "var(--card-shadow)" }}>
           <h3 style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem" }}>
