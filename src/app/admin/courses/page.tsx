@@ -1,7 +1,8 @@
 import React from "react";
 import prisma from "@/lib/db/client";
 import Link from "next/link";
-import { Plus, Edit, Trash2, ExternalLink } from "lucide-react";
+import { Plus } from "lucide-react";
+import CourseActions from "@/components/admin/course-actions";
 
 const AdminCoursesPage = async () => {
   const courses = await prisma.course.findMany({
@@ -48,17 +49,7 @@ const AdminCoursesPage = async () => {
                   {new Date(course.createdAt).toLocaleDateString()}
                 </td>
                 <td style={{ padding: "1.25rem 1.5rem", textAlign: "right" }}>
-                  <div style={{ display: "flex", gap: "0.75rem", justifyContent: "flex-end" }}>
-                    <Link href={`/courses/${course.id}`} target="_blank" title="预览">
-                      <ExternalLink size={18} color="#6c757d" />
-                    </Link>
-                    <button style={{ background: "none", border: "none", cursor: "pointer" }} title="编辑">
-                      <Edit size={18} color="#4c6ef5" />
-                    </button>
-                    <button style={{ background: "none", border: "none", cursor: "pointer" }} title="删除">
-                      <Trash2 size={18} color="var(--primary)" />
-                    </button>
-                  </div>
+                  <CourseActions courseId={course.id} courseTitle={course.title} />
                 </td>
               </tr>
             ))}
