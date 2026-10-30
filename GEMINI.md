@@ -51,9 +51,11 @@ src/
 │   ├── ui/                      # Atomic UI elements
 │   └── course/                  # Video player & course components
 ├── lib/
+│   ├── actions/                 # Server Actions (Web entry points & Security guards)
+│   ├── services/                # Service Layer (Business logic & DAO operations)
 │   ├── db/client.ts             # Prisma client singleton
 │   └── payment/                 # WeChat & Alipay SDK integration helpers
-├── scripts/                     # Administrative utility scripts
+├── scripts/                     # Administrative utility scripts (CLI entry points)
 └── types/                       # Shared type definitions
 
 # 项目积压任务 (Backlog)
