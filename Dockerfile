@@ -8,7 +8,7 @@ COPY package.json package-lock.json ./
 COPY prisma ./prisma/
 
 # Skip husky prepare script in Docker build
-RUN npm pkg delete scripts.prepare && npm ci
+RUN npm pkg delete scripts.prepare && npm ci --legacy-peer-deps
 
 # Stage 2: Build the Next.js application
 FROM node:20-alpine AS builder

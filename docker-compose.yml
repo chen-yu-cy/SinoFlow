@@ -27,7 +27,12 @@ services:
     environment:
       DATABASE_URL: "postgresql://${POSTGRES_USER:-devuser}:${POSTGRES_PASSWORD:-devpassword}@db:5432/${POSTGRES_DB:-sinoflow_db}?schema=public"
       AUTH_SECRET: ${AUTH_SECRET:-R5vh0RA9bh9lTjZb8S2hpAtsHLCOY4kScJGKarxnahQ=}
-      AUTH_TRUST_HOST: "true"
+      AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@sinoflow.cn}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin1234}
+      ADMIN_NAME: ${ADMIN_NAME:-Administrator}
+      SUPPORT_EMAIL: ${SUPPORT_EMAIL:-support@sinoflow.com}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
       NODE_ENV: production
     volumes:
       - ./public/uploads:/app/public/uploads
@@ -57,6 +62,9 @@ services:
     image: grafana/grafana:latest
     ports:
       - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
     depends_on:
       - loki
 

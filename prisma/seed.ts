@@ -11,22 +11,24 @@ async function main() {
   await prisma.course.deleteMany({})
   // Optional: Clean users if needed, or just find by email
   
-  // 创建管理员账号
-  const adminEmail = 'admin@sinoflow.cn'
-  const hashedPassword = await bcrypt.hash('admin1234', 10)
+  // 创建管理员账号（支持从环境变量读取预设账号密码）
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@sinoflow.cn'
+  const adminPassword = process.env.ADMIN_PASSWORD || 'admin1234'
+  const adminName = process.env.ADMIN_NAME || 'Administrator'
+  const hashedPassword = await bcrypt.hash(adminPassword, 10)
   
   await prisma.user.upsert({
     where: { email: adminEmail },
     update: { 
       password: hashedPassword,
       role: Role.ADMIN,
-      name: 'Administrator'
+      name: adminName
     },
     create: {
       email: adminEmail,
       password: hashedPassword,
       role: Role.ADMIN,
-      name: 'Administrator'
+      name: adminName
     }
   })
 
@@ -71,7 +73,7 @@ async function main() {
     }
   })
 
-  console.log('数据库种子数据注入成功！管理员账号: admin@sinoflow.cn / admin1234')
+  console.log(`数据库种子数据注入成功！管理员账号: ${adminEmail} / ${adminPassword}`)
 }
 
 main()

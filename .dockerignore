@@ -12,3 +12,8 @@ README.md
 *.pdf
 coverage
 .husky
+public/uploads/*
+!public/uploads/resources
+public/uploads/resources/*
+!public/uploads/resources/*.pdf
+
