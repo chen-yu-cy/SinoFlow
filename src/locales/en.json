@@ -18,12 +18,20 @@
     "priceLabel": "Course Price",
     "learnNow": "Learn Now",
     "details": "Details",
-    "noThumbnail": "No Cover"
+    "noThumbnail": "No Cover",
+    "completed": "Completed",
+    "lessons": "lessons"
   },
   "userNav": {
     "adminPortal": "Admin Dashboard",
     "myLearning": "My Learning",
     "logout": "Logout",
     "returnAdmin": "Return to Admin"
+  },
+  "courseDetail": {
+    "learningTitle": "Learning",
+    "introTitle": "Course Introduction",
+    "curriculumTitle": "Curriculum",
+    "progressTitle": "Progress"
   }
 }

@@ -37,7 +37,14 @@ vi.mock('@/lib/db/client', () => ({
       deleteMany: vi.fn(),
     },
     lesson: {
+      findUnique: vi.fn(),
       deleteMany: vi.fn(),
+      count: vi.fn(),
+    },
+    lessonProgress: {
+      findMany: vi.fn(() => Promise.resolve([])),
+      count: vi.fn(() => Promise.resolve(0)),
+      upsert: vi.fn(() => Promise.resolve({})),
     }
   },
 }))
@@ -48,6 +55,15 @@ vi.mock('@/lib/auth', () => ({
   signIn: vi.fn(),
   signOut: vi.fn(),
   handlers: { GET: vi.fn(), POST: vi.fn() },
+}))
+
+// Mock next/headers for Server Component cookies
+vi.mock('next/headers', () => ({
+  cookies: vi.fn(() => ({
+    get: vi.fn(),
+    set: vi.fn(),
+    delete: vi.fn(),
+  })),
 }))
 
 // Mock next/navigation

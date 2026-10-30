@@ -18,12 +18,20 @@
     "priceLabel": "课程价格",
     "learnNow": "立即学习",
     "details": "详情",
-    "noThumbnail": "暂无封面"
+    "noThumbnail": "暂无封面",
+    "completed": "已完成",
+    "lessons": "课时"
   },
   "userNav": {
     "adminPortal": "进入管理后台",
     "myLearning": "我的学习",
     "logout": "退出登录",
     "returnAdmin": "返回管理员账号"
+  },
+  "courseDetail": {
+    "learningTitle": "正在学习",
+    "introTitle": "课程简介",
+    "curriculumTitle": "课程目录",
+    "progressTitle": "学习进度"
   }
 }

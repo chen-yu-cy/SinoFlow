@@ -6,9 +6,10 @@ import Hls from "hls.js";
 interface VideoPlayerProps {
   url: string;
   autoPlay?: boolean;
+  onEnded?: () => void;
 }
 
-const VideoPlayer = ({ url, autoPlay = false }: VideoPlayerProps) => {
+const VideoPlayer = ({ url, autoPlay = false, onEnded }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -68,6 +69,7 @@ const VideoPlayer = ({ url, autoPlay = false }: VideoPlayerProps) => {
         ref={videoRef}
         controls
         playsInline
+        onEnded={onEnded}
         style={{ width: '100%', height: '100%' }}
       >
         Your browser does not support the video tag.

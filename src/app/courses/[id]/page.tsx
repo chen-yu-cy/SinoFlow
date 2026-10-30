@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import PurchaseButton from "@/components/course/purchase-button";
 import { OrderStatus } from "@prisma/client";
 import LessonContent from "@/components/course/lesson-content";
+import { getTranslation } from "@/lib/i18n";
 
 interface CourseDetailPageProps {
   params: Promise<{ id: string }>;
@@ -13,10 +14,20 @@ interface CourseDetailPageProps {
 const CourseDetailPage = async ({ params }: CourseDetailPageProps) => {
   const { id } = await params;
   const session = await auth();
+  const { t } = await getTranslation();
+
+  const labels = {
+    learningTitle: t("courseDetail.learningTitle") || "正在学习",
+    introTitle: t("courseDetail.introTitle") || "课程简介",
+    curriculumTitle: t("courseDetail.curriculumTitle") || "课程目录",
+    progressTitle: t("courseDetail.progressTitle") || "学习进度",
+  };
 
   const course = await prisma.course.findUnique({
     where: { id },
-    include: { lessons: { orderBy: { order: 'asc' } } }
+    include: { 
+      lessons: { orderBy: { order: 'asc' } }
+    }
   });
 
   if (!course) {
@@ -41,10 +52,22 @@ const CourseDetailPage = async ({ params }: CourseDetailPageProps) => {
     }
   }
 
+  // 如果有权限且登录了，预取该课程下学员已学完的课时 ID
+  let completedLessonIds: string[] = [];
+  if (session?.user?.id && hasFullAccess) {
+    const { ProgressService } = await import("@/lib/services/progress.service");
+    completedLessonIds = await ProgressService.getCompletedLessonIds(session.user.id, id);
+  }
+
   return (
     <div className="course-detail-container">
       {/* Interactive Lesson Content & Sidebar */}
-      <LessonContent course={course} hasFullAccess={hasFullAccess} />
+      <LessonContent 
+        course={course} 
+        hasFullAccess={hasFullAccess} 
+        initialCompletedLessonIds={completedLessonIds}
+        labels={labels}
+      />
       
       {/* Purchase Banner (Show only if not purchased) */}
       {!hasFullAccess && (

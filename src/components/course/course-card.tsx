@@ -19,15 +19,24 @@ interface CourseCardProps {
     details: string;
     noThumbnail: string;
   };
+  progress?: {
+    completedCount: number;
+    totalCount: number;
+  };
 }
 
-const CourseCard = ({ id, title, description, price, level, duration, thumbnail, layout = "grid", isAdmin, labels }: CourseCardProps) => {
+const CourseCard = ({ id, title, description, price, level, duration, thumbnail, layout = "grid", isAdmin, labels, progress }: CourseCardProps) => {
   const t = labels || {
     priceLabel: "课程价格",
     learnNow: "立即学习",
     details: "详情",
-    noThumbnail: "暂无封面"
+    noThumbnail: "暂无封面",
+    completed: "已完成",
+    lessons: "课时"
   };
+
+  const completedText = (t as any).completed || "已完成";
+  const lessonsText = (t as any).lessons || "课时";
 
   // 根据 3 个等级确定颜色映射逻辑
   const getLevelStyles = () => {
@@ -220,8 +229,20 @@ const CourseCard = ({ id, title, description, price, level, duration, thumbnail,
           {description}
         </p>
 
+        {progress && (
+          <div style={{ marginTop: "auto", marginBottom: "1rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", color: "#6c757d", marginBottom: "0.4rem", fontWeight: "500" }}>
+              <span>{completedText} {progress.completedCount}/{progress.totalCount} {lessonsText}</span>
+              <span style={{ fontWeight: "700", color: "var(--success)" }}>{Math.round((progress.completedCount / (progress.totalCount || 1)) * 100)}%</span>
+            </div>
+            <div style={{ width: "100%", height: "6px", background: "#e9ecef", borderRadius: "3px", overflow: "hidden" }}>
+              <div style={{ width: `${(progress.completedCount / (progress.totalCount || 1)) * 100}%`, height: "100%", background: "var(--success)", transition: "width 0.4s ease-out" }}></div>
+            </div>
+          </div>
+        )}
+
         <div style={{ 
-          marginTop: "auto", 
+          marginTop: progress ? "0" : "auto", 
           display: "flex", 
           justifyContent: "space-between", 
           alignItems: "center",

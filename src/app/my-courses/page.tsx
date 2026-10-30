@@ -1,9 +1,12 @@
+// FILE: src/app/my-courses/page.tsx
 import React from "react";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db/client";
 import { redirect } from "next/navigation";
 import CourseCard from "@/components/course/course-card";
 import { OrderStatus } from "@prisma/client";
+import { ProgressService } from "@/lib/services/progress.service";
+import { getTranslation } from "@/lib/i18n";
 
 const MyCoursesPage = async () => {
   const session = await auth();
@@ -12,6 +15,8 @@ const MyCoursesPage = async () => {
     redirect("/login");
     return null;
   }
+
+  const { t } = await getTranslation();
 
   // 获取用户已成功支付的订单及其关联的课程
   const orders = await prisma.order.findMany({
@@ -28,11 +33,15 @@ const MyCoursesPage = async () => {
   });
 
   const purchasedCourses = orders.map((order) => order.course);
+  const courseIds = purchasedCourses.map((c) => c.id);
+
+  // 获取这些已购课程的学习进度
+  const progressMap = await ProgressService.getCoursesProgress(session.user.id, courseIds);
 
   return (
     <div>
       <section style={{ marginBottom: "3rem" }}>
-        <h2 style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>我的课程</h2>
+        <h2 style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>{t("nav.myCourses")}</h2>
         <p style={{ color: "#6c757d" }}>您已购买并解锁的所有学习内容。</p>
       </section>
 
@@ -52,6 +61,13 @@ const MyCoursesPage = async () => {
               level={course.level}
               duration={course.duration}
               thumbnail={course.thumbnail}
+              progress={progressMap[course.id]}
+              labels={{
+                priceLabel: t("courseCard.priceLabel"),
+                learnNow: t("courseCard.learnNow"),
+                details: t("courseCard.details"),
+                noThumbnail: t("courseCard.noThumbnail")
+              }}
             />
           ))}
         </div>
