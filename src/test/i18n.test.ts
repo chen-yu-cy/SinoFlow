@@ -6,11 +6,12 @@ import { cookies, headers } from 'next/headers'
 // Mock cookies and headers
 vi.mock('next/headers', () => {
   const get = vi.fn()
+  const set = vi.fn()
   const headersGet = vi.fn()
   return {
     cookies: vi.fn(() => ({
       get,
-      set: vi.fn(),
+      set,
       delete: vi.fn(),
     })),
     headers: vi.fn(async () => ({
@@ -119,6 +120,20 @@ describe('Internationalization (i18n) System', () => {
       // 验证在 support.ticketNo (如：ID de ticket: {id} / 工单号: {id}) 上的替换逻辑
       const result = t('support.ticketNo', { id: 't-999' })
       expect(result).toBe('工单号: t-999')
+    })
+  })
+
+  describe('setLocaleAction Server Action', () => {
+    it('应该成功设置带有指定属性的语言 Cookie', async () => {
+      const { setLocaleAction } = await import('@/lib/actions/locale')
+      await setLocaleAction('es')
+
+      expect(mockCookies.set).toHaveBeenCalledWith('NEXT_LOCALE', 'es', {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 365,
+        httpOnly: true,
+        sameSite: "lax",
+      })
     })
   })
 })

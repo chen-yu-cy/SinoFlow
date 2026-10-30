@@ -1,7 +1,9 @@
 // FILE: src/test/user.service.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { UserService } from '@/lib/services/user.service'
+import { updateUserPasswordAction } from '@/lib/actions/auth'
 import prisma from '@/lib/db/client'
+import { auth } from '@/lib/auth'
 import bcrypt from 'bcryptjs'
 
 vi.mock('bcryptjs', () => {
@@ -135,6 +137,26 @@ describe('UserService', () => {
         where: { id: 'u-1' },
         data: { password: 'new_hashed_pwd' }
       })
+    })
+  })
+
+  describe('updateUserPasswordAction Server Action', () => {
+    it('未登录用户修改密码应被拦截', async () => {
+      (auth as any).mockResolvedValue(null)
+      const result = await updateUserPasswordAction('curr', 'new')
+      expect(result.error).toBe('请先登录后再修改密码')
+    })
+
+    it('登录用户使用合法数据修改密码应该执行成功', async () => {
+      (auth as any).mockResolvedValue({ user: { id: 'u-1' } });
+      (prisma.user.findUnique as any).mockResolvedValue({ id: 'u-1', password: 'hashed_pwd' });
+      (bcrypt.compare as any).mockResolvedValue(true);
+      (bcrypt.hash as any).mockResolvedValue('new_hashed_pwd');
+      (prisma.user.update as any).mockResolvedValue({ id: 'u-1' })
+
+      const result = await updateUserPasswordAction('correct_pwd', 'new_secure_pwd')
+      expect(result.success).toBe(true)
+      expect(prisma.user.update).toHaveBeenCalled()
     })
   })
 })
