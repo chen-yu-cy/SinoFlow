@@ -11,12 +11,18 @@ model User {
   id            String    @id @default(cuid())
   name          String?
   email         String?   @unique
+  password      String?
+  role          Role      @default(USER)
   emailVerified DateTime?
   image         String?
+  orders        Order[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  password      String?
-  orders        Order[]
+}
+
+enum Role {
+  USER
+  ADMIN
 }
 
 model Course {
@@ -32,14 +38,22 @@ model Course {
 }
 
 model Lesson {
-  id        String   @id @default(cuid())
+  id        String       @id @default(cuid())
   title     String
   videoUrl  String
   order     Int
+  status    LessonStatus @default(READY)
   courseId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  course    Course   @relation(fields: [courseId], references: [id])
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  course    Course       @relation(fields: [courseId], references: [id])
+}
+
+enum LessonStatus {
+  UPLOADING
+  PROCESSING
+  READY
+  FAILED
 }
 
 model Order {

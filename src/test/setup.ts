@@ -12,13 +12,19 @@ vi.mock('@/lib/db/client', () => ({
     course: {
       findUnique: vi.fn(),
       findMany: vi.fn(),
+      count: vi.fn(),
+      create: vi.fn(),
     },
     order: {
       findFirst: vi.fn(),
       findMany: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
+      count: vi.fn(),
     },
+    lesson: {
+      deleteMany: vi.fn(),
+    }
   },
 }))
 
@@ -39,4 +45,10 @@ vi.mock('next/navigation', () => ({
     refresh: vi.fn(),
   })),
   usePathname: vi.fn(),
+}))
+
+// Mock next/cache
+vi.mock('next/cache', () => ({
+  revalidatePath: vi.fn(),
+  revalidateTag: vi.fn(),
 }))

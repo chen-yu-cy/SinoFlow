@@ -1,4 +1,6 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Role } from '@prisma/client'
+import bcrypt from 'bcryptjs'
+
 const prisma = new PrismaClient()
 
 async function main() {
@@ -6,6 +8,26 @@ async function main() {
   await prisma.lesson.deleteMany({})
   await prisma.order.deleteMany({})
   await prisma.course.deleteMany({})
+  // Optional: Clean users if needed, or just find by email
+  
+  // 创建管理员账号
+  const adminEmail = 'admin@sinoflow.cn'
+  const hashedPassword = await bcrypt.hash('admin1234', 10)
+  
+  await prisma.user.upsert({
+    where: { email: adminEmail },
+    update: { 
+      password: hashedPassword,
+      role: Role.ADMIN,
+      name: 'Administrator'
+    },
+    create: {
+      email: adminEmail,
+      password: hashedPassword,
+      role: Role.ADMIN,
+      name: 'Administrator'
+    }
+  })
 
   // 创建课程：HSK 1
   const hsk1 = await prisma.course.create({
@@ -28,7 +50,7 @@ async function main() {
     data: {
       id: 'business-chinese',
       title: '职场汉语：商务沟通技巧',
-      description: '学习在专业工作环境中使用汉语，包括会议发言、邮件撰写和商务谈判常用表达。',
+      description: '学习在专业工作环境中使用汉语，包括会议发言、邮件撰写和商务谈判常用表达 Morse。',
       price: 399.00,
       lessons: {
         create: [
@@ -38,7 +60,7 @@ async function main() {
     }
   })
 
-  console.log('数据库种子数据注入成功！')
+  console.log('数据库种子数据注入成功！管理员账号: admin@sinoflow.cn / admin1234')
 }
 
 main()

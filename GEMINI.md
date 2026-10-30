@@ -8,6 +8,7 @@ We are building an online Chinese Language Learning Platform for a newspaper org
 - ALWAYS specify the absolute file path before each code block using the format: `// FILE: path/to/file.ts`
 - If code is truncated due to length limits, stop and ask me to type "continue".
 - Before performing any `git commit`, ALWAYS provide a detailed summary of the changes and obtain explicit user approval.
+- ALWAYS run `npx prisma db push` and `npx prisma generate` immediately after modifying `prisma/schema.prisma` to ensure database and type synchronization.
 
 # 语言规范 & 编码标准 (Coding Specifications)
 You must strictly adhere to the following code quality rules:
