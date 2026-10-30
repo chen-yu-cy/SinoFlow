@@ -26,11 +26,12 @@ describe('VideoPlayer Component', () => {
     vi.clearAllMocks()
   })
 
-  it('应该正确渲染视频容器', () => {
+  it('应该正确渲染视频容器且禁用原生控制栏', () => {
     const { container } = render(<VideoPlayer url={mockUrl} />)
     const videoElement = container.querySelector('video')
     expect(videoElement).toBeDefined()
-    expect(videoElement).toHaveAttribute('controls')
+    expect(videoElement).not.toHaveAttribute('controls')
+    expect(container.querySelector('.custom-video-player')).toBeDefined()
   })
 
   it('如果是 MP4 文件，应直接设置 video 的 src 属性', () => {
