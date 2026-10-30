@@ -48,7 +48,7 @@ const CourseCard = ({ id, title, description, price, level, duration, thumbnail,
       }}>
         {/* Admin Quick Edit Floating Icon */}
         {isAdmin && (
-          <Link href={`/admin/courses/${id}/edit`} style={{ position: "absolute", top: "1rem", right: "1rem", color: "#adb5bd", transition: "color 0.2s" }} title="快速编辑">
+          <Link href={`/admin/courses/${id}/edit`} target="_blank" style={{ position: "absolute", top: "1rem", right: "1rem", color: "#adb5bd", transition: "color 0.2s" }} title="快速编辑">
             <Edit size={18} />
           </Link>
         )}
@@ -129,7 +129,7 @@ const CourseCard = ({ id, title, description, price, level, duration, thumbnail,
     }}>
       {/* Admin Quick Edit Floating Icon */}
       {isAdmin && (
-        <Link href={`/admin/courses/${id}/edit`} style={{ position: "absolute", top: "1rem", right: "1rem", zIndex: 10, background: "rgba(255,255,255,0.9)", padding: "0.4rem", borderRadius: "50%", display: "flex", color: "var(--primary)", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }} title="快速编辑">
+        <Link href={`/admin/courses/${id}/edit`} target="_blank" style={{ position: "absolute", top: "1rem", right: "1rem", zIndex: 10, background: "rgba(255,255,255,0.9)", padding: "0.4rem", borderRadius: "50%", display: "flex", color: "var(--primary)", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }} title="快速编辑">
           <Edit size={18} />
         </Link>
       )}

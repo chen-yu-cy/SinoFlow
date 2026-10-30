@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { User, LogOut, LayoutDashboard, Shield, ChevronDown, BookOpen } from "lucide-react";
+import { User, LogOut, Shield, ChevronDown, BookOpen } from "lucide-react";
 import { signOut } from "next-auth/react";
 
 interface UserNavProps {
@@ -14,14 +14,14 @@ interface UserNavProps {
 }
 
 const UserNav = ({ user }: UserNavProps) => {
-  const [isOpen, setIsState] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // 点击外部关闭菜单
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsState(false);
+        setIsOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -31,7 +31,7 @@ const UserNav = ({ user }: UserNavProps) => {
   return (
     <div style={{ position: "relative" }} ref={dropdownRef}>
       <button 
-        onClick={() => setIsState(!isOpen)}
+        onClick={() => setIsOpen(!isOpen)}
         style={{ 
           display: "flex", 
           alignItems: "center", 
@@ -76,7 +76,7 @@ const UserNav = ({ user }: UserNavProps) => {
 
           {/* Admin Entry */}
           {user.role === "ADMIN" && (
-            <Link href="/admin" onClick={() => setIsState(false)} style={{ textDecoration: "none" }}>
+            <Link href="/admin" target="_blank" onClick={() => setIsOpen(false)} style={{ textDecoration: "none" }}>
               <div style={{ 
                 display: "flex", 
                 alignItems: "center", 
@@ -94,7 +94,7 @@ const UserNav = ({ user }: UserNavProps) => {
             </Link>
           )}
 
-          <Link href="/my-courses" onClick={() => setIsState(false)} style={{ textDecoration: "none" }}>
+          <Link href="/my-courses" onClick={() => setIsOpen(false)} style={{ textDecoration: "none" }}>
             <div style={{ 
               display: "flex", 
               alignItems: "center", 
