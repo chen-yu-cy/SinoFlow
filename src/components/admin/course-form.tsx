@@ -27,11 +27,17 @@ interface CourseFormProps {
 }
 
 const CourseForm = ({ initialData }: CourseFormProps) => {
+  const getInitialDuration = () => {
+    if (!initialData?.duration) return "20";
+    const matches = initialData.duration.match(/\d+/);
+    return matches ? matches[0] : "20";
+  };
+
   const [title, setTitle] = useState(initialData?.title || "");
   const [description, setDescription] = useState(initialData?.description || "");
   const [price, setPrice] = useState(initialData?.price.toString() || "");
   const [level, setLevel] = useState(initialData?.level || "入门级");
-  const [duration, setDuration] = useState(initialData?.duration || "20 课时");
+  const [duration, setDuration] = useState(getInitialDuration());
   const [thumbnail, setThumbnail] = useState(initialData?.thumbnail || "");
   const [lessons, setLessons] = useState<LessonData[]>(initialData?.lessons || []);
   const [uploading, setUploading] = useState(false);
@@ -95,6 +101,12 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
       return;
     }
 
+    const durationNum = parseInt(duration, 10);
+    if (isNaN(durationNum) || durationNum < 0 || durationNum > 100) {
+      alert("课时数必须为 0 到 100 之间的有效数字");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const payload = {
@@ -102,7 +114,7 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
         description,
         price: parseFloat(price),
         level,
-        duration,
+        duration: durationNum.toString(), // 存入数据库
         thumbnail,
         lessons
       };
@@ -172,14 +184,22 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
               <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.85rem", color: "#6c757d", fontWeight: "600" }}>课程标题 <span style={{ color: "var(--primary)" }}>*</span></label>
               <input value={title} onChange={(e) => setTitle(e.target.value)} type="text" placeholder="例如：HSK 1 入门汉语" style={{ width: "100%", padding: "0.8rem", borderRadius: "8px", border: "1px solid #dee2e6" }} required />
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-               <div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+              <div>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.85rem", color: "#6c757d", fontWeight: "600" }}>价格 (元) *</label>
                 <input value={price} onChange={(e) => setPrice(e.target.value)} type="number" step="0.01" style={{ width: "100%", padding: "0.8rem", borderRadius: "8px", border: "1px solid #dee2e6" }} required />
               </div>
               <div>
-                <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.85rem", color: "#6c757d", fontWeight: "600" }}>课时描述 *</label>
-                <input value={duration} onChange={(e) => setDuration(e.target.value)} type="text" style={{ width: "100%", padding: "0.8rem", borderRadius: "8px", border: "1px solid #dee2e6" }} required />
+                <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.85rem", color: "#6c757d", fontWeight: "600" }}>课时 *</label>
+                <input 
+                  value={duration} 
+                  onChange={(e) => setDuration(e.target.value)} 
+                  type="number" 
+                  min="0" 
+                  max="100" 
+                  style={{ width: "100%", padding: "0.8rem", borderRadius: "8px", border: "1px solid #dee2e6" }} 
+                  required 
+                />
               </div>
             </div>
           </div>

@@ -46,6 +46,9 @@ const CourseCard = ({ id, title, description, price, level, duration, thumbnail,
   };
 
   const getDurationLabel = () => {
+    if (/^\d+$/.test(duration)) {
+      return `${duration} ${lessonsText}`;
+    }
     return duration.replace("课时", lessonsText);
   };
 
