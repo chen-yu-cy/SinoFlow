@@ -44,7 +44,9 @@ describe('MyCoursesPage', () => {
           id: 'c1',
           title: '已购课程 A',
           description: '描述',
-          price: 100
+          price: 100,
+          level: '入门级',
+          duration: '10课时'
         }
       }
     ])
@@ -53,6 +55,6 @@ describe('MyCoursesPage', () => {
     render(Page)
 
     expect(screen.getByText('已购课程 A')).toBeDefined()
-    expect(screen.getByText('已购买')).toBeDefined() // 检查级别标签是否显示为已购买
+    expect(screen.getByText('入门级')).toBeDefined() 
   })
 })

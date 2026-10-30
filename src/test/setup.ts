@@ -4,6 +4,14 @@ import { vi } from 'vitest'
 // Mock Prisma
 vi.mock('@/lib/db/client', () => ({
   default: {
+    $transaction: vi.fn((callback) => callback({
+      course: {
+        update: vi.fn(),
+      },
+      lesson: {
+        deleteMany: vi.fn(),
+      },
+    })),
     user: {
       findUnique: vi.fn(),
       create: vi.fn(),

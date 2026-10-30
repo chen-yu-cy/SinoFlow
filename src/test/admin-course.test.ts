@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { createCourse } from '@/lib/actions/course'
+import { createCourse, updateCourse } from '@/lib/actions/course'
 import prisma from '@/lib/db/client'
 import { auth } from '@/lib/auth'
 
@@ -42,6 +42,8 @@ describe('createCourse Server Action', () => {
       title: 'Valid Course',
       description: 'Description',
       price: 299,
+      level: '进阶级',
+      duration: '15 课时',
       lessons: [
         { title: 'Lesson 1', videoUrl: '/uploads/vid1.mp4' },
         { title: 'Lesson 2', videoUrl: '/uploads/vid2.mp4' }
@@ -54,7 +56,26 @@ describe('createCourse Server Action', () => {
       data: expect.objectContaining({
         title: 'Valid Course',
         price: 299,
+        level: '进阶级',
+        duration: '15 课时',
       })
     })
+  })
+
+  it('管理员应能成功更新课程', async () => {
+    (auth as any).mockResolvedValue({ user: { id: 'admin-1', role: 'ADMIN' } });
+    
+    const result = await updateCourse('existing-id', {
+      title: 'Updated Title',
+      description: 'Updated Desc',
+      price: 199,
+      level: '高级',
+      duration: '30 课时',
+      lessons: [{ title: 'New L1', videoUrl: 'new-url' }]
+    })
+
+    expect(result.success).toBe(true)
+    // 验证事务是否被正确调用
+    expect(prisma.$transaction).toHaveBeenCalled()
   })
 })
