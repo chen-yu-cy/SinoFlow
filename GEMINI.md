@@ -53,6 +53,7 @@ src/
 ├── lib/
 │   ├── db/client.ts             # Prisma client singleton
 │   └── payment/                 # WeChat & Alipay SDK integration helpers
+├── scripts/                     # Administrative utility scripts
 └── types/                       # Shared type definitions
 
 # 项目积压任务 (Backlog)
