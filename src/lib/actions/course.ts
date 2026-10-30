@@ -1,66 +1,35 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import prisma from "@/lib/db/client";
 import { revalidatePath } from "next/cache";
+import { CourseService, type CreateCourseInput, type UpdateCourseInput } from "@/lib/services/course.service";
 
-export async function createCourse(data: {
-  title: string;
-  description: string;
-  price: number;
-  level: string;
-  duration: string;
-  lessons: { title: string; videoUrl: string; isPreview: boolean }[];
-}) {
+/**
+ * Server Actions for Courses
+ * 职责：权限校验、调用 Service、Web 侧边效果（如缓存刷新）
+ */
+
+export async function createCourse(data: CreateCourseInput) {
   const session = await auth();
 
-  // 严格权限校验
   if (!session?.user || (session.user as any).role !== "ADMIN") {
     return { error: "未经授权的操作" };
   }
 
-  if (!data.title || !data.description || data.lessons.length === 0) {
-    return { error: "请填写完整的课程信息并至少添加一个章节" };
-  }
-
   try {
-    const course = await prisma.course.create({
-      data: {
-        title: data.title,
-        description: data.description,
-        price: data.price,
-        level: data.level,
-        duration: data.duration,
-        lessons: {
-          create: data.lessons.map((lesson, index) => ({
-            title: lesson.title,
-            videoUrl: lesson.videoUrl,
-            order: index + 1,
-            status: "READY",
-            isPreview: lesson.isPreview,
-          })),
-        },
-      },
-    });
+    const course = await CourseService.createCourse(data);
 
     revalidatePath("/");
     revalidatePath("/courses");
 
     return { success: true, courseId: course.id };
-  } catch (error) {
-    console.error("创建课程失败:", error);
-    return { error: "保存课程失败，请检查数据格式" };
+  } catch (error: any) {
+    console.error("Action Error (createCourse):", error);
+    return { error: error.message || "保存课程失败" };
   }
 }
 
-export async function updateCourse(id: string, data: {
-  title: string;
-  description: string;
-  price: number;
-  level: string;
-  duration: string;
-  lessons: { id?: string; title: string; videoUrl: string; isPreview: boolean }[];
-}) {
+export async function updateCourse(id: string, data: UpdateCourseInput) {
   const session = await auth();
 
   if (!session?.user || (session.user as any).role !== "ADMIN") {
@@ -68,48 +37,16 @@ export async function updateCourse(id: string, data: {
   }
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
-      // 1. 更新课程基本信息
-      await tx.course.update({
-        where: { id },
-        data: {
-          title: data.title,
-          description: data.description,
-          price: data.price,
-          level: data.level,
-          duration: data.duration,
-        },
-      });
-
-      // 2. 章节同步
-      await tx.lesson.deleteMany({ where: { courseId: id } });
-
-      await tx.course.update({
-        where: { id },
-        data: {
-          lessons: {
-            create: data.lessons.map((lesson, index) => ({
-              title: lesson.title,
-              videoUrl: lesson.videoUrl,
-              order: index + 1,
-              status: "READY",
-              isPreview: lesson.isPreview,
-            })),
-          },
-        },
-      });
-
-      return { success: true };
-    });
+    await CourseService.updateCourse(id, data);
 
     revalidatePath("/");
     revalidatePath("/courses");
     revalidatePath(`/courses/${id}`);
 
-    return result;
-  } catch (error) {
-    console.error("更新课程失败:", error);
-    return { error: "更新失败，请检查数据" };
+    return { success: true };
+  } catch (error: any) {
+    console.error("Action Error (updateCourse):", error);
+    return { error: error.message || "更新失败" };
   }
 }
 
@@ -121,23 +58,15 @@ export async function deleteCourse(id: string) {
   }
 
   try {
-    await prisma.$transaction(async (tx) => {
-      // 1. 删除关联的章节
-      await tx.lesson.deleteMany({ where: { courseId: id } });
-      // 2. 删除关联的订单
-      await tx.order.deleteMany({ where: { courseId: id } });
-      // 3. 删除课程主体
-      await tx.course.delete({ where: { id } });
-    });
+    await CourseService.deleteCourse(id);
 
     revalidatePath("/");
     revalidatePath("/courses");
     revalidatePath("/admin/courses");
 
     return { success: true };
-  } catch (error) {
-    console.error("删除课程失败:", error);
-    return { error: "删除失败，请稍后再试" };
+  } catch (error: any) {
+    console.error("Action Error (deleteCourse):", error);
+    return { error: error.message || "删除失败" };
   }
 }
-
