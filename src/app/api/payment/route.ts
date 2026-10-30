@@ -2,6 +2,50 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db/client";
 
+/**
+ * @openapi
+ * /api/payment:
+ *   post:
+ *     summary: Initiate a payment for an order
+ *     description: Creates a payment session with WeChat or Alipay for a specific order.
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - orderId
+ *               - paymentMethod
+ *             properties:
+ *               orderId:
+ *                 type: string
+ *                 example: "order_123"
+ *               paymentMethod:
+ *                 type: string
+ *                 enum: [wechat, alipay]
+ *                 example: "alipay"
+ *     responses:
+ *       200:
+ *         description: Payment initiated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 paymentUrl:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized - User not logged in
+ *       404:
+ *         description: Order not found
+ */
 export async function POST(req: Request) {
   try {
     const session = await auth();

@@ -2,6 +2,28 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db/client";
 import { OrderStatus } from "@prisma/client";
 
+/**
+ * @openapi
+ * /api/payment/callback:
+ *   post:
+ *     summary: Payment gateway webhook listener
+ *     description: Receives asynchronous payment results from WeChat/Alipay. Requires raw body verification.
+ *     responses:
+ *       200:
+ *         description: Callback processed successfully
+ *   get:
+ *     summary: Mock payment completion (Development only)
+ *     description: Manually trigger a successful payment for testing purposes.
+ *     parameters:
+ *       - in: query
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Order updated to SUCCESS and redirected to success page
+ */
 export async function POST(req: Request) {
   try {
     // 微信/支付宝的回调通常需要读取原始 Body 进行签名校验
