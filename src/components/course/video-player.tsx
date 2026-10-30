@@ -5,9 +5,10 @@ import Hls from "hls.js";
 
 interface VideoPlayerProps {
   url: string;
+  autoPlay?: boolean;
 }
 
-const VideoPlayer = ({ url }: VideoPlayerProps) => {
+const VideoPlayer = ({ url, autoPlay = false }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -21,23 +22,38 @@ const VideoPlayer = ({ url }: VideoPlayerProps) => {
 
     const isHLS = url.toLowerCase().endsWith('.m3u8') || url.includes('application/vnd.apple.mpegurl');
 
+    const handlePlay = () => {
+      if (autoPlay) {
+        video.play().catch(error => {
+          console.log("Autoplay was prevented by browser:", error);
+        });
+      }
+    };
+
     if (isHLS) {
       let hls: Hls | null = null;
       if (Hls.isSupported()) {
         hls = new Hls();
         hls.loadSource(url);
         hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, handlePlay);
       } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
         video.src = url;
+        video.addEventListener('loadedmetadata', handlePlay, { once: true });
       }
       return () => {
         if (hls) hls.destroy();
+        video.removeEventListener('loadedmetadata', handlePlay);
       };
     } else {
       // 处理普通 MP4 或其他原生支持的格式
       video.src = url;
+      video.addEventListener('loadedmetadata', handlePlay, { once: true });
+      return () => {
+        video.removeEventListener('loadedmetadata', handlePlay);
+      };
     }
-  }, [url]);
+  }, [url, autoPlay]);
 
   return (
     <div className="video-container" style={{ 
