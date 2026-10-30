@@ -20,6 +20,7 @@ ENV NEXT_PUBLIC_GIT_SHA=${GIT_SHA}
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN mkdir -p /app/public
 
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npx prisma generate
