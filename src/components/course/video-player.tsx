@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-// Note: In a real production app, we would install 'hls.js'
-// For this prototype, we'll use the native video element which supports HLS in Safari
-// and add a placeholder for hls.js initialization.
+import Hls from "hls.js";
 
 interface VideoPlayerProps {
   url: string;
@@ -13,27 +11,47 @@ const VideoPlayer = ({ url }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (videoRef.current) {
-      // Basic HLS support check (Safari)
-      if (videoRef.current.canPlayType("application/vnd.apple.mpegurl")) {
-        videoRef.current.src = url;
-      } else {
-        // Here we would initialize hls.js for other browsers
-        console.log("HLS.js would be initialized here for non-Safari browsers.");
-        // videoRef.current.src = url; // Fallback
-      }
+    const video = videoRef.current;
+    if (!video || !url) return;
+
+    let hls: Hls | null = null;
+
+    if (Hls.isSupported()) {
+      hls = new Hls({
+        // Optional: Add HLS configuration here for encryption/HLS patterns
+      });
+      hls.loadSource(url);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        // video.play(); // Auto-play is often blocked by browsers
+      });
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      // For Safari and iOS browsers which support HLS natively
+      video.src = url;
     }
+
+    return () => {
+      if (hls) {
+        hls.destroy();
+      }
+    };
   }, [url]);
 
   return (
-    <div className="video-container" style={{ width: '100%', aspectRatio: '16/9', background: '#000', borderRadius: '8px', overflow: 'hidden' }}>
+    <div className="video-container" style={{ 
+      width: '100%', 
+      aspectRatio: '16/9', 
+      background: '#000', 
+      borderRadius: '8px', 
+      overflow: 'hidden',
+      boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
+    }}>
       <video
         ref={videoRef}
         controls
         playsInline
         style={{ width: '100%', height: '100%' }}
       >
-        <source src={url} type="application/x-mpegURL" />
         Your browser does not support the video tag.
       </video>
     </div>
