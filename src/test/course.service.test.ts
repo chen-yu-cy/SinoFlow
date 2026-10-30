@@ -15,6 +15,7 @@ describe('CourseService', () => {
         price: 99,
         level: '入门级',
         duration: '10h',
+        isFree: true,
         lessons: [{ title: 'L1', videoUrl: 'url', isPreview: true }]
       };
       
@@ -23,7 +24,11 @@ describe('CourseService', () => {
       const result = await CourseService.createCourse(mockData)
 
       expect(result.id).toBe('c1')
-      expect(prisma.course.create).toHaveBeenCalled()
+      expect(prisma.course.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          isFree: true
+        })
+      })
     })
   })
 

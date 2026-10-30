@@ -28,9 +28,13 @@ export async function toggleLessonProgressAction(lessonId: string, completed: bo
       return { error: "课时不存在" };
     }
 
-    // 2. 权限校验：管理员，或已购买课程的学员，或该课时是免费试看课时
+    // 2. 权限校验：管理员，免费课程，或已购买课程的学员，或该课时是免费试看课时
+    const course = await prisma.course.findUnique({
+      where: { id: lesson.courseId },
+    });
+
     const isAdmin = (session.user as any).role === "ADMIN";
-    let hasAccess = isAdmin || lesson.isPreview;
+    let hasAccess = isAdmin || lesson.isPreview || !!course?.isFree;
 
     if (!hasAccess) {
       const order = await prisma.order.findFirst({

@@ -9,6 +9,7 @@ export interface CreateCourseInput {
   price: number;
   level: string;
   duration: string;
+  isFree?: boolean;
   thumbnail?: string | null;
   lessons: { title: string; videoUrl: string; isPreview: boolean; duration?: number | null }[];
   resources?: { title: string; fileUrl: string; fileSize?: string | null }[];
@@ -43,6 +44,7 @@ export const CourseService = {
         price: data.price,
         level: data.level,
         duration: data.duration,
+        isFree: data.isFree ?? false,
         thumbnail: data.thumbnail,
         lessons: {
           create: data.lessons.map((lesson, index) => ({
@@ -82,6 +84,7 @@ export const CourseService = {
           price: data.price,
           level: data.level,
           duration: data.duration,
+          isFree: data.isFree ?? false,
           thumbnail: data.thumbnail,
         },
       });

@@ -43,9 +43,9 @@ const CourseDetailPage = async ({ params }: CourseDetailPageProps) => {
     return null;
   }
 
-  // 检查当前用户全权限：管理员拥有上帝视角，普通用户需检查购买记录
-  let hasFullAccess = false;
-  if (session?.user?.id) {
+  // 检查当前用户全权限：免费课程开放给所有人，管理员有上帝视角，普通用户需要检查购买记录
+  let hasFullAccess = course.isFree;
+  if (!hasFullAccess && session?.user?.id) {
     if ((session.user as any).role === "ADMIN") {
       hasFullAccess = true;
     } else {

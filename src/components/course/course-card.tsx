@@ -10,6 +10,7 @@ interface CourseCardProps {
   price: number;
   level: string;
   duration: string;
+  isFree?: boolean;
   thumbnail?: string;
   layout?: "grid" | "list";
   isAdmin?: boolean;
@@ -25,14 +26,15 @@ interface CourseCardProps {
   };
 }
 
-const CourseCard = ({ id, title, description, price, level, duration, thumbnail, layout = "grid", isAdmin, labels, progress }: CourseCardProps) => {
+const CourseCard = ({ id, title, description, price, level, duration, isFree, thumbnail, layout = "grid", isAdmin, labels, progress }: CourseCardProps) => {
   const t = labels || {
     priceLabel: "课程价格",
     learnNow: "立即学习",
     details: "详情",
     noThumbnail: "暂无封面",
     completed: "已完成",
-    lessons: "课时"
+    lessons: "课时",
+    free: "免费"
   };
 
   const completedText = (t as any).completed || "已完成";
@@ -146,7 +148,9 @@ const CourseCard = ({ id, title, description, price, level, duration, thumbnail,
         }}>
           <div>
             <div style={{ fontSize: "0.8rem", color: "#adb5bd", marginBottom: "0.2rem" }}>{t.priceLabel}</div>
-            <span style={{ fontSize: "1.75rem", fontWeight: "800", color: "var(--primary)" }}>¥{price.toFixed(2)}</span>
+            <span style={{ fontSize: "1.75rem", fontWeight: "800", color: "var(--primary)" }}>
+              {isFree ? (t as any).free || "免费" : `¥${price.toFixed(2)}`}
+            </span>
           </div>
           <Link href={`/courses/${id}`} style={{ width: "100%" }}>
             <button className="btn-primary" style={{ width: "100%", padding: "0.75rem", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
@@ -269,7 +273,7 @@ const CourseCard = ({ id, title, description, price, level, duration, thumbnail,
           borderTop: "1px solid #f8f9fa"
         }}>
           <span style={{ fontSize: "1.4rem", fontWeight: "800", color: "var(--primary)" }}>
-            ¥{price.toFixed(2)}
+            {isFree ? (t as any).free || "免费" : `¥${price.toFixed(2)}`}
           </span>
           <Link href={`/courses/${id}`}>
             <button className="btn-primary" style={{ padding: "0.5rem 1.25rem", borderRadius: "6px", fontSize: "0.9rem" }}>

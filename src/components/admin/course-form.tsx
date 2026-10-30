@@ -27,6 +27,7 @@ interface CourseFormProps {
     price: number;
     level: string;
     duration: string;
+    isFree?: boolean;
     thumbnail?: string | null;
     lessons: LessonData[];
     resources?: ResourceData[];
@@ -48,6 +49,8 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
   const [thumbnail, setThumbnail] = useState(initialData?.thumbnail || "");
   const [lessons, setLessons] = useState<LessonData[]>(initialData?.lessons || []);
   const [resources, setResources] = useState<ResourceData[]>(initialData?.resources || []);
+  const [isFree, setIsFree] = useState(initialData?.isFree || false);
+  const [showFreeConfirm, setShowFreeConfirm] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
@@ -171,14 +174,24 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
       return;
     }
 
+    if (!initialData && isFree) {
+      setShowFreeConfirm(true);
+      return;
+    }
+
+    await executeSave(durationNum);
+  };
+
+  const executeSave = async (durationNum: number) => {
     setIsSubmitting(true);
     try {
       const payload = {
         title,
         description,
-        price: parseFloat(price),
+        price: isFree ? 0 : parseFloat(price),
         level,
-        duration: durationNum.toString(), // 存入数据库
+        duration: durationNum.toString(),
+        isFree,
         thumbnail,
         lessons,
         resources
@@ -203,7 +216,8 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+    <>
+      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
       {/* 1. 基础信息卡片 */}
       <section style={{ background: "#fff", padding: "2rem", borderRadius: "12px", border: "1px solid var(--border-color)", boxShadow: "var(--card-shadow)" }}>
         <h4 style={{ marginTop: 0, marginBottom: "1.5rem", color: "#212529" }}>1. 课程基本信息</h4>
@@ -251,8 +265,43 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
               <div>
-                <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.85rem", color: "#6c757d", fontWeight: "600" }}>价格 (元) *</label>
-                <input value={price} onChange={(e) => setPrice(e.target.value)} type="number" step="0.01" style={{ width: "100%", padding: "0.8rem", borderRadius: "8px", border: "1px solid #dee2e6" }} required />
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                  <label style={{ fontSize: "0.85rem", color: "#6c757d", fontWeight: "600", margin: 0 }}>
+                    {isFree ? "价格 (免费)" : "价格 (元) *"}
+                  </label>
+                  <label style={{ display: "flex", alignItems: "center", gap: "0.25rem", fontSize: "0.8rem", color: "var(--primary)", fontWeight: "600", cursor: "pointer", margin: 0 }}>
+                    <input 
+                      type="checkbox" 
+                      checked={isFree} 
+                      onChange={(e) => {
+                        setIsFree(e.target.checked);
+                        if (e.target.checked) {
+                          setPrice("0");
+                        }
+                      }}
+                      style={{ cursor: "pointer" }}
+                    />
+                    免费课程
+                  </label>
+                </div>
+                <input 
+                  value={isFree ? "免费" : price} 
+                  onChange={(e) => setPrice(e.target.value)} 
+                  type={isFree ? "text" : "number"} 
+                  step="0.01" 
+                  disabled={isFree}
+                  placeholder={isFree ? "免费" : "0.00"}
+                  style={{ 
+                    width: "100%", 
+                    padding: "0.8rem", 
+                    borderRadius: "8px", 
+                    border: "1px solid #dee2e6",
+                    background: isFree ? "#f1f3f5" : "#fff",
+                    color: isFree ? "#adb5bd" : "inherit",
+                    fontWeight: isFree ? "600" : "normal"
+                  }} 
+                  required={!isFree} 
+                />
               </div>
               <div>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.85rem", color: "#6c757d", fontWeight: "600" }}>课时 *</label>
@@ -530,7 +579,80 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
           <Save size={22} /> {(uploading || isSubmitting) ? "请稍候..." : (initialData ? "保存并更新" : "确认发布课程")}
         </button>
       </div>
-    </form>
+      </form>
+
+      {showFreeConfirm && (
+        <div style={{ 
+          position: "fixed", 
+          top: 0, 
+          left: 0, 
+          width: "100%", 
+          height: "100%", 
+          background: "rgba(0,0,0,0.4)", 
+          backdropFilter: "blur(4px)",
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center", 
+          zIndex: 2000 
+        }}>
+          <div style={{ 
+            width: "100%", 
+            maxWidth: "400px", 
+            background: "#fff", 
+            borderRadius: "16px", 
+            boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
+            overflow: "hidden"
+          }}>
+            <div style={{ padding: "1.5rem", borderBottom: "1px solid #f1f3f5", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--primary)", fontWeight: "bold" }}>
+                确认发布免费课程
+              </div>
+              <button type="button" onClick={() => setShowFreeConfirm(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#adb5bd" }}>
+                ×
+              </button>
+            </div>
+
+            <div style={{ padding: "2rem" }}>
+              <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+                <h3 style={{ marginTop: 0, marginBottom: "0.75rem", fontSize: "1.25rem", color: "#212529", fontWeight: "800" }}>
+                  确认发布为免费课程？
+                </h3>
+                <p style={{ color: "#6c757d", fontSize: "0.95rem", lineHeight: "1.6", margin: 0 }}>
+                  您正准备将《{title}》发布为免费课程。发布后所有注册与未注册的访客都将拥有上帝视角，可以直接播放全部章节视频并免费下载随堂资料附件。
+                </p>
+              </div>
+
+              <div style={{ display: "flex", gap: "1rem" }}>
+                <button type="button" onClick={() => setShowFreeConfirm(false)} style={{ flex: 1, padding: "0.8rem", borderRadius: "10px", border: "1px solid #dee2e6", background: "#fff", cursor: "pointer", fontWeight: "600", color: "#495057" }}>
+                  取消
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setShowFreeConfirm(false);
+                    const durationNum = parseInt(duration, 10);
+                    executeSave(durationNum);
+                  }}
+                  className="btn-primary" 
+                  style={{ 
+                    flex: 1, 
+                    padding: "0.8rem", 
+                    borderRadius: "10px", 
+                    display: "flex", 
+                    alignItems: "center", 
+                    justifyContent: "center", 
+                    fontWeight: "600",
+                    fontSize: "1rem"
+                  }}
+                >
+                  确认发布
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

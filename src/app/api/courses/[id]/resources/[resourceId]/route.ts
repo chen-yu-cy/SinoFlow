@@ -50,22 +50,32 @@ export async function GET(
       return NextResponse.json({ error: "请先登录" }, { status: 401 });
     }
 
-    const userId = session.user.id;
-    const userRole = (session.user as any).role;
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+    });
 
-    // 2. 鉴权：只有管理员或已购课程的用户才可下载
-    let hasAccess = false;
-    if (userRole === "ADMIN") {
-      hasAccess = true;
-    } else {
-      const order = await prisma.order.findFirst({
-        where: {
-          userId,
-          courseId,
-          status: OrderStatus.SUCCESS,
-        },
-      });
-      hasAccess = !!order;
+    if (!course) {
+      return NextResponse.json({ error: "课程不存在" }, { status: 404 });
+    }
+
+    // 2. 鉴权：只有管理员、免费课程或已购课程的用户才可下载
+    let hasAccess = course.isFree;
+    if (!hasAccess) {
+      const userId = session.user.id;
+      const userRole = (session.user as any).role;
+
+      if (userRole === "ADMIN") {
+        hasAccess = true;
+      } else {
+        const order = await prisma.order.findFirst({
+          where: {
+            userId,
+            courseId,
+            status: OrderStatus.SUCCESS,
+          },
+        });
+        hasAccess = !!order;
+      }
     }
 
     if (!hasAccess) {

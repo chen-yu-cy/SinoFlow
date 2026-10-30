@@ -25,6 +25,25 @@ describe('Course Resources Secure Download API Route', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    ;(prisma.course.findUnique as any).mockResolvedValue({ id: mockCourseId, isFree: false })
+  })
+
+  it('如果是免费课程，任何已登录用户均可直接下载，无需购买订单', async () => {
+    (auth as any).mockResolvedValue({ user: { id: 'user-1', role: 'USER' } })
+    ;(prisma.course.findUnique as any).mockResolvedValue({ id: mockCourseId, isFree: true })
+    ;(prisma.resource.findUnique as any).mockResolvedValue({
+      id: mockResourceId,
+      title: '学习资料.pdf',
+      fileUrl: '/uploads/resources/test.pdf',
+      courseId: mockCourseId
+    })
+    ;(fs.existsSync as any).mockReturnValue(true)
+    ;(fs.readFileSync as any).mockReturnValue(Buffer.from('free pdf data'))
+
+    const response = await GET(new Request('http://localhost'), { params: mockParams })
+    expect(response.status).toBe(200)
+    const body = await response.text()
+    expect(body).toBe('free pdf data')
   })
 
   it('未登录用户下载应被拒绝 (401)', async () => {

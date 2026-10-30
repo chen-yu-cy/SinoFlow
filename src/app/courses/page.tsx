@@ -68,6 +68,7 @@ const AllCoursesPage = async ({ searchParams }: AllCoursesPageProps) => {
               price={course.price}
               level={course.level}
               duration={course.duration}
+              isFree={course.isFree}
               thumbnail={course.thumbnail}
               layout="list"
               isAdmin={isAdmin}
@@ -80,7 +81,8 @@ const AllCoursesPage = async ({ searchParams }: AllCoursesPageProps) => {
                 lessons: t("courseCard.lessons"),
                 levelBeginner: t("courseFilters.levelBeginner"),
                 levelIntermediate: t("courseFilters.levelIntermediate"),
-                levelAdvanced: t("courseFilters.levelAdvanced")
+                levelAdvanced: t("courseFilters.levelAdvanced"),
+                free: t("courseCard.free")
               }}
             />          ))}
         </div>

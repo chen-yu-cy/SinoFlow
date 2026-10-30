@@ -21,7 +21,8 @@
     "details": "Details",
     "noThumbnail": "No Cover",
     "completed": "Completed",
-    "lessons": "lessons"
+    "lessons": "lessons",
+    "free": "Free"
   },
   "userNav": {
     "adminPortal": "Admin Dashboard",

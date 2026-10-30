@@ -21,7 +21,8 @@
     "details": "详情",
     "noThumbnail": "暂无封面",
     "completed": "已完成",
-    "lessons": "课时"
+    "lessons": "课时",
+    "free": "免费"
   },
   "userNav": {
     "adminPortal": "进入管理后台",

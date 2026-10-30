@@ -126,6 +126,7 @@ const HomePage = async () => {
               price={course.price}
               level={course.level}
               duration={course.duration}
+              isFree={course.isFree}
               thumbnail={course.thumbnail}
               layout="grid"
               isAdmin={isAdmin}
@@ -138,7 +139,8 @@ const HomePage = async () => {
                 lessons: t("courseCard.lessons"),
                 levelBeginner: t("courseFilters.levelBeginner"),
                 levelIntermediate: t("courseFilters.levelIntermediate"),
-                levelAdvanced: t("courseFilters.levelAdvanced")
+                levelAdvanced: t("courseFilters.levelAdvanced"),
+                free: t("courseCard.free")
               }}
             />
           ))}

@@ -38,6 +38,7 @@ model Course {
   level       String   @default("入门级")
   duration    String   @default("20 课时")
   isFeatured  Boolean  @default(false)
+  isFree      Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   lessons     Lesson[]
