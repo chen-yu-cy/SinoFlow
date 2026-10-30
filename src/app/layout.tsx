@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { auth, signOut } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import Link from "next/link";
-import { BookOpen, Home, User, LogOut, LayoutDashboard } from "lucide-react";
+import { BookOpen, Home, LayoutDashboard } from "lucide-react";
+import UserNav from "@/components/layout/user-nav";
 
 export const metadata: Metadata = {
   title: "SinoFlow - Chinese Language Learning",
@@ -45,20 +46,11 @@ const RootLayout = async ({
             </div>
             <div style={{ display: "flex", gap: "1.25rem", alignItems: "center" }}>
               {session ? (
-                <>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.4rem 0.8rem", background: "#f1f3f5", borderRadius: "20px" }}>
-                    <User size={16} />
-                    <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>{session.user?.name?.split(' ')[0] || "学员"}</span>
-                  </div>
-                  <form action={async () => {
-                    "use server";
-                    await signOut();
-                  }}>
-                    <button style={{ background: "none", border: "none", color: "#adb5bd", cursor: "pointer", display: "flex", alignItems: "center" }} title="退出登录">
-                      <LogOut size={20} />
-                    </button>
-                  </form>
-                </>
+                <UserNav user={{ 
+                  name: session.user?.name, 
+                  email: session.user?.email, 
+                  role: (session.user as any).role 
+                }} />
               ) : (
                 <>
                   <Link href="/login" style={{ fontSize: "0.95rem", fontWeight: 500, color: "var(--secondary)", textDecoration: "none" }}>登录</Link>
