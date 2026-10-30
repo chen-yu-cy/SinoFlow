@@ -8,7 +8,14 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "next lint --fix",
+      "vitest related --run"
+    ]
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -33,7 +40,9 @@
     "@vitejs/plugin-react": "^6.0.2",
     "eslint": "^8",
     "eslint-config-next": "15.0.0-rc.0",
+    "husky": "^9.1.7",
     "jsdom": "^27.0.1",
+    "lint-staged": "^17.0.5",
     "postcss": "^8",
     "prisma": "^5.21.1",
     "tsx": "^4.22.3",
