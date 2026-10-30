@@ -7,6 +7,7 @@ We are building an online Chinese Language Learning Platform for a newspaper org
 - Go straight to file creation.
 - ALWAYS specify the absolute file path before each code block using the format: `// FILE: path/to/file.ts`
 - If code is truncated due to length limits, stop and ask me to type "continue".
+- ALWAYS perform a `git commit` after successfully completing a unit test or a set of related tests.
 
 # 语言规范 & 编码标准 (Coding Specifications)
 You must strictly adhere to the following code quality rules:
