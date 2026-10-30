@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { BarChart, Clock, ChevronRight, BookOpen } from "lucide-react";
+import { BarChart, Clock, ChevronRight, BookOpen, Edit } from "lucide-react";
 
 interface CourseCardProps {
   id: string;
@@ -11,9 +11,27 @@ interface CourseCardProps {
   duration: string;
   thumbnail?: string;
   layout?: "grid" | "list";
+  isAdmin?: boolean;
 }
 
-const CourseCard = ({ id, title, description, price, level, duration, layout = "grid" }: CourseCardProps) => {
+const CourseCard = ({ id, title, description, price, level, duration, layout = "grid", isAdmin }: CourseCardProps) => {
+  // 根据 3 个等级确定颜色映射逻辑
+  const getLevelStyles = () => {
+    switch (level) {
+      case "入门级":
+      case "基础级":
+        return { bg: "var(--success-light)", color: "var(--success)" };
+      case "进阶级":
+        return { bg: "var(--warning-light)", color: "var(--warning)" };
+      case "高级":
+        return { bg: "var(--primary-light)", color: "var(--primary)" };
+      default:
+        return { bg: "#f1f3f5", color: "#495057" };
+    }
+  };
+
+  const { bg: levelBg, color: levelColor } = getLevelStyles();
+
   if (layout === "list") {
     return (
       <div className="course-card" style={{
@@ -25,8 +43,16 @@ const CourseCard = ({ id, title, description, price, level, duration, layout = "
         border: "1px solid var(--border-color)",
         padding: "1.25rem",
         gap: "2rem",
-        alignItems: "center"
+        alignItems: "center",
+        position: "relative"
       }}>
+        {/* Admin Quick Edit Floating Icon */}
+        {isAdmin && (
+          <Link href={`/admin/courses/${id}/edit`} style={{ position: "absolute", top: "1rem", right: "1rem", color: "#adb5bd", transition: "color 0.2s" }} title="快速编辑">
+            <Edit size={18} />
+          </Link>
+        )}
+
         {/* Thumbnail Placeholder */}
         <div style={{
           width: "240px",
@@ -48,7 +74,7 @@ const CourseCard = ({ id, title, description, price, level, duration, layout = "
 
         <div style={{ flex: 1 }}>
           <div style={{ display: "flex", gap: "1rem", marginBottom: "0.75rem" }}>
-            <span style={{ fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "0.3rem", padding: "0.2rem 0.6rem", background: "var(--success-light)", borderRadius: "4px", color: "var(--success)", fontWeight: 600 }}>
+            <span style={{ fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "0.3rem", padding: "0.2rem 0.6rem", background: levelBg, borderRadius: "4px", color: levelColor, fontWeight: 600 }}>
               <BarChart size={14} /> {level}
             </span>
             <span style={{ fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "0.3rem", padding: "0.2rem 0.6rem", background: "#fff3cd", borderRadius: "4px", color: "#856404", fontWeight: 600 }}>
@@ -91,8 +117,16 @@ const CourseCard = ({ id, title, description, price, level, duration, layout = "
       boxShadow: "var(--card-shadow)",
       display: "flex",
       flexDirection: "column",
-      border: "1px solid var(--border-color)"
+      border: "1px solid var(--border-color)",
+      position: "relative"
     }}>
+      {/* Admin Quick Edit Floating Icon */}
+      {isAdmin && (
+        <Link href={`/admin/courses/${id}/edit`} style={{ position: "absolute", top: "1rem", right: "1rem", zIndex: 10, background: "rgba(255,255,255,0.9)", padding: "0.4rem", borderRadius: "50%", display: "flex", color: "var(--primary)", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }} title="快速编辑">
+          <Edit size={18} />
+        </Link>
+      )}
+
       {/* Thumbnail Placeholder */}
       <div style={{
         width: "100%",
@@ -119,9 +153,9 @@ const CourseCard = ({ id, title, description, price, level, duration, layout = "
             alignItems: "center",
             gap: "0.3rem",
             padding: "0.2rem 0.5rem", 
-            background: "var(--success-light)", 
+            background: levelBg, 
             borderRadius: "4px",
-            color: "var(--success)",
+            color: levelColor,
             fontWeight: 600
           }}>
             <BarChart size={12} /> {level}

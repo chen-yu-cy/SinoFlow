@@ -49,8 +49,8 @@ const MyCoursesPage = async () => {
               title={course.title}
               description={course.description}
               price={course.price}
-              level="已购买"
-              duration="可永久观看"
+              level={course.level}
+              duration={course.duration}
             />
           ))}
         </div>

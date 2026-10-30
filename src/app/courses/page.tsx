@@ -1,8 +1,12 @@
 import React from "react";
 import CourseCard from "@/components/course/course-card";
 import prisma from "@/lib/db/client";
+import { auth } from "@/lib/auth";
 
 const AllCoursesPage = async () => {
+  const session = await auth();
+  const isAdmin = (session?.user as any)?.role === "ADMIN";
+
   const courses = await prisma.course.findMany({
     orderBy: { createdAt: 'desc' }
   });
@@ -22,9 +26,10 @@ const AllCoursesPage = async () => {
             title={course.title}
             description={course.description}
             price={course.price}
-            level="基础级"
-            duration="20 课时"
+            level={course.level}
+            duration={course.duration}
             layout="list"
+            isAdmin={isAdmin}
           />
         ))}
       </div>
