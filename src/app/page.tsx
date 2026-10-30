@@ -1,5 +1,5 @@
 import React from "react";
-import CourseCard from "@/components/course/course-card";
+import CourseList from "@/components/course/course-list";
 import prisma from "@/lib/db/client";
 
 const HomePage = async () => {
@@ -24,30 +24,9 @@ const HomePage = async () => {
         </p>
       </section>
       
-      {/* Featured Courses */}
+      {/* Featured Courses with Layout Toggle */}
       <section>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
-          <h3 style={{ fontSize: "1.75rem", margin: 0 }}>精选课程</h3>
-          <span style={{ color: "var(--primary)", cursor: "pointer", fontWeight: 600 }}>查看全部 &rarr;</span>
-        </div>
-        
-        <div style={{ 
-          display: "grid", 
-          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", 
-          gap: "2rem" 
-        }}>
-          {courses.map(course => (
-            <CourseCard 
-              key={course.id} 
-              id={course.id}
-              title={course.title}
-              description={course.description}
-              price={course.price}
-              level="基础级" // 之后可以在 schema 中增加这个字段
-              duration="20 课时" // 之后可以在 schema 中增加这个字段
-            />
-          ))}
-        </div>
+        <CourseList initialCourses={courses} />
       </section>
 
       {/* Trust Banner */}

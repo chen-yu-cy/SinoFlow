@@ -9,9 +9,68 @@ interface CourseCardProps {
   level: string;
   duration: string;
   thumbnail?: string;
+  layout?: "grid" | "list";
 }
 
-const CourseCard = ({ id, title, description, price, level, duration }: CourseCardProps) => {
+const CourseCard = ({ id, title, description, price, level, duration, layout = "grid" }: CourseCardProps) => {
+  if (layout === "list") {
+    return (
+      <div className="course-card" style={{
+        background: "#fff",
+        borderRadius: "8px",
+        overflow: "hidden",
+        boxShadow: "var(--card-shadow)",
+        display: "flex",
+        border: "1px solid var(--border-color)",
+        padding: "1rem",
+        gap: "1.5rem",
+        alignItems: "center"
+      }}>
+        {/* Thumbnail Placeholder */}
+        <div style={{
+          width: "240px",
+          height: "135px",
+          background: "#f0f0f0",
+          borderRadius: "4px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#adb5bd",
+          fontSize: "0.8rem",
+          flexShrink: 0
+        }}>
+          <div>[ 课程封面 ]</div>
+        </div>
+
+        <div style={{ flex: 1 }}>
+          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
+            <span style={{ fontSize: "0.7rem", padding: "0.15rem 0.4rem", background: "#e9ecef", borderRadius: "4px", color: "#495057", fontWeight: 600 }}>{level}</span>
+            <span style={{ fontSize: "0.7rem", padding: "0.15rem 0.4rem", background: "#fff3cd", borderRadius: "4px", color: "#856404", fontWeight: 600 }}>{duration}</span>
+          </div>
+          <h4 style={{ margin: "0 0 0.5rem 0", fontSize: "1.2rem", color: "var(--foreground-rgb)" }}>{title}</h4>
+          <p style={{ margin: "0", fontSize: "0.9rem", color: "#6c757d", lineHeight: "1.5" }}>{description}</p>
+        </div>
+
+        <div style={{ 
+          width: "180px", 
+          borderLeft: "1px solid #eee", 
+          paddingLeft: "1.5rem",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "1rem"
+        }}>
+          <span style={{ fontSize: "1.4rem", fontWeight: "bold", color: "var(--primary)" }}>¥{price.toFixed(2)}</span>
+          <Link href={`/courses/${id}`} style={{ width: "100%" }}>
+            <button className="btn-primary" style={{ width: "100%", padding: "0.6rem" }}>查看详情</button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Default Grid Layout
   return (
     <div className="course-card" style={{
       background: "#fff",
