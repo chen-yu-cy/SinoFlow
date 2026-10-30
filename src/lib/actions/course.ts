@@ -10,7 +10,7 @@ export async function createCourse(data: {
   price: number;
   level: string;
   duration: string;
-  lessons: { title: string; videoUrl: string }[];
+  lessons: { title: string; videoUrl: string; isPreview: boolean }[];
 }) {
   const session = await auth();
 
@@ -37,6 +37,7 @@ export async function createCourse(data: {
             videoUrl: lesson.videoUrl,
             order: index + 1,
             status: "READY",
+            isPreview: lesson.isPreview,
           })),
         },
       },
@@ -58,7 +59,7 @@ export async function updateCourse(id: string, data: {
   price: number;
   level: string;
   duration: string;
-  lessons: { id?: string; title: string; videoUrl: string }[];
+  lessons: { id?: string; title: string; videoUrl: string; isPreview: boolean }[];
 }) {
   const session = await auth();
 
@@ -92,6 +93,7 @@ export async function updateCourse(id: string, data: {
               videoUrl: lesson.videoUrl,
               order: index + 1,
               status: "READY",
+              isPreview: lesson.isPreview,
             })),
           },
         },
@@ -110,3 +112,32 @@ export async function updateCourse(id: string, data: {
     return { error: "更新失败，请检查数据" };
   }
 }
+
+export async function deleteCourse(id: string) {
+  const session = await auth();
+
+  if (!session?.user || (session.user as any).role !== "ADMIN") {
+    return { error: "未经授权的操作" };
+  }
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      // 1. 删除关联的章节
+      await tx.lesson.deleteMany({ where: { courseId: id } });
+      // 2. 删除关联的订单
+      await tx.order.deleteMany({ where: { courseId: id } });
+      // 3. 删除课程主体
+      await tx.course.delete({ where: { id } });
+    });
+
+    revalidatePath("/");
+    revalidatePath("/courses");
+    revalidatePath("/admin/courses");
+
+    return { success: true };
+  } catch (error) {
+    console.error("删除课程失败:", error);
+    return { error: "删除失败，请稍后再试" };
+  }
+}
+

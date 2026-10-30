@@ -2,6 +2,7 @@
 
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/db/client";
+import { auth } from "@/lib/auth";
 
 export async function registerUser(formData: FormData) {
   console.log("开始处理注册请求...");
@@ -38,3 +39,28 @@ export async function registerUser(formData: FormData) {
     return { error: "注册失败，请稍后再试" };
   }
 }
+
+export async function verifyAdminPassword(password: string) {
+  const session = await auth();
+
+  if (!session?.user || (session.user as any).role !== "ADMIN") {
+    return { error: "未经授权" };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email as string },
+  });
+
+  if (!user || !user.password) {
+    return { error: "用户不存在" };
+  }
+
+  const isValid = await bcrypt.compare(password, user.password);
+  
+  if (!isValid) {
+    return { error: "管理员密码错误" };
+  }
+
+  return { success: true };
+}
+
