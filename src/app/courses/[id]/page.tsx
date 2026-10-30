@@ -26,17 +26,21 @@ const CourseDetailPage = async ({ params }: CourseDetailPageProps) => {
     return null; // Ensure subsequent code doesn't execute in tests
   }
 
-  // 检查当前用户是否已购买
-  let isPurchased = false;
+  // 检查当前用户权限：管理员拥有上帝视角，普通用户需检查购买记录
+  let hasAccess = false;
   if (session?.user?.id) {
-    const order = await prisma.order.findFirst({
-      where: {
-        userId: session.user.id,
-        courseId: id,
-        status: OrderStatus.SUCCESS
-      }
-    });
-    isPurchased = !!order;
+    if ((session.user as any).role === "ADMIN") {
+      hasAccess = true;
+    } else {
+      const order = await prisma.order.findFirst({
+        where: {
+          userId: session.user.id,
+          courseId: id,
+          status: OrderStatus.SUCCESS
+        }
+      });
+      hasAccess = !!order;
+    }
   }
 
   return (
@@ -45,7 +49,7 @@ const CourseDetailPage = async ({ params }: CourseDetailPageProps) => {
         {/* Main Content: Video and Description */}
         <section>
           <div style={{ marginBottom: "2rem" }}>
-            {isPurchased ? (
+            {hasAccess ? (
               <VideoPlayer url={course.lessons[0]?.videoUrl || ""} />
             ) : (
               <PurchaseNotice price={course.price} />
@@ -104,8 +108,8 @@ const CourseDetailPage = async ({ params }: CourseDetailPageProps) => {
                       width: '28px', 
                       height: '28px', 
                       borderRadius: '50%', 
-                      background: isPurchased ? 'var(--primary-light)' : '#f1f3f5', 
-                      color: isPurchased ? 'var(--primary)' : '#adb5bd',
+                      background: hasAccess ? 'var(--primary-light)' : '#f1f3f5', 
+                      color: hasAccess ? 'var(--primary)' : '#adb5bd',
                       display: 'flex', 
                       alignItems: 'center', 
                       justifyContent: 'center',
@@ -116,7 +120,7 @@ const CourseDetailPage = async ({ params }: CourseDetailPageProps) => {
                     </span>
                     <span style={{ fontSize: '1rem', fontWeight: "500" }}>{lesson.title}</span>
                   </div>
-                  {isPurchased ? (
+                  {hasAccess ? (
                     <PlayCircle size={18} color="#adb5bd" />
                   ) : (
                     <Lock size={16} color="#adb5bd" />

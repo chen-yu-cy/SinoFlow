@@ -44,7 +44,17 @@ describe('CourseDetailPage Access Control', () => {
     render(Page)
 
     expect(screen.getByText('此内容仅限订阅学员观看')).toBeDefined()
-    expect(screen.queryByTestId('video-player')).toBeNull() // 假设我们给播放器加了 test-id
+    expect(screen.queryByTestId('video-player')).toBeNull()
+  })
+
+  it('管理员（ADMIN）应能直接看到播放器，无需购买', async () => {
+    (auth as any).mockResolvedValue({ user: { id: 'admin-1', role: 'ADMIN' } });
+    
+    const Page = await CourseDetailPage({ params: mockParams })
+    render(Page)
+
+    expect(screen.queryByText('此内容仅限订阅学员观看')).toBeNull()
+    expect(screen.getByText('测试课程')).toBeDefined()
   })
 
   it('如果用户已购买成功，应显示 VideoPlayer', async () => {
