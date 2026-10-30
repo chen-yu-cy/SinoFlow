@@ -1,8 +1,11 @@
+// FILE: src/app/admin/layout.tsx
 import React from "react";
 import { auth, signOut } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { LayoutDashboard, BookOpen, Users, Settings, LogOut, ShoppingCart, LifeBuoy } from "lucide-react";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminLayout({
   children,

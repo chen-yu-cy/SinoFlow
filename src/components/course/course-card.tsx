@@ -11,7 +11,7 @@ interface CourseCardProps {
   level: string;
   duration: string;
   isFree?: boolean;
-  thumbnail?: string;
+  thumbnail?: string | null;
   layout?: "grid" | "list";
   isAdmin?: boolean;
   labels?: {
@@ -19,6 +19,12 @@ interface CourseCardProps {
     learnNow: string;
     details: string;
     noThumbnail: string;
+    completed?: string;
+    lessons?: string;
+    levelBeginner?: string;
+    levelIntermediate?: string;
+    levelAdvanced?: string;
+    free?: string;
   };
   progress?: {
     completedCount: number;

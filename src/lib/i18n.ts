@@ -51,7 +51,8 @@ export async function getTranslation() {
 
   const t = (key: string, replacements?: Record<string, string | number>) => {
     // 支持嵌套点语法 "nav.home"
-    let value = key.split('.').reduce((obj, k) => (obj as any)?.[k], dict) as string || key;
+    const resolved = key.split('.').reduce<unknown>((obj, k) => (obj as Record<string, unknown>)?.[k], dict);
+    let value = typeof resolved === "string" ? resolved : key;
     
     // 支持占位符替换，如 "{name}"
     if (replacements) {
