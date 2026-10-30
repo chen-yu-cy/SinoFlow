@@ -64,7 +64,7 @@ const CourseDetailPage = async ({ params }: CourseDetailPageProps) => {
   }
 
   return (
-    <div className="course-detail-container">
+    <div className="course-detail-container" style={{ paddingTop: '1.5rem', paddingBottom: '3rem' }}>
       {/* Interactive Lesson Content & Sidebar */}
       <LessonContent 
         course={course} 

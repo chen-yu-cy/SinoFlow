@@ -107,7 +107,7 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
   const progressPercentage = Math.round((completedLessonsCount / (course.lessons.length || 1)) * 100);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '3rem' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '3rem', alignItems: 'start' }}>
       {/* Main Content: Video and Description */}
       <section>
         <div style={{ marginBottom: "2rem" }}>
