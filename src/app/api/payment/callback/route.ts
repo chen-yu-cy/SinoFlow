@@ -44,14 +44,18 @@ export async function GET(req: Request) {
     });
 
     return new Response(`
-      <html>
+      <html lang="zh-CN">
+        <head>
+          <meta charset="UTF-8">
+          <title>支付成功</title>
+        </head>
         <body style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; font-family:sans-serif;">
           <h1 style="color: #28a745;">支付成功！</h1>
           <p>订单 ${orderId} 已完成。</p>
           <a href="/" style="padding: 10px 20px; background: #c8102e; color: white; text-decoration: none; border-radius: 5px;">返回首页</a>
         </body>
       </html>
-    `, { headers: { 'Content-Type': 'text/html' } });
+    `, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
   } catch (error) {
     return NextResponse.json({ error: "Failed to update order" }, { status: 500 });
   }
