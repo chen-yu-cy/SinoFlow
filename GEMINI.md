@@ -63,3 +63,6 @@ src/
   - *现象*: 数据库中已有图片路径且文件存在于 `public/uploads`，但前端页面（首页/列表页）依然显示占位符或“暂无封面”。
   - *尝试过的方案*: 强制动态渲染 (`force-dynamic`)、清理 Next.js 缓存、脚本批量修复数据。
   - *待调研*: Next.js 15 图片静态资源服务的路径映射问题。
+- [ ] **中优先级**: 将用户与认证领域逻辑重构至 `UserService`。
+  - *目标*: 将 `registerUser` 和 `verifyAdminPassword` 中的加密与数据库写入逻辑从 Action 层迁往 `lib/services/user.service.ts`。
+  - *价值*: 实现密码处理逻辑的集中管理，提升可测试性，并为未来多平台（Web/CLI）复用打下基础。
