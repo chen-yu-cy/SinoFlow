@@ -95,5 +95,18 @@ export const OrderService = {
     });
 
     return result.count;
+  },
+
+  async getOrder(orderId: string) {
+    return await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { user: true, course: true }
+    });
+  },
+
+  async deleteOrder(orderId: string) {
+    return await prisma.order.delete({
+      where: { id: orderId }
+    });
   }
 };

@@ -60,3 +60,42 @@ describe('createOrder Server Action', () => {
     })
   })
 })
+
+describe('revokeOrderAction Server Action', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('应该拦截非管理员的撤销请求', async () => {
+    (auth as any).mockResolvedValue({ user: { id: 'user-1', role: 'USER' } })
+    const { revokeOrderAction } = await import('@/lib/actions/order')
+    const result = await revokeOrderAction('order-1')
+    expect(result.error).toBe('未经授权')
+  })
+
+  it('应该拦截不存在的订单撤销请求', async () => {
+    (auth as any).mockResolvedValue({ user: { id: 'admin-1', role: 'ADMIN' } });
+    (prisma.order.findUnique as any).mockResolvedValue(null)
+    const { revokeOrderAction } = await import('@/lib/actions/order')
+    const result = await revokeOrderAction('nonexistent')
+    expect(result.error).toBe('订单不存在')
+  })
+
+  it('应该成功删除并撤销订单授权', async () => {
+    (auth as any).mockResolvedValue({ user: { id: 'admin-1', role: 'ADMIN', email: 'admin@test.com' } });
+    (prisma.order.findUnique as any).mockResolvedValue({
+      id: 'order-1',
+      userId: 'user-1',
+      courseId: 'course-1',
+      user: { email: 'user@test.com' }
+    });
+    (prisma.order.delete as any).mockResolvedValue({ id: 'order-1' })
+    const { revokeOrderAction } = await import('@/lib/actions/order')
+    const result = await revokeOrderAction('order-1')
+    expect(result.success).toBe(true)
+    expect(prisma.order.delete).toHaveBeenCalledWith({
+      where: { id: 'order-1' }
+    })
+  })
+})
+

@@ -63,3 +63,36 @@ export async function revokeCourseAccess(email: string, courseId: string) {
   }
 }
 
+/**
+ * 撤销特定订单授权 Action (管理员专用)
+ * @param orderId 目标订单 ID
+ */
+export async function revokeOrderAction(orderId: string) {
+  const session = await auth();
+
+  // 安全检查：仅允许管理员角色操作
+  if (!session?.user || (session.user as any).role !== "ADMIN") {
+    return { error: "未经授权" };
+  }
+
+  try {
+    const order = await OrderService.getOrder(orderId);
+    if (!order) {
+      return { error: "订单不存在" };
+    }
+
+    await OrderService.deleteOrder(orderId);
+
+    logger.info(
+      { adminEmail: session.user.email, userEmail: order.user?.email, courseId: order.courseId, orderId },
+      "[Order Action] 管理员通过订单记录成功撤销了用户的课程访问权限并删除订单"
+    );
+
+    return { success: true };
+  } catch (error: any) {
+    logger.error({ err: error, orderId }, "[Order Action] 撤销订单授权失败");
+    return { error: error.message || "撤销订单失败，请稍后再试" };
+  }
+}
+
+
