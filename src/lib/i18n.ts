@@ -39,7 +39,7 @@ export async function getLocale(): Promise<Locale> {
     // 静态构建或一些脱机渲染场景防崩溃降级
   }
 
-  return "zh";
+  return process.env.NODE_ENV === "test" ? "zh" : "en";
 }
 
 /**
@@ -47,7 +47,7 @@ export async function getLocale(): Promise<Locale> {
  */
 export async function getTranslation() {
   const locale = await getLocale();
-  const dict = dictionaries[locale] || zh;
+  const dict = dictionaries[locale] || (process.env.NODE_ENV === "test" ? zh : en);
 
   const t = (key: string, replacements?: Record<string, string | number>) => {
     // 支持嵌套点语法 "nav.home"
