@@ -95,15 +95,15 @@ const NewCoursePage = () => {
           <h4 style={{ marginTop: 0, marginBottom: "1.5rem" }}>基本信息</h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
             <div>
-              <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem" }}>课程标题</label>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem" }}>课程标题 <span style={{ color: "var(--primary)" }}>*</span></label>
               <input value={title} onChange={(e) => setTitle(e.target.value)} type="text" placeholder="例如：高级商务汉语" style={{ width: "100%", padding: "0.75rem", borderRadius: "8px", border: "1px solid #ddd" }} required />
             </div>
             <div>
-              <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem" }}>课程描述</label>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem" }}>课程描述 <span style={{ color: "var(--primary)" }}>*</span></label>
               <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} placeholder="介绍课程的核心内容..." style={{ width: "100%", padding: "0.75rem", borderRadius: "8px", border: "1px solid #ddd", fontFamily: "inherit" }} required />
             </div>
             <div style={{ width: "200px" }}>
-              <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.85rem", color: "#495057" }}>价格 (元)</label>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.85rem", color: "#495057" }}>价格 (元) <span style={{ color: "var(--primary)" }}>*</span></label>
               <input value={price} onChange={(e) => setPrice(e.target.value)} type="number" step="0.01" placeholder="0.00" style={{ width: "100%", padding: "0.75rem", borderRadius: "8px", border: "1px solid #ddd" }} required />
             </div>
           </div>
@@ -123,7 +123,7 @@ const NewCoursePage = () => {
               <div key={index} style={{ padding: "1.5rem", border: "1px solid #f1f3f5", borderRadius: "8px", background: "#f8f9fa" }}>
                 <div style={{ display: "flex", gap: "1rem", alignItems: "flex-end" }}>
                   <div style={{ flex: 1 }}>
-                    <label style={{ display: "block", marginBottom: "0.4rem", fontSize: "0.8rem", color: "#6c757d" }}>章节 {index + 1} 标题</label>
+                    <label style={{ display: "block", marginBottom: "0.4rem", fontSize: "0.8rem", color: "#6c757d" }}>章节 {index + 1} 标题 <span style={{ color: "var(--primary)" }}>*</span></label>
                     <input value={lesson.title} onChange={(e) => {
                       const newLessons = [...lessons];
                       newLessons[index].title = e.target.value;
@@ -131,7 +131,7 @@ const NewCoursePage = () => {
                     }} type="text" style={{ width: "100%", padding: "0.6rem", borderRadius: "6px", border: "1px solid #ddd" }} required />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <label style={{ display: "block", marginBottom: "0.4rem", fontSize: "0.8rem", color: "#6c757d" }}>视频文件</label>
+                    <label style={{ display: "block", marginBottom: "0.4rem", fontSize: "0.8rem", color: "#6c757d" }}>视频文件 <span style={{ color: "var(--primary)" }}>*</span></label>
                     <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
                       <input type="file" accept="video/*" onChange={(e) => handleFileUpload(e, index)} style={{ fontSize: "0.8rem" }} />
                       {lesson.videoUrl && <span style={{ color: "#28a745", fontSize: "0.8rem", fontWeight: "bold" }}>✅ 已就绪</span>}

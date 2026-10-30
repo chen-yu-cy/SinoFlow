@@ -2,7 +2,6 @@
 
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db/client";
-import { LessonStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 export async function createCourse(data: {
@@ -33,7 +32,7 @@ export async function createCourse(data: {
             title: lesson.title,
             videoUrl: lesson.videoUrl,
             order: index + 1,
-            status: LessonStatus.READY, // 目前默认为 READY，未来可改为 PROCESSING
+            status: "READY", // 直接使用字符串常量避免 Enum 对象未定义的错误
           })),
         },
       },
