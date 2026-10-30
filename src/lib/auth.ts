@@ -1,7 +1,9 @@
+// FILE: src/lib/auth.ts
 import NextAuth, { type DefaultSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/db/client";
+import { logger } from "@/lib/logger";
 
 declare module "next-auth" {
   interface Session {
@@ -42,7 +44,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
-        console.log("Authorize Success - Returning user with role:", user.role);
+        logger.info({ email: user.email, role: user.role }, "Authorize Success - User authenticated");
 
         return {
           id: user.id,
@@ -58,7 +60,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         // @ts-ignore
         token.role = user.role;
-        console.log("JWT Callback - Set role in token:", token.role);
+        logger.debug({ role: token.role }, "JWT Callback - Set role in token");
       }
       return token;
     },
@@ -66,7 +68,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (token.sub && session.user) {
         session.user.id = token.sub;
         session.user.role = token.role as string;
-        console.log("Session Callback - Set role in session:", session.user.role);
+        logger.debug({ role: session.user.role }, "Session Callback - Set role in session");
       }
       return session;
     },

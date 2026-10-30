@@ -1,7 +1,9 @@
+// FILE: src/lib/actions/order.ts
 "use server";
 
 import { auth } from "@/lib/auth";
 import { OrderService } from "@/lib/services/order.service";
+import { logger } from "@/lib/logger";
 
 /**
  * 订单相关 Server Actions
@@ -30,7 +32,8 @@ export async function createOrder(courseId: string) {
     if (error.alreadyOwned) {
       return { error: error.message, alreadyOwned: true };
     }
-    console.error("Action Error (createOrder):", error);
+    logger.error({ err: error, courseId, userId: session.user.id }, "Action Error (createOrder)");
     return { error: error.message || "创建订单失败，请稍后再试" };
   }
 }
+

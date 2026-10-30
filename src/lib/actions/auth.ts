@@ -3,6 +3,7 @@
 
 import { auth } from "@/lib/auth";
 import { UserService } from "@/lib/services/user.service";
+import { logger } from "@/lib/logger";
 
 /**
  * 身份验证与用户管理 Server Actions
@@ -14,7 +15,7 @@ import { UserService } from "@/lib/services/user.service";
  * @param formData 包含 name, email, password 的表单对象
  */
 export async function registerUser(formData: FormData) {
-  console.log("[Auth Action] 开始处理注册请求...");
+  logger.info("[Auth Action] 开始处理注册请求...");
   
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
@@ -23,10 +24,10 @@ export async function registerUser(formData: FormData) {
   try {
     // 委托给 Service 层处理注册逻辑
     await UserService.registerUser({ name, email, password });
-    console.log("[Auth Action] 用户注册成功:", email);
+    logger.info({ email }, "[Auth Action] 用户注册成功");
     return { success: true };
   } catch (error: any) {
-    console.error("[Auth Action] 注册错误:", error);
+    logger.error({ err: error, email }, "[Auth Action] 注册错误");
     return { error: error.message || "注册失败，请稍后再试" };
   }
 }
@@ -49,8 +50,9 @@ export async function verifyAdminPassword(password: string) {
     await UserService.verifyUserPassword(session.user.email as string, password);
     return { success: true };
   } catch (error: any) {
-    console.error("[Auth Action] 密码对比校验失败:", error);
+    logger.error({ err: error, email: session.user.email }, "[Auth Action] 密码对比校验失败");
     return { error: error.message || "验证失败" };
   }
 }
+
 

@@ -1,8 +1,10 @@
+// FILE: src/lib/actions/course.ts
 "use server";
 
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { CourseService, type CreateCourseInput, type UpdateCourseInput } from "@/lib/services/course.service";
+import { logger } from "@/lib/logger";
 
 /**
  * 课程相关 Server Actions
@@ -31,7 +33,7 @@ export async function createCourse(data: CreateCourseInput) {
 
     return { success: true, courseId: course.id };
   } catch (error: any) {
-    console.error("Action Error (createCourse):", error);
+    logger.error({ err: error, data }, "Action Error (createCourse)");
     // 向前端透传 Service 层的具体错误信息
     return { error: error.message || "保存课程失败" };
   }
@@ -57,7 +59,7 @@ export async function updateCourse(id: string, data: UpdateCourseInput) {
 
     return { success: true };
   } catch (error: any) {
-    console.error("Action Error (updateCourse):", error);
+    logger.error({ err: error, id, data }, "Action Error (updateCourse)");
     return { error: error.message || "更新失败" };
   }
 }
@@ -81,7 +83,8 @@ export async function deleteCourse(id: string) {
 
     return { success: true };
   } catch (error: any) {
-    console.error("Action Error (deleteCourse):", error);
+    logger.error({ err: error, id }, "Action Error (deleteCourse)");
     return { error: error.message || "删除失败" };
   }
 }
+

@@ -1,10 +1,11 @@
+// FILE: src/app/api/admin/upload/route.ts
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
-import ffmpeg from "fluent-ffmpeg";
 import { exec } from "child_process";
 import { promisify } from "util";
+import { logger } from "@/lib/logger";
 
 const execPromise = promisify(exec);
 
@@ -47,12 +48,12 @@ export async function POST(req: Request) {
       // -vframes 1: 取 1 帧
       // -q:v 2: 高质量控制
       const ffmpegCmd = `ffmpeg -i "${videoPath}" -ss 00:00:01 -vframes 1 -q:v 2 "${thumbnailPath}"`;
-      console.log(`[FFmpeg] 执行命令: ${ffmpegCmd}`);
+      logger.info({ ffmpegCmd }, "[FFmpeg] 执行命令");
       
       await execPromise(ffmpegCmd);
-      console.log(`[FFmpeg] 封面提取成功: ${thumbnailUrl}`);
+      logger.info({ thumbnailUrl }, "[FFmpeg] 封面提取成功");
     } catch (ffmpegErr) {
-      console.error("[FFmpeg] 封面提取失败:", ffmpegErr);
+      logger.error({ err: ffmpegErr, videoPath }, "[FFmpeg] 封面提取失败");
       // 封面失败不应中断视频上传，可以返回空封面
     }
 
@@ -64,7 +65,7 @@ export async function POST(req: Request) {
     });
 
   } catch (error) {
-    console.error("Upload & Processing error:", error);
+    logger.error({ err: error }, "Upload & Processing error");
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

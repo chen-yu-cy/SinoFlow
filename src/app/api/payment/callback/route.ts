@@ -1,5 +1,7 @@
+// FILE: src/app/api/payment/callback/route.ts
 import { NextResponse } from "next/server";
 import { OrderService } from "@/lib/services/order.service";
+import { logger } from "@/lib/logger";
 
 /**
  * @openapi
@@ -15,14 +17,14 @@ import { OrderService } from "@/lib/services/order.service";
 export async function POST(req: Request) {
   try {
     const rawBody = await req.text();
-    console.log("收到支付平台回调 (Webhook):", rawBody);
+    logger.info({ rawBody }, "收到支付平台回调 (Webhook)");
 
     // 逻辑：验证签名 -> 解析数据 -> 调用 Service
     // await OrderService.completeOrder(parsedOrderId, parsedPaymentId);
 
     return NextResponse.json({ message: "Webhook received" });
   } catch (error) {
-    console.error("Payment callback error:", error);
+    logger.error({ err: error }, "Payment callback error");
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
@@ -37,8 +39,10 @@ export async function GET(req: Request) {
   }
 
   try {
+    const paymentId = `MOCK_PAY_${Date.now()}`;
     // 调用业务服务层完成订单状态更新
-    await OrderService.completeOrder(orderId, `MOCK_PAY_${Date.now()}`);
+    await OrderService.completeOrder(orderId, paymentId);
+    logger.info({ orderId, paymentId }, "本地模拟支付回调成功，已更新订单状态");
 
     return new Response(`
       <html lang="zh-CN">
@@ -54,7 +58,7 @@ export async function GET(req: Request) {
       </html>
     `, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
   } catch (error) {
-    console.error("Callback API Error:", error);
+    logger.error({ err: error, orderId }, "Callback API Error");
     return NextResponse.json({ error: "Failed to update order" }, { status: 500 });
   }
 }
