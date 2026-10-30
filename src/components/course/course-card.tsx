@@ -94,31 +94,33 @@ const CourseCard = ({ id, title, description, price, level, duration, thumbnail,
           </Link>
         )}
 
-        {/* Thumbnail */}
-        <div style={{
-          width: "240px",
-          height: "135px",
-          background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
-          borderRadius: "8px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#adb5bd",
-          fontSize: "0.8rem",
-          flexShrink: 0,
-          border: "1px solid #eee",
-          overflow: "hidden"
-        }}>
-          {thumbnail ? (
-            <img src={thumbnail} alt={title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          ) : (
-            <>
-              <BookOpen size={32} strokeWidth={1} style={{ marginBottom: "0.5rem" }} />
-              <div>{t.noThumbnail}</div>
-            </>
-          )}
-        </div>
+        {/* Thumbnail Link */}
+        <Link href={`/courses/${id}`} style={{ display: "block", textDecoration: "none", flexShrink: 0 }}>
+          <div style={{
+            width: "240px",
+            height: "135px",
+            background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+            borderRadius: "8px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#adb5bd",
+            fontSize: "0.8rem",
+            border: "1px solid #eee",
+            overflow: "hidden",
+            cursor: "pointer"
+          }}>
+            {thumbnail ? (
+              <img src={thumbnail} alt={title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            ) : (
+              <>
+                <BookOpen size={32} strokeWidth={1} style={{ marginBottom: "0.5rem" }} />
+                <div>{t.noThumbnail}</div>
+              </>
+            )}
+          </div>
+        </Link>
 
         <div style={{ flex: 1 }}>
           <div style={{ display: "flex", gap: "1rem", marginBottom: "0.75rem" }}>
@@ -175,29 +177,32 @@ const CourseCard = ({ id, title, description, price, level, duration, thumbnail,
         </Link>
       )}
 
-      {/* Thumbnail */}
-      <div style={{
-        width: "100%",
-        aspectRatio: "16/9",
-        background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "#adb5bd",
-        fontSize: "0.9rem",
-        overflow: "hidden",
-        borderBottom: "1px solid #f1f3f5"
-      }}>
-        {thumbnail ? (
-          <img src={thumbnail} alt={title} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.5s" }} className="card-image" />
-        ) : (
-          <>
-            <BookOpen size={40} strokeWidth={1} style={{ marginBottom: "0.5rem" }} />
-            <div>{t.noThumbnail}</div>
-          </>
-        )}
-      </div>
+      {/* Thumbnail Link */}
+      <Link href={`/courses/${id}`} style={{ display: "block", textDecoration: "none" }}>
+        <div style={{
+          width: "100%",
+          aspectRatio: "16/9",
+          background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#adb5bd",
+          fontSize: "0.9rem",
+          overflow: "hidden",
+          borderBottom: "1px solid #f1f3f5",
+          cursor: "pointer"
+        }}>
+          {thumbnail ? (
+            <img src={thumbnail} alt={title} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.5s" }} className="card-image" />
+          ) : (
+            <>
+              <BookOpen size={40} strokeWidth={1} style={{ marginBottom: "0.5rem" }} />
+              <div>{t.noThumbnail}</div>
+            </>
+          )}
+        </div>
+      </Link>
 
       <div style={{ padding: "1.5rem", flex: 1, display: "flex", flexDirection: "column" }}>
         <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1rem" }}>
