@@ -200,9 +200,9 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
   const progressPercentage = Math.round((completedLessonsCount / (course.lessons.length || 1)) * 100);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '3rem', alignItems: 'start' }}>
+    <div className="lesson-content-grid">
       {/* Main Content: Video and Description */}
-      <section>
+      <section style={{ minInlineSize: 0 }}>
         <div ref={videoWrapperRef} style={{ marginBottom: "2rem" }}>
           {canViewCurrentLesson ? (
             <VideoPlayer 
@@ -236,7 +236,7 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
           </div>
         )}
 
-        <h1 style={{ fontSize: "2.5rem", marginBottom: "1.5rem", fontWeight: "800" }}>
+        <h1 style={{ fontSize: "clamp(1.5rem, 4vw, 2.5rem)", marginBottom: "1.5rem", fontWeight: "800" }}>
           {canViewCurrentLesson ? (currentLesson?.title || course.title) : course.title}
         </h1>
         

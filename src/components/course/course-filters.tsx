@@ -66,7 +66,7 @@ const CourseFilters = ({ levels, placeholder, filterLabel, resetLabel }: CourseF
     }}>
       <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
         {/* Search Input */}
-        <div style={{ flex: 1, minWidth: "300px", position: "relative" }}>
+        <div style={{ flex: "1 1 220px", minInlineSize: 0, position: "relative" }}>
           <Search size={18} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "#adb5bd" }} />
           <input 
             type="text" 
@@ -91,7 +91,7 @@ const CourseFilters = ({ levels, placeholder, filterLabel, resetLabel }: CourseF
         </div>
 
         {/* Level Selector */}
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+        <div className="course-filter-pills">
           <div style={{ color: "#6c757d", fontSize: "0.9rem", marginRight: "0.5rem", display: "flex", alignItems: "center", gap: "0.3rem" }}>
             <Filter size={16} /> {filterLabel}
           </div>

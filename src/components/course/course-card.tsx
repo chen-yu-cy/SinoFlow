@@ -83,44 +83,19 @@ const CourseCard = ({ id, title, description, price, level, duration, isFree, th
 
   if (layout === "list") {
     return (
-      <div className="course-card" style={{
-        background: "#fff",
-        borderRadius: "12px",
-        overflow: "hidden",
-        boxShadow: "var(--card-shadow)",
-        display: "flex",
-        border: "1px solid var(--border-color)",
-        padding: "1.25rem",
-        gap: "2rem",
-        alignItems: "center",
-        position: "relative"
-      }}>
+      <div className="course-card course-card-list">
         {/* Admin Quick Edit Floating Icon */}
         {isAdmin && (
-          <Link href={`/admin/courses/${id}/edit`} target="_blank" style={{ position: "absolute", top: "1rem", right: "1rem", color: "#adb5bd", transition: "color 0.2s" }} title="快速编辑">
+          <Link href={`/admin/courses/${id}/edit`} target="_blank" style={{ position: "absolute", top: "1rem", right: "1rem", color: "#adb5bd", transition: "color 0.2s", zIndex: 2 }} title="快速编辑">
             <Edit size={18} />
           </Link>
         )}
 
         {/* Thumbnail Link */}
         <Link href={`/courses/${id}`} style={{ display: "block", textDecoration: "none", flexShrink: 0 }}>
-          <div style={{
-            width: "240px",
-            height: "135px",
-            background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
-            borderRadius: "8px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#adb5bd",
-            fontSize: "0.8rem",
-            border: "1px solid #eee",
-            overflow: "hidden",
-            cursor: "pointer"
-          }}>
+          <div className="course-card-list-thumb">
             {thumbnail ? (
-              <img src={thumbnail} alt={title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <img src={thumbnail} alt={title} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
             ) : (
               <>
                 <BookOpen size={32} strokeWidth={1} style={{ marginBottom: "0.5rem" }} />
@@ -130,8 +105,8 @@ const CourseCard = ({ id, title, description, price, level, duration, isFree, th
           </div>
         </Link>
 
-        <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", gap: "1rem", marginBottom: "0.75rem" }}>
+        <div className="course-card-list-body">
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginBottom: "0.75rem" }}>
             <span style={{ fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "0.3rem", padding: "0.2rem 0.6rem", background: levelBg, borderRadius: "4px", color: levelColor, fontWeight: 600 }}>
               <BarChart size={14} /> {getLevelLabel()}
             </span>
@@ -139,26 +114,18 @@ const CourseCard = ({ id, title, description, price, level, duration, isFree, th
               <Clock size={14} /> {getDurationLabel()}
             </span>
           </div>
-          <h4 style={{ margin: "0 0 0.75rem 0", fontSize: "1.3rem", color: "var(--foreground-rgb)", fontWeight: "700" }}>{title}</h4>
+          <h4 style={{ margin: "0 0 0.75rem 0", fontSize: "clamp(1.1rem, 3vw, 1.3rem)", color: "var(--foreground-rgb)", fontWeight: "700" }}>{title}</h4>
           <p style={{ margin: "0", fontSize: "0.95rem", color: "#6c757d", lineHeight: "1.6" }}>{description}</p>
         </div>
 
-        <div style={{ 
-          width: "200px", 
-          borderLeft: "1px solid #eee", 
-          paddingLeft: "2rem",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-          gap: "1.25rem"
-        }}>
+        <div className="course-card-list-cta">
           <div>
             <div style={{ fontSize: "0.8rem", color: "#adb5bd", marginBottom: "0.2rem" }}>{t.priceLabel}</div>
             <span style={{ fontSize: "1.75rem", fontWeight: "800", color: "var(--primary)" }}>
               {isFree ? (t as any).free || "免费" : `¥${price.toFixed(2)}`}
             </span>
           </div>
-          <Link href={`/courses/${id}`} style={{ width: "100%" }}>
+          <Link href={`/courses/${id}`} style={{ minWidth: "140px", flex: "1 1 auto" }}>
             <button className="btn-primary" style={{ width: "100%", padding: "0.75rem", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
               {t.learnNow} <ChevronRight size={18} />
             </button>

@@ -781,6 +781,7 @@ const VideoPlayer = ({
               </button>
               <input
                 type="range"
+                className="video-volume-slider"
                 min={0}
                 max={1}
                 step={0.05}
