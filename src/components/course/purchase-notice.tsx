@@ -1,5 +1,7 @@
+// FILE: src/components/course/purchase-notice.tsx
+"use client";
+
 import React from "react";
-import Link from "next/link";
 
 interface PurchaseNoticeProps {
   price: number;
@@ -9,14 +11,70 @@ interface PurchaseNoticeProps {
     unlockAll?: string;
     paymentSupport?: string;
   };
+  onUnlockClick?: () => void;
 }
 
-const PurchaseNotice = ({ price, labels }: PurchaseNoticeProps) => {
+let activeScrollId = 0;
+
+export const scrollIntoViewAsync = (
+  element: Element,
+  options: ScrollIntoViewOptions,
+  scroller: Window = window
+): Promise<void> => {
+  const result = element.scrollIntoView(options) as unknown;
+  if (result instanceof Promise) {
+    return result as Promise<void>;
+  }
+  return new Promise((resolve) => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const finish = () => {
+      clearTimeout(timeoutId);
+      scroller.removeEventListener("scrollend", finish);
+      scroller.removeEventListener("scroll", onScroll);
+      resolve();
+    };
+    const onScroll = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(finish, 100);
+    };
+    scroller.addEventListener("scrollend", finish, { once: true });
+    scroller.addEventListener("scroll", onScroll, { passive: true });
+    timeoutId = setTimeout(finish, 100);
+  });
+};
+
+export const scrollToPurchaseSection = async (): Promise<void> => {
+  if (typeof document === "undefined") return;
+  const purchaseSection = document.getElementById("purchase-section");
+  if (!purchaseSection) return;
+
+  const scrollId = ++activeScrollId;
+  await scrollIntoViewAsync(purchaseSection, { behavior: "smooth", block: "center" });
+  if (scrollId !== activeScrollId) return;
+
+  const buyButton = purchaseSection.querySelector("button") as HTMLButtonElement | null;
+  buyButton?.focus({ preventScroll: true });
+
+  purchaseSection.style.boxShadow = "0 0 0 3px var(--primary), 0 12px 30px rgba(200, 16, 46, 0.25)";
+  setTimeout(() => {
+    purchaseSection.style.boxShadow = "none";
+  }, 1600);
+};
+
+const PurchaseNotice = ({ price, labels, onUnlockClick }: PurchaseNoticeProps) => {
   const t = labels || {
     subscribersOnly: "此内容仅限订阅学员观看",
     unlockDescription: "加入我们的学习计划，解锁完整的 HLS 加密课程视频，获得权威报社为您准备的专业教材。",
     unlockAll: "立即解锁全部内容",
     paymentSupport: "支持微信支付 / 支付宝"
+  };
+
+  const handleUnlock = () => {
+    if (onUnlockClick) {
+      onUnlockClick();
+    } else {
+      void scrollToPurchaseSection();
+    }
   };
 
   return (
@@ -57,7 +115,12 @@ const PurchaseNotice = ({ price, labels }: PurchaseNoticeProps) => {
       
       <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
         <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--accent)' }}>¥{price.toFixed(2)}</span>
-        <button className="btn-primary" style={{ padding: '0.8rem 2.5rem', fontSize: '1.1rem' }}>
+        <button
+          type="button"
+          onClick={handleUnlock}
+          className="btn-primary"
+          style={{ padding: '0.8rem 2.5rem', fontSize: '1.1rem', cursor: 'pointer' }}
+        >
           {t.unlockAll}
         </button>
       </div>

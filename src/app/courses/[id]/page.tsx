@@ -79,7 +79,7 @@ const CourseDetailPage = async ({ params }: CourseDetailPageProps) => {
       
       {/* Purchase Banner (Show only if not purchased) */}
       {!hasFullAccess && (
-        <section style={{ marginTop: '2rem' }}>
+        <section id="purchase-section" style={{ marginTop: '2rem', borderRadius: '12px', transition: 'box-shadow 0.35s ease' }}>
           <div style={{ padding: '2rem', background: 'var(--primary-light)', borderRadius: '12px', border: '1px solid rgba(200, 16, 46, 0.1)' }}>
             <h3 style={{ marginBottom: "1.5rem" }}>{t("courseDetail.getAccess") || "获取完整课程权限"}</h3>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>

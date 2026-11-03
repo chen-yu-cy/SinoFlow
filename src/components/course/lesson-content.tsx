@@ -1,9 +1,9 @@
 // FILE: src/components/course/lesson-content.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
-import VideoPlayer from "@/components/course/video-player";
-import PurchaseNotice from "@/components/course/purchase-notice";
+import React, { useState, useEffect, useRef } from "react";
+import VideoPlayer, { VideoNoteMarker } from "@/components/course/video-player";
+import PurchaseNotice, { scrollToPurchaseSection, scrollIntoViewAsync } from "@/components/course/purchase-notice";
 import { PlayCircle, Lock, Info, BookText, FileText, Download, PenTool } from "lucide-react";
 import { toggleLessonProgressAction } from "@/lib/actions/progress";
 import { getNotesAction, createNoteAction, deleteNoteAction } from "@/lib/actions/note";
@@ -62,12 +62,22 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
   
   // 笔记相关状态
   const [activeTab, setActiveTab] = useState<"intro" | "notes">("intro");
-  const [notes, setNotes] = useState<any[]>([]);
+  const [notes, setNotes] = useState<VideoNoteMarker[]>([]);
   const [noteContent, setNoteContent] = useState("");
   const [currentVideoTime, setCurrentVideoTime] = useState(0);
   const [seekToTime, setSeekToTime] = useState<number | null>(null);
+  const [seekTrigger, setSeekTrigger] = useState(0);
+  const videoWrapperRef = useRef<HTMLDivElement>(null);
 
   const currentLesson = course.lessons[currentLessonIndex];
+
+  const handleNoteJump = async (timestamp: number) => {
+    setSeekToTime(timestamp);
+    setSeekTrigger((prev) => prev + 1);
+    if (videoWrapperRef.current) {
+      await scrollIntoViewAsync(videoWrapperRef.current, { behavior: "smooth", block: "center" });
+    }
+  };
 
   // 监听课时切换，重新加载笔记
   useEffect(() => {
@@ -193,7 +203,7 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '3rem', alignItems: 'start' }}>
       {/* Main Content: Video and Description */}
       <section>
-        <div style={{ marginBottom: "2rem" }}>
+        <div ref={videoWrapperRef} style={{ marginBottom: "2rem" }}>
           {canViewCurrentLesson ? (
             <VideoPlayer 
               url={currentLesson?.videoUrl || ""} 
@@ -201,8 +211,10 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
               onEnded={handleVideoEnded}
               isLimitedPreview={!hasFullAccess && currentLesson?.isPreview}
               seekToTime={seekToTime}
+              seekTrigger={seekTrigger}
               onSeekProcessed={() => setSeekToTime(null)}
               onTimeUpdate={(time) => setCurrentVideoTime(time)}
+              notes={notes}
             />
           ) : (
             <PurchaseNotice 
@@ -298,11 +310,9 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                   购买该课程后即可解锁时间戳记笔记特权！支持在播放至任意时间一键截取记录，点击时间戳快速定位跳转视频，为您定制最高效的复习通路。
                 </p>
                 <button 
+                  type="button"
                   onClick={() => {
-                    const purchaseSection = document.getElementById("purchase-section") || document.querySelector("button.btn-primary");
-                    if (purchaseSection) {
-                      purchaseSection.scrollIntoView({ behavior: "smooth" });
-                    }
+                    void scrollToPurchaseSection();
                   }}
                   className="btn-primary" 
                   style={{ 
@@ -310,7 +320,8 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                     borderRadius: "20px", 
                     fontSize: "0.9rem",
                     fontWeight: "600",
-                    boxShadow: "0 6px 15px rgba(200, 16, 46, 0.25)"
+                    boxShadow: "0 6px 15px rgba(200, 16, 46, 0.25)",
+                    cursor: "pointer"
                   }}
                 >
                   立即购买解锁完整特权
@@ -380,6 +391,18 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                     {notes.map((note) => (
                       <div 
                         key={note.id}
+                        onClick={() => {
+                          void handleNoteJump(note.timestamp);
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = "var(--primary)";
+                          e.currentTarget.style.boxShadow = "0 4px 12px rgba(200, 16, 46, 0.08)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = "#e9ecef";
+                          e.currentTarget.style.boxShadow = "none";
+                        }}
+                        title="点击跳转到对应视频时间点播放"
                         style={{
                           padding: "1rem 1.25rem",
                           borderRadius: "8px",
@@ -388,42 +411,49 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "flex-start",
-                          gap: "1.5rem"
+                          gap: "1.5rem",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease"
                         }}
                       >
                         <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", flex: 1 }}>
-                          <span 
-                            onClick={() => setSeekToTime(note.timestamp)}
-                            style={{
-                              fontSize: "0.85rem",
-                              color: "var(--primary)",
-                              fontWeight: "700",
-                              fontFamily: "monospace",
-                              background: "rgba(200, 16, 46, 0.06)",
-                              padding: "0.2rem 0.6rem",
-                              borderRadius: "4px",
-                              alignSelf: "flex-start",
-                              cursor: "pointer",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "0.25rem"
-                            }}
-                            title="点击跳转到视频时间"
-                          >
-                            ⏱️ {formatTime(note.timestamp)}
-                          </span>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                            <span 
+                              style={{
+                                fontSize: "0.85rem",
+                                color: "var(--primary)",
+                                fontWeight: "700",
+                                fontFamily: "monospace",
+                                background: "rgba(200, 16, 46, 0.08)",
+                                padding: "0.2rem 0.65rem",
+                                borderRadius: "4px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.3rem"
+                              }}
+                            >
+                              ⏱️ {formatTime(note.timestamp)}
+                            </span>
+                            <span style={{ fontSize: "0.78rem", color: "#868e96", fontWeight: "600" }}>
+                              ▶ 点击跳转播放
+                            </span>
+                          </div>
                           <p style={{ margin: 0, fontSize: "0.95rem", color: "#343a40", whiteSpace: "pre-wrap", lineHeight: "1.6" }}>
                             {note.content}
                           </p>
                         </div>
                         <button 
-                          onClick={() => handleDeleteNote(note.id)}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void handleDeleteNote(note.id);
+                          }}
                           style={{
                             background: "none",
                             border: "none",
                             color: "#adb5bd",
                             cursor: "pointer",
-                            padding: 0,
+                            padding: "0.25rem 0.5rem",
                             fontSize: "0.85rem",
                             fontWeight: "600",
                             transition: "color 0.2s"
