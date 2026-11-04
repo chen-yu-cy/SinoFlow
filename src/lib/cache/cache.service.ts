@@ -87,6 +87,7 @@ export const CacheService = {
     fetcher: () => Promise<T>,
     nullTtlSeconds: number = 30
   ): Promise<T> {
+    const startTime = performance.now();
     const client = getRedisClient();
     const redisReady = client !== null && isRedisConnected();
 
@@ -94,10 +95,13 @@ export const CacheService = {
       try {
         const raw = await client.get(key);
         if (raw === NULL_CACHE_SENTINEL) {
-          // 命中了防穿透空值哨兵，直接返回 null，绝不穿透查 DB
+          const duration = (performance.now() - startTime).toFixed(2);
+          logger.debug({ key, durationMs: `${duration}ms`, status: "SENTINEL_HIT" }, "[Cache] 命中防穿透空值哨兵");
           return null as unknown as T;
         }
         if (raw !== null && raw !== undefined) {
+          const duration = (performance.now() - startTime).toFixed(2);
+          logger.debug({ key, durationMs: `${duration}ms`, status: "CACHE_HIT" }, "[Cache] 命中 Redis 缓存直出");
           return JSON.parse(raw) as T;
         }
       } catch (error: unknown) {
@@ -108,6 +112,8 @@ export const CacheService = {
 
     // 缓存未命中或 Redis 断开，执行业务数据库查询
     const freshData = await fetcher();
+    const duration = (performance.now() - startTime).toFixed(2);
+    logger.info({ key, durationMs: `${duration}ms`, status: "CACHE_MISS" }, "[Cache] 缓存未命中，回源查 DB 并回填");
 
     // 异步回填缓存，不阻塞主业务响应
     if (redisReady) {

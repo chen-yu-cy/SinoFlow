@@ -1,3 +1,4 @@
+// FILE: src/app/courses/[id]/page.tsx
 import React from "react";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/db/client";
@@ -6,6 +7,7 @@ import PurchaseButton from "@/components/course/purchase-button";
 import { OrderStatus } from "@prisma/client";
 import LessonContent from "@/components/course/lesson-content";
 import { getTranslation } from "@/lib/i18n";
+import { CourseService } from "@/lib/services/course.service";
 
 interface CourseDetailPageProps {
   params: Promise<{ id: string }>;
@@ -30,13 +32,7 @@ const CourseDetailPage = async ({ params }: CourseDetailPageProps) => {
     paymentSupport: t("courseDetail.paymentSupport") || "支持微信支付 / 支付宝",
   };
 
-  const course = await prisma.course.findUnique({
-    where: { id },
-    include: { 
-      lessons: { orderBy: { order: 'asc' } },
-      resources: true
-    }
-  });
+  const course = await CourseService.getCourseById(id);
 
   if (!course) {
     notFound();
