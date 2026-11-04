@@ -9,6 +9,7 @@ We are building an online Chinese Language Learning Platform for a newspaper org
 - If code is truncated due to length limits, stop and ask me to type "continue".
 - Before performing any `git commit`, ALWAYS provide a detailed summary of the changes and obtain explicit user approval.
 - Whenever a `git commit` is requested, ALWAYS evaluate if new unit tests are required for the changes or if existing tests need to be updated, and propose these test changes before finalizing the commit.
+- **PR Review & Feature 深度审查规范**: 在特性分支开发完成并准备提交 PR Review 时，严禁直接询问是否合并。必须站在资深全栈架构师角度进行深度推演和边界审查（包括安全性、边界限制、格式校验、关联页面一致性、极端体验等），主动向用户列出“可进一步优化的潜在点”，与用户充分探讨、征询意见并按需完善后，方可进行最终的 `main` 分支 Merge。
 - ALWAYS run `npx prisma db push` and `npx prisma generate` immediately after modifying `prisma/schema.prisma` to ensure database and type synchronization.
 
 # 语言规范 & 编码标准 (Coding Specifications)
