@@ -70,3 +70,7 @@ src/
   - *目标*: 将视频和封面等媒体资源从本地 `public/uploads` 迁移至云端私有对象存储 (如阿里云 OSS / 腾讯云 COS)，并开启 CDN URL 鉴权防盗链。
   - *实现方案*: 在 Next.js 服务端校验登录及购买状态后，使用共享私钥实时计算并生成带有时效性签名参数 (如 `auth_key`) 的视频播放链接，由 CDN 边缘节点验证合法性并完成内容分发。
   - *价值*: 极大降低服务器磁盘与带宽压力，有效防止视频资源被非法抓包、共享和盗刷。
+- [ ] **运维与通知**: Watchtower 自动部署集成 Telegram 通知。
+  - *目标*: 当 Watchtower 检测到 GHCR 新镜像并完成自动更新重启后，通过 Shoutrrr 自动向指定的 Telegram 机器人/群组发送部署通知。
+  - *配置项*: 在 `docker-compose.yml` 中支持 `WATCHTOWER_NOTIFICATIONS=shoutrrr` 与 `WATCHTOWER_NOTIFICATION_URL=telegram://<bot-token>@telegram/?channels=<chat-id>`。
+  - *价值*: 团队和开发者无需手动登录服务器或轮询查看 health 接口，即可第一时间获知生产环境的更新状态。
