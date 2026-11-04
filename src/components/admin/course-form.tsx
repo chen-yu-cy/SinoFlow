@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Save, Plus, Eye, EyeOff, Trash2, Video, CheckCircle2, Image as ImageIcon, Loader2 } from "lucide-react";
+import { Save, Plus, Eye, EyeOff, Trash2, Video, CheckCircle2, Image as ImageIcon, Loader2, ExternalLink, Copy, Check, Link2 } from "lucide-react";
 import { createCourse, updateCourse } from "@/lib/actions/course";
 import { extractVideoMetadataAndThumbnail, uploadFileViaPresignedUrl } from "@/lib/storage/client-upload";
 
@@ -54,8 +54,21 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
   const [showFreeConfirm, setShowFreeConfirm] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<Record<number, number>>({});
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+
+  const copyToClipboard = async (text: string, index: number) => {
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        await navigator.clipboard.writeText(text);
+        setCopiedIndex(index);
+        setTimeout(() => setCopiedIndex(null), 2000);
+      }
+    } catch (err) {
+      console.error("复制视频链接失败:", err);
+    }
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = e.target.files?.[0];
@@ -407,10 +420,10 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
 
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           {/* Table Header */}
-          <div style={{ display: "grid", gridTemplateColumns: "40px 1fr 1.5fr 120px 40px", gap: "1.5rem", padding: "0 1.5rem", color: "#adb5bd", fontSize: "0.75rem", fontWeight: "700" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "35px 1.2fr 2fr 100px 35px", gap: "1.5rem", padding: "0 1.5rem", color: "#adb5bd", fontSize: "0.75rem", fontWeight: "700" }}>
             <span>#</span>
             <span>章节标题</span>
-            <span>视频资源与封面</span>
+            <span>视频资源与直链</span>
             <span style={{ textAlign: "center" }}>权限设置</span>
             <span></span>
           </div>
@@ -418,7 +431,7 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
           {lessons.map((lesson, index) => (
             <div key={index} style={{ 
               display: "grid", 
-              gridTemplateColumns: "40px 1fr 1.5fr 120px 40px", 
+              gridTemplateColumns: "35px 1.2fr 2fr 100px 35px", 
               gap: "1.5rem", 
               alignItems: "center", 
               padding: "1.25rem 1.5rem", 
@@ -442,59 +455,150 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
                 required 
               />
 
-              <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                <div style={{ position: "relative", flexShrink: 0 }}>
-                  <button
-                    type="button"
-                    disabled={uploading}
-                    style={{
-                      padding: "0.5rem 1rem",
-                      border: "1px solid #ddd",
-                      background: uploadProgress[index] !== undefined ? "var(--primary-light, #e7f5ff)" : "#f8f9fa",
-                      borderRadius: "8px",
-                      fontSize: "0.85rem",
-                      cursor: uploading ? "not-allowed" : "pointer",
-                      fontWeight: "600",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.3rem",
-                    }}
-                  >
-                    {uploadProgress[index] !== undefined ? (
-                      <>
-                        <Loader2 size={14} className="animate-spin" />
-                        上传中 {uploadProgress[index]}%
-                      </>
-                    ) : (
-                      "选择视频"
-                    )}
-                  </button>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", width: "100%", minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap" }}>
+                  <div style={{ position: "relative", flexShrink: 0 }}>
+                    <button
+                      type="button"
+                      disabled={uploading}
+                      style={{
+                        padding: "0.4rem 0.8rem",
+                        border: "1px solid #ddd",
+                        background: uploadProgress[index] !== undefined ? "var(--primary-light, #e7f5ff)" : "#f8f9fa",
+                        borderRadius: "6px",
+                        fontSize: "0.8rem",
+                        cursor: uploading ? "not-allowed" : "pointer",
+                        fontWeight: "600",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.3rem",
+                      }}
+                    >
+                      {uploadProgress[index] !== undefined ? (
+                        <>
+                          <Loader2 size={13} className="animate-spin" />
+                          上传中 {uploadProgress[index]}%
+                        </>
+                      ) : (
+                        "选择视频"
+                      )}
+                    </button>
+                    <input
+                      type="file"
+                      accept="video/*"
+                      disabled={uploading}
+                      onChange={(e) => handleFileUpload(e, index)}
+                      style={{ position: "absolute", top: 0, left: 0, opacity: 0, width: "100%", height: "100%", cursor: uploading ? "not-allowed" : "pointer" }}
+                    />
+                  </div>
+
+                  {lesson.videoUrl && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", flexWrap: "wrap" }}>
+                      <span style={{ color: "var(--success)", display: "flex", alignItems: "center", gap: "0.2rem", fontSize: "0.75rem", fontWeight: "700" }}>
+                        <CheckCircle2 size={14} /> 已就绪
+                      </span>
+
+                      {/* 复制链接 */}
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(lesson.videoUrl, index)}
+                        title="复制视频直链"
+                        style={{
+                          background: "#f1f3f5",
+                          border: "1px solid #ced4da",
+                          borderRadius: "4px",
+                          padding: "0.2rem 0.45rem",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.25rem",
+                          fontSize: "0.7rem",
+                          fontWeight: "600",
+                          color: "#495057",
+                        }}
+                      >
+                        {copiedIndex === index ? (
+                          <>
+                            <Check size={12} color="var(--success)" /> 已复制
+                          </>
+                        ) : (
+                          <>
+                            <Copy size={12} /> 复制
+                          </>
+                        )}
+                      </button>
+
+                      {/* 新标签页预览播放 */}
+                      <a
+                        href={lesson.videoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="在新标签页直接播放预览此视频"
+                        style={{
+                          background: "#e7f5ff",
+                          border: "1px solid #a5d8ff",
+                          borderRadius: "4px",
+                          padding: "0.2rem 0.45rem",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.25rem",
+                          fontSize: "0.7rem",
+                          fontWeight: "600",
+                          color: "#1971c2",
+                          textDecoration: "none",
+                        }}
+                      >
+                        <ExternalLink size={12} /> 预览
+                      </a>
+
+                      {/* 设为主封面 */}
+                      {lesson.thumbnail && (
+                        <button
+                          type="button"
+                          onClick={() => setThumbnail(lesson.thumbnail!)}
+                          style={{
+                            background: "var(--success-light)",
+                            color: "var(--success)",
+                            border: "none",
+                            padding: "0.2rem 0.45rem",
+                            borderRadius: "4px",
+                            fontSize: "0.7rem",
+                            fontWeight: "700",
+                            cursor: "pointer",
+                          }}
+                          title="使用此章节的截图作为课程主封面"
+                        >
+                          设为封面
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* 视频真实链接展示与支持手动粘贴编辑 */}
+                <div style={{ display: "flex", alignItems: "center", gap: "0.3rem", width: "100%" }}>
                   <input
-                    type="file"
-                    accept="video/*"
-                    disabled={uploading}
-                    onChange={(e) => handleFileUpload(e, index)}
-                    style={{ position: "absolute", top: 0, left: 0, opacity: 0, width: "100%", height: "100%", cursor: uploading ? "not-allowed" : "pointer" }}
+                    type="text"
+                    value={lesson.videoUrl}
+                    onChange={(e) => {
+                      const newLessons = [...lessons];
+                      newLessons[index].videoUrl = e.target.value;
+                      setLessons(newLessons);
+                    }}
+                    placeholder="可在此粘贴或修改视频直链 (S3 / MinIO / 本地)"
+                    title={lesson.videoUrl || "暂未关联视频"}
+                    style={{
+                      width: "100%",
+                      fontSize: "0.75rem",
+                      padding: "0.35rem 0.5rem",
+                      border: "1px solid #e9ecef",
+                      borderRadius: "6px",
+                      background: lesson.videoUrl ? "#f8f9fa" : "#fff",
+                      color: lesson.videoUrl ? "#495057" : "#adb5bd",
+                      fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+                    }}
                   />
                 </div>
-                
-                {lesson.videoUrl && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", minWidth: 0 }}>
-                    <div style={{ color: "var(--success)", display: "flex", alignItems: "center", gap: "0.3rem", fontSize: "0.8rem", fontWeight: "700" }}>
-                      <CheckCircle2 size={16} /> 已就绪
-                    </div>
-                    {lesson.thumbnail && (
-                      <button 
-                        type="button" 
-                        onClick={() => setThumbnail(lesson.thumbnail!)}
-                        style={{ background: "var(--success-light)", color: "var(--success)", border: "none", padding: "0.2rem 0.5rem", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "700", cursor: "pointer" }}
-                        title="使用此章节的截图作为课程主封面"
-                      >
-                        设为课程主封面
-                      </button>
-                    )}
-                  </div>
-                )}
               </div>
 
               <div style={{ display: "flex", justifyContent: "center" }}>
