@@ -66,6 +66,29 @@ describe("POST /api/admin/upload/presign (预签名直传接口)", () => {
     expect(json.error).toContain("缺少有效的文件名参数");
   });
 
+  it("当上传不被支持的视频格式或超限时，应返回 400 Bad Request 且不生成预签名地址", async () => {
+    vi.mocked(auth).mockResolvedValueOnce({
+      user: { id: "admin-1", role: "ADMIN" },
+    } as any);
+
+    const req = new Request("http://localhost/api/admin/upload/presign", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        filename: "video.avi",
+        contentType: "video/x-msvideo",
+        folder: "videos",
+      }),
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(400);
+    const json = await res.json();
+    expect(json.success).toBe(false);
+    expect(json.error).toContain("格式不支持");
+    expect(StorageService.createPresignedUploadUrl).not.toHaveBeenCalled();
+  });
+
   it("当请求合法时，应调用 StorageService 并成功返回 200 及预签名地址", async () => {
     vi.mocked(auth).mockResolvedValueOnce({
       user: { id: "admin-1", role: "ADMIN" },

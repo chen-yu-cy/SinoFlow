@@ -5,6 +5,7 @@ import {
   GetObjectCommand,
   HeadBucketCommand,
   CreateBucketCommand,
+  PutBucketCorsCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import crypto from "crypto";
@@ -69,11 +70,14 @@ export const getS3Client = (): S3Client => {
   return cachedClient;
 };
 
+let bucketInitialized = false;
+
 /**
  * 重置客户端缓存 (主要供测试隔离使用)
  */
 export const resetS3Client = (): void => {
   cachedClient = null;
+  bucketInitialized = false;
 };
 
 /**
@@ -94,7 +98,38 @@ export const sanitizeFileName = (filename: string): string => {
  */
 export const StorageService = {
   /**
-   * 确保目标存储桶存在，如不存在则尝试自动创建 (特别适合 MinIO 本地快速启动)
+   * 确保存储桶配置了正确的 CORS 跨域规则，允许浏览器端直接发起 PUT/GET 请求
+   */
+  async configureBucketCors(): Promise<boolean> {
+    const client = getS3Client();
+    const config = getStorageConfig();
+
+    try {
+      await client.send(
+        new PutBucketCorsCommand({
+          Bucket: config.bucketName,
+          CORSConfiguration: {
+            CORSRules: [
+              {
+                AllowedHeaders: ["*"],
+                AllowedMethods: ["PUT", "GET", "HEAD", "POST"],
+                AllowedOrigins: ["*"],
+                ExposeHeaders: ["ETag"],
+                MaxAgeSeconds: 3000,
+              },
+            ],
+          },
+        })
+      );
+      return true;
+    } catch {
+      // 部分云环境如无 CORS 设置权限则优雅忽略，避免阻塞主流程
+      return false;
+    }
+  },
+
+  /**
+   * 确保目标存储桶存在，如不存在则尝试自动创建，并自动注入 CORS 跨域策略
    */
   async ensureBucketExists(): Promise<boolean> {
     const client = getS3Client();
@@ -102,17 +137,18 @@ export const StorageService = {
 
     try {
       await client.send(new HeadBucketCommand({ Bucket: config.bucketName }));
-      return true;
     } catch {
       try {
         await client.send(new CreateBucketCommand({ Bucket: config.bucketName }));
-        return true;
       } catch (createErr) {
         throw new Error(
           `无法创建或访问存储桶 [${config.bucketName}]: ${createErr instanceof Error ? createErr.message : String(createErr)}`
         );
       }
     }
+
+    await this.configureBucketCors();
+    return true;
   },
 
   /**
@@ -125,6 +161,16 @@ export const StorageService = {
 
     if (!filename || !contentType) {
       throw new Error("文件名与 MIME 内容类型不能为空");
+    }
+
+    // 首次签发时自动确保 Bucket 与 CORS 初始化
+    if (!bucketInitialized) {
+      try {
+        await this.ensureBucketExists();
+        bucketInitialized = true;
+      } catch {
+        // 允许静默尝试，即使无管理员建桶权限也不中断签发
+      }
     }
 
     const config = getStorageConfig();

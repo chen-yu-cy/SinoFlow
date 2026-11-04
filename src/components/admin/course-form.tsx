@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Save, Plus, Eye, EyeOff, Trash2, Video, CheckCircle2, Image as ImageIcon, Loader2, ExternalLink, Copy, Check, Link2 } from "lucide-react";
 import { createCourse, updateCourse } from "@/lib/actions/course";
 import { extractVideoMetadataAndThumbnail, uploadFileViaPresignedUrl } from "@/lib/storage/client-upload";
+import { validateUploadFile } from "@/lib/storage/validation";
 
 interface LessonData {
   title: string;
@@ -53,26 +54,85 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
   const [isFree, setIsFree] = useState(initialData?.isFree || false);
   const [showFreeConfirm, setShowFreeConfirm] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<Record<number, number>>({});
+  const [resourceUploadProgress, setResourceUploadProgress] = useState<Record<number, number>>({});
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [copiedResourceIndex, setCopiedResourceIndex] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
-  const copyToClipboard = async (text: string, index: number) => {
+  const copyToClipboard = async (text: string, index: number, isResource = false) => {
     try {
       if (typeof navigator !== "undefined" && navigator.clipboard) {
         await navigator.clipboard.writeText(text);
-        setCopiedIndex(index);
-        setTimeout(() => setCopiedIndex(null), 2000);
+        if (isResource) {
+          setCopiedResourceIndex(index);
+          setTimeout(() => setCopiedResourceIndex(null), 2000);
+        } else {
+          setCopiedIndex(index);
+          setTimeout(() => setCopiedIndex(null), 2000);
+        }
       }
     } catch (err) {
-      console.error("复制视频链接失败:", err);
+      console.error("复制链接失败:", err);
+    }
+  };
+
+  const handleCoverImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 前端即时格式与大小校验
+    const validation = validateUploadFile(file.name, file.type, "covers", file.size);
+    if (!validation.valid) {
+      alert(validation.error);
+      e.target.value = "";
+      return;
+    }
+
+    setUploadingCover(true);
+    try {
+      let coverUrl = "";
+      try {
+        const result = await uploadFileViaPresignedUrl(file, {
+          filename: file.name,
+          contentType: file.type || "image/jpeg",
+          folder: "covers",
+        });
+        coverUrl = result.publicUrl;
+      } catch (s3Err) {
+        console.warn("[Frontend] 封面直传失败，回退至本地接口:", s3Err);
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
+        if (!res.ok) throw new Error("上传失败");
+        const data = await res.json();
+        coverUrl = data.thumbnail || data.url;
+      }
+
+      if (coverUrl) {
+        setThumbnail(coverUrl);
+      }
+    } catch (err) {
+      console.error("[Frontend] 封面图上传异常:", err);
+      alert("封面图上传失败");
+    } finally {
+      setUploadingCover(false);
     }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // 前端即时视频格式与 2GB 体积校验
+    const validation = validateUploadFile(file.name, file.type, "videos", file.size);
+    if (!validation.valid) {
+      alert(validation.error);
+      e.target.value = "";
+      return;
+    }
 
     setUploading(true);
     setUploadProgress((prev) => ({ ...prev, [index]: 0 }));
@@ -157,26 +217,49 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // 前端即时资料格式与 100MB 体积校验
+    const validation = validateUploadFile(file.name, file.type, "resources", file.size);
+    if (!validation.valid) {
+      alert(validation.error);
+      e.target.value = "";
+      return;
+    }
+
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
+    setResourceUploadProgress((prev) => ({ ...prev, [index]: 0 }));
 
     try {
       console.log(`[Frontend] 正在上传配套课件: ${file.name}`);
-      const res = await fetch("/api/admin/upload", {
-        method: "POST",
-        body: formData,
-      });
-      
-      if (!res.ok) throw new Error("课件服务器响应错误");
-      
-      const data = await res.json();
-      console.log("[Frontend] 课件上传成功，服务器返回:", data);
-      
-      if (data.url) {
+      let fileUrl = "";
+
+      // 1. 优先尝试 S3/MinIO 客户端预签名直传 (课件/PDF/ZIP 等)
+      try {
+        const uploadResult = await uploadFileViaPresignedUrl(file, {
+          filename: file.name,
+          contentType: file.type || "application/octet-stream",
+          folder: "resources",
+          onProgress: (percent) => {
+            setResourceUploadProgress((prev) => ({ ...prev, [index]: percent }));
+          },
+        });
+        fileUrl = uploadResult.publicUrl;
+      } catch (s3Err) {
+        console.warn("[Frontend] 课件直传失败，回退至本地服务器上传:", s3Err);
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await fetch("/api/admin/upload", {
+          method: "POST",
+          body: formData,
+        });
+        if (!res.ok) throw new Error("课件服务器响应错误");
+        const data = await res.json();
+        fileUrl = data.url;
+      }
+
+      if (fileUrl) {
         const newResources = [...resources];
-        newResources[index].fileUrl = data.url;
-        
+        newResources[index].fileUrl = fileUrl;
+
         // 格式化文件大小展示
         let formattedSize = "未知大小";
         if (file.size) {
@@ -197,6 +280,11 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
       alert("课件上传失败");
     } finally {
       setUploading(false);
+      setResourceUploadProgress((prev) => {
+        const next = { ...prev };
+        delete next[index];
+        return next;
+      });
     }
   };
 
@@ -299,19 +387,71 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
               ) : (
                 <div style={{ textAlign: "center", color: "#adb5bd" }}>
                   <ImageIcon size={32} style={{ marginBottom: "0.5rem" }} />
-                  <div style={{ fontSize: "0.75rem" }}>视频上传后自动提取</div>
+                  <div style={{ fontSize: "0.75rem" }}>视频上传自动提取 或 自定义上传</div>
                 </div>
               )}
             </div>
-            {thumbnail && (
-              <button 
-                type="button" 
-                onClick={() => setThumbnail("")}
-                style={{ width: "100%", marginTop: "0.5rem", padding: "0.4rem", background: "none", border: "1px solid #dee2e6", borderRadius: "6px", fontSize: "0.75rem", cursor: "pointer", color: "#6c757d" }}
-              >
-                重置封面
-              </button>
-            )}
+
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+              <div style={{ position: "relative", flex: 1 }}>
+                <button
+                  type="button"
+                  disabled={uploadingCover}
+                  style={{
+                    width: "100%",
+                    padding: "0.4rem 0.6rem",
+                    background: "#f8f9fa",
+                    border: "1px solid #dee2e6",
+                    borderRadius: "6px",
+                    fontSize: "0.75rem",
+                    cursor: uploadingCover ? "not-allowed" : "pointer",
+                    color: "#495057",
+                    fontWeight: "600",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.3rem",
+                  }}
+                >
+                  {uploadingCover ? <Loader2 size={13} className="animate-spin" /> : <ImageIcon size={13} />}
+                  {uploadingCover ? "上传中..." : "上传自定义封面"}
+                </button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  disabled={uploadingCover}
+                  onChange={handleCoverImageUpload}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    opacity: 0,
+                    width: "100%",
+                    height: "100%",
+                    cursor: uploadingCover ? "not-allowed" : "pointer",
+                  }}
+                />
+              </div>
+
+              {thumbnail && (
+                <button 
+                  type="button" 
+                  onClick={() => setThumbnail("")}
+                  style={{
+                    padding: "0.4rem 0.6rem",
+                    background: "none",
+                    border: "1px solid #dee2e6",
+                    borderRadius: "6px",
+                    fontSize: "0.75rem",
+                    cursor: "pointer",
+                    color: "#dc3545",
+                  }}
+                  title="清除当前封面"
+                >
+                  重置
+                </button>
+              )}
+            </div>
           </div>
 
           {/* 右侧基本字段 */}
@@ -662,17 +802,17 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
 
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           {/* Table Header */}
-          <div style={{ display: "grid", gridTemplateColumns: "40px 1.5fr 1.5fr 40px", gap: "1.5rem", padding: "0 1.5rem", color: "#adb5bd", fontSize: "0.75rem", fontWeight: "700" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "35px 1.2fr 2fr 35px", gap: "1.5rem", padding: "0 1.5rem", color: "#adb5bd", fontSize: "0.75rem", fontWeight: "700" }}>
             <span>#</span>
             <span>资料名称 / 标题</span>
-            <span>文件上传</span>
+            <span>资料文件与直链</span>
             <span></span>
           </div>
 
           {resources.map((res, index) => (
             <div key={index} style={{ 
               display: "grid", 
-              gridTemplateColumns: "40px 1.5fr 1.5fr 40px", 
+              gridTemplateColumns: "35px 1.2fr 2fr 35px", 
               gap: "1.5rem", 
               alignItems: "center", 
               padding: "1.25rem 1.5rem", 
@@ -696,24 +836,141 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
                 required 
               />
 
-              <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                <div style={{ position: "relative", flexShrink: 0 }}>
-                  <button type="button" style={{ padding: "0.5rem 1rem", border: "1px solid #ddd", background: "#f8f9fa", borderRadius: "8px", fontSize: "0.85rem", cursor: "pointer", fontWeight: "600" }}>
-                    {res.fileUrl ? "重新选择文件" : "上传文件"}
-                  </button>
-                  <input type="file" onChange={(e) => handleResourceUpload(e, index)} style={{ position: "absolute", top: 0, left: 0, opacity: 0, width: "100%", height: "100%", cursor: "pointer" }} />
-                </div>
-                
-                {res.fileUrl && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem", minWidth: 0 }}>
-                    <div style={{ color: "var(--success)", display: "flex", alignItems: "center", gap: "0.3rem", fontSize: "0.8rem", fontWeight: "700" }}>
-                      <CheckCircle2 size={16} /> 上传成功
-                    </div>
-                    {res.fileSize && (
-                      <span style={{ fontSize: "0.75rem", color: "#868e96" }}>大小: {res.fileSize}</span>
-                    )}
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", width: "100%", minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap" }}>
+                  <div style={{ position: "relative", flexShrink: 0 }}>
+                    <button
+                      type="button"
+                      disabled={uploading}
+                      style={{
+                        padding: "0.4rem 0.8rem",
+                        border: "1px solid #ddd",
+                        background: resourceUploadProgress[index] !== undefined ? "var(--primary-light, #e7f5ff)" : "#f8f9fa",
+                        borderRadius: "6px",
+                        fontSize: "0.8rem",
+                        cursor: uploading ? "not-allowed" : "pointer",
+                        fontWeight: "600",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.3rem",
+                      }}
+                    >
+                      {resourceUploadProgress[index] !== undefined ? (
+                        <>
+                          <Loader2 size={13} className="animate-spin" />
+                          上传中 {resourceUploadProgress[index]}%
+                        </>
+                      ) : (
+                        res.fileUrl ? "重新选择文件" : "上传文件"
+                      )}
+                    </button>
+                    <input
+                      type="file"
+                      disabled={uploading}
+                      onChange={(e) => handleResourceUpload(e, index)}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        opacity: 0,
+                        width: "100%",
+                        height: "100%",
+                        cursor: uploading ? "not-allowed" : "pointer",
+                      }}
+                    />
                   </div>
-                )}
+
+                  {res.fileUrl && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", flexWrap: "wrap" }}>
+                      <span style={{ color: "var(--success)", display: "flex", alignItems: "center", gap: "0.2rem", fontSize: "0.75rem", fontWeight: "700" }}>
+                        <CheckCircle2 size={14} /> 已上传
+                      </span>
+                      {res.fileSize && (
+                        <span style={{ fontSize: "0.7rem", color: "#868e96", background: "#f8f9fa", padding: "0.15rem 0.35rem", borderRadius: "4px" }}>
+                          {res.fileSize}
+                        </span>
+                      )}
+
+                      {/* 复制资料链接 */}
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(res.fileUrl, index, true)}
+                        title="复制资料直链"
+                        style={{
+                          background: "#f1f3f5",
+                          border: "1px solid #ced4da",
+                          borderRadius: "4px",
+                          padding: "0.2rem 0.45rem",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.25rem",
+                          fontSize: "0.7rem",
+                          fontWeight: "600",
+                          color: "#495057",
+                        }}
+                      >
+                        {copiedResourceIndex === index ? (
+                          <>
+                            <Check size={12} color="var(--success)" /> 已复制
+                          </>
+                        ) : (
+                          <>
+                            <Copy size={12} /> 复制
+                          </>
+                        )}
+                      </button>
+
+                      {/* 打开或下载预览 */}
+                      <a
+                        href={res.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="在新标签页直接查看或下载该课件"
+                        style={{
+                          background: "#e7f5ff",
+                          border: "1px solid #a5d8ff",
+                          borderRadius: "4px",
+                          padding: "0.2rem 0.45rem",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.25rem",
+                          fontSize: "0.7rem",
+                          fontWeight: "600",
+                          color: "#1971c2",
+                          textDecoration: "none",
+                        }}
+                      >
+                        <ExternalLink size={12} /> 下载/查看
+                      </a>
+                    </div>
+                  )}
+                </div>
+
+                {/* 课件资料直链展示与手动编辑输入框 */}
+                <div style={{ display: "flex", alignItems: "center", gap: "0.3rem", width: "100%" }}>
+                  <input
+                    type="text"
+                    value={res.fileUrl}
+                    onChange={(e) => {
+                      const newResources = [...resources];
+                      newResources[index].fileUrl = e.target.value;
+                      setResources(newResources);
+                    }}
+                    placeholder="可在此粘贴或修改资料直链 (S3 / MinIO / 本地)"
+                    title={res.fileUrl || "暂未关联资料文件"}
+                    style={{
+                      width: "100%",
+                      fontSize: "0.75rem",
+                      padding: "0.35rem 0.5rem",
+                      border: "1px solid #e9ecef",
+                      borderRadius: "6px",
+                      background: res.fileUrl ? "#f8f9fa" : "#fff",
+                      color: res.fileUrl ? "#495057" : "#adb5bd",
+                      fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+                    }}
+                  />
+                </div>
               </div>
 
               <button 

@@ -1,4 +1,6 @@
 // FILE: src/lib/storage/client-upload.ts
+import { validateUploadFile } from "./validation";
+
 export interface VideoMetadata {
   duration: number; // 秒数
   thumbnailBlob: Blob | null;
@@ -97,11 +99,17 @@ export const uploadFileViaPresignedUrl = async (
 ): Promise<DirectUploadResult> => {
   const { filename, contentType, folder, onProgress } = options;
 
+  // 0. 客户端先行校验格式与体积，避免浪费带宽
+  const validation = validateUploadFile(filename, contentType, folder, file.size);
+  if (!validation.valid) {
+    throw new Error(validation.error || "文件格式或体积不符合要求");
+  }
+
   // 1. 请求服务端换取有时效性的预签名直传 PUT URL
   const presignRes = await fetch("/api/admin/upload/presign", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ filename, contentType, folder }),
+    body: JSON.stringify({ filename, contentType, folder, size: file.size }),
   });
 
   if (!presignRes.ok) {

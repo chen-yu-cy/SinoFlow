@@ -36,6 +36,9 @@ vi.mock("@aws-sdk/client-s3", () => {
     CreateBucketCommand: class {
       constructor(public input: unknown) {}
     },
+    PutBucketCorsCommand: class {
+      constructor(public input: unknown) {}
+    },
   };
 });
 
@@ -131,21 +134,29 @@ describe("StorageService (S3 / MinIO 兼容存储服务)", () => {
     });
   });
 
-  describe("ensureBucketExists", () => {
-    it("当存储桶已存在时直接返回 true", async () => {
-      mockSend.mockResolvedValueOnce({});
+  describe("ensureBucketExists & configureBucketCors", () => {
+    it("当存储桶已存在时直接返回 true 并注入 CORS 跨域策略", async () => {
+      mockSend.mockResolvedValue({});
       const exists = await StorageService.ensureBucketExists();
       expect(exists).toBe(true);
+      expect(mockSend).toHaveBeenCalledTimes(2); // HeadBucket + PutBucketCors
     });
 
-    it("当存储桶不存在时应尝试自动创建", async () => {
+    it("当存储桶不存在时应尝试自动创建并配置 CORS", async () => {
       mockSend
-        .mockRejectedValueOnce(new Error("NotFound"))
-        .mockResolvedValueOnce({});
+        .mockRejectedValueOnce(new Error("NotFound")) // HeadBucket
+        .mockResolvedValueOnce({}) // CreateBucket
+        .mockResolvedValueOnce({}); // PutBucketCors
 
       const exists = await StorageService.ensureBucketExists();
       expect(exists).toBe(true);
-      expect(mockSend).toHaveBeenCalledTimes(2);
+      expect(mockSend).toHaveBeenCalledTimes(3);
+    });
+
+    it("当 CORS 配置失败时应优雅降级返回 false 而不崩溃", async () => {
+      mockSend.mockRejectedValueOnce(new Error("AccessDenied"));
+      const success = await StorageService.configureBucketCors();
+      expect(success).toBe(false);
     });
   });
 });

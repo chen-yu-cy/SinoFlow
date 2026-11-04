@@ -2,12 +2,14 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { StorageService } from "@/lib/services/storage.service";
+import { validateUploadFile } from "@/lib/storage/validation";
 import { logger } from "@/lib/logger";
 
 interface PresignRequestBody {
   filename?: string;
   contentType?: string;
   folder?: "videos" | "covers" | "resources" | "general";
+  size?: number;
   expiresInSeconds?: number;
 }
 
@@ -30,7 +32,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { filename, contentType, folder, expiresInSeconds } = body;
+    const { filename, contentType, folder, size, expiresInSeconds } = body;
 
     if (!filename || typeof filename !== "string") {
       return NextResponse.json(
@@ -42,6 +44,15 @@ export async function POST(req: Request) {
     if (!contentType || typeof contentType !== "string") {
       return NextResponse.json(
         { success: false, error: "缺少有效的 MIME 内容类型 (contentType)" },
+        { status: 400 }
+      );
+    }
+
+    // 执行严格的格式与文件体积校验
+    const validation = validateUploadFile(filename, contentType, folder || "general", size);
+    if (!validation.valid) {
+      return NextResponse.json(
+        { success: false, error: validation.error },
         { status: 400 }
       );
     }
