@@ -4,6 +4,7 @@
 import { auth } from "@/lib/auth";
 import { UserService } from "@/lib/services/user.service";
 import { logger } from "@/lib/logger";
+import { checkRateLimit } from "@/lib/security/rate-limiter";
 
 /**
  * 身份验证与用户管理 Server Actions
@@ -20,6 +21,13 @@ export async function registerUser(formData: FormData) {
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+
+  // 敏感操作防撞库与批量注册限流 (5 次 / 60 秒)
+  const rateLimit = await checkRateLimit(email || "anonymous_register", "AUTH");
+  if (!rateLimit.success) {
+    logger.warn({ email }, "[Auth Action] 注册请求触发频率限制");
+    return { error: `请求过于频繁，请等待 ${rateLimit.resetSeconds} 秒后再试` };
+  }
 
   try {
     // 委托给 Service 层处理注册逻辑
@@ -43,6 +51,13 @@ export async function verifyAdminPassword(password: string) {
   // 第一层防御：校验 Session 中的 Role 权限
   if (!session?.user || (session.user as any).role !== "ADMIN") {
     return { error: "未经授权" };
+  }
+
+  // 管理员密码二次验证防爆破限流 (5 次 / 60 秒)
+  const rateLimit = await checkRateLimit(session.user.email || "admin_verify", "AUTH");
+  if (!rateLimit.success) {
+    logger.warn({ email: session.user.email }, "[Auth Action] 管理员密码验证触发频率限制");
+    return { error: `验证过于频繁，请等待 ${rateLimit.resetSeconds} 秒后再试` };
   }
 
   try {

@@ -43,6 +43,21 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    restart: always
+    logging: *default-logging
+    command: redis-server --requirepass ${REDIS_PASSWORD:-sinoflow_redis_pass} --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-sinoflow_redis_pass}", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   app:
     image: ${APP_IMAGE:-ghcr.io/chen-yu-cy/sinoflow:latest}
     build:
@@ -73,10 +88,13 @@ services:
       S3_BUCKET_NAME: ${S3_BUCKET_NAME:-sinoflow}
       S3_FORCE_PATH_STYLE: ${S3_FORCE_PATH_STYLE:-true}
       S3_PUBLIC_URL: ${S3_PUBLIC_URL:-}
+      REDIS_URL: ${REDIS_URL:-redis://:sinoflow_redis_pass@redis:6379/0}
     volumes:
       - ./public/uploads:/app/public/uploads
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
@@ -183,6 +201,7 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
   loki_data:
   grafana_data:
   caddy_data:
