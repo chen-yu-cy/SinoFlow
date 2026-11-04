@@ -12,8 +12,13 @@ export default function AdminMonitoringPage() {
     if (typeof window !== "undefined") {
       const host = window.location.hostname || "localhost";
       const protocol = window.location.protocol || "http:";
-      // 动态拼装同主机的 3001 端口 Grafana 地址
-      setGrafanaUrl(`${protocol}//${host}:3001/d/sinoflow-traffic?kiosk=tv`);
+      // 如果当前是 HTTPS 环境且为生产域名访问（如 sslip.io），使用全站安全二级域名 https://grafana.<domain>
+      if (protocol === "https:" || host.includes("sslip.io")) {
+        setGrafanaUrl(`https://grafana.${host}/d/sinoflow-traffic?kiosk=tv`);
+      } else {
+        // 本地开发回退使用 3001 端口
+        setGrafanaUrl(`${protocol}//${host}:3001/d/sinoflow-traffic?kiosk=tv`);
+      }
     }
   }, []);
 
