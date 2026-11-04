@@ -56,6 +56,39 @@ describe("Cache Service Tests", () => {
       expect(result).toEqual(dbData);
       expect(fetcher).toHaveBeenCalledTimes(1);
     });
+
+    it("空值防穿透：当 fetcher 返回 null 时，应缓存哨兵标记并设置 30 秒短 TTL", async () => {
+      const mockGet = vi.fn().mockResolvedValue(null);
+      const mockSet = vi.fn().mockResolvedValue("OK");
+      const mockRedis = { get: mockGet, set: mockSet, status: "ready" } as any;
+
+      vi.spyOn(redisClientModule, "getRedisClient").mockReturnValue(mockRedis);
+      vi.spyOn(redisClientModule, "isRedisConnected").mockReturnValue(true);
+
+      const fetcher = vi.fn().mockResolvedValue(null);
+
+      const result = await CacheService.getOrSet("course:not-found-id", 300, fetcher);
+
+      expect(result).toBeNull();
+      expect(fetcher).toHaveBeenCalledTimes(1);
+      // 应写入 NULL_CACHE_SENTINEL 且 TTL 为 30 秒
+      expect(mockSet).toHaveBeenCalledWith("course:not-found-id", "__NULL_CACHE_SENTINEL__", "EX", 30);
+    });
+
+    it("空值防穿透：命中哨兵标记时，直接返回 null 且绝不调用 fetcher 回源查库", async () => {
+      const mockGet = vi.fn().mockResolvedValue("__NULL_CACHE_SENTINEL__");
+      const mockRedis = { get: mockGet, status: "ready" } as any;
+
+      vi.spyOn(redisClientModule, "getRedisClient").mockReturnValue(mockRedis);
+      vi.spyOn(redisClientModule, "isRedisConnected").mockReturnValue(true);
+
+      const fetcher = vi.fn().mockResolvedValue({ id: "unexpected" });
+
+      const result = await CacheService.getOrSet("course:not-found-id", 300, fetcher);
+
+      expect(result).toBeNull();
+      expect(fetcher).not.toHaveBeenCalled();
+    });
   });
 
   describe("del & invalidatePattern", () => {
