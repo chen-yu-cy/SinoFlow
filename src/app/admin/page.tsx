@@ -1,7 +1,7 @@
 // FILE: src/app/admin/page.tsx
 import React from "react";
 import prisma from "@/lib/db/client";
-import { BookOpen, Users, ShoppingCart, TrendingUp, LifeBuoy } from "lucide-react";
+import { BookOpen, Users, ShoppingCart, TrendingUp, LifeBuoy, Activity } from "lucide-react";
 import Link from "next/link";
 
 const AdminDashboard = async () => {
@@ -33,6 +33,7 @@ const AdminDashboard = async () => {
     { title: "总订单数", value: orderCount, icon: <ShoppingCart />, color: "#fab005", link: "/admin/orders" },
     { title: "总营收", value: `¥${totalRevenue.toFixed(2)}`, icon: <TrendingUp />, color: "#40c057", link: "/admin/orders" },
     { title: "待处理工单", value: `${pendingTicketsCount} 个`, icon: <LifeBuoy />, color: "#fa5252", link: "/admin/tickets" },
+    { title: "流媒体与访问", value: "实时监控", icon: <Activity />, color: "#845ef7", link: "/admin/monitoring" },
   ];
 
   return (
