@@ -3,5 +3,11 @@
   request_body {
     max_size 500MB
   }
+
+  log {
+    output stdout
+    format json
+  }
+
   reverse_proxy app:3000
 }
