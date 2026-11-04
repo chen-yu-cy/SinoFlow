@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import prisma from "@/lib/db/client";
 import { logger } from "@/lib/logger";
 import { PaymentFactory } from "@/lib/payment/factory";
+import { enforceRateLimit } from "@/lib/security/rate-limit-guard";
 
 /**
  * @openapi
@@ -52,8 +53,14 @@ import { PaymentFactory } from "@/lib/payment/factory";
 export async function POST(req: Request) {
   try {
     const session = await auth();
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // 关键动作限流拦截（防止恶意批量发起支付与刷单）
+    const rateCheck = await enforceRateLimit(req, "ACTION", session.user.id);
+    if (rateCheck.blocked && rateCheck.response) {
+      return rateCheck.response;
     }
 
     const { orderId, paymentMethod } = await req.json();

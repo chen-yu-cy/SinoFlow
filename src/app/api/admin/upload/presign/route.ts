@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { StorageService } from "@/lib/services/storage.service";
 import { validateUploadFile } from "@/lib/storage/validation";
 import { logger } from "@/lib/logger";
+import { enforceRateLimit } from "@/lib/security/rate-limit-guard";
 
 interface PresignRequestBody {
   filename?: string;
@@ -20,6 +21,12 @@ export async function POST(req: Request) {
 
     if (!session?.user || userRole !== "ADMIN") {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    // 管理员预签名直传频次限流保护（30 次 / 60 秒）
+    const rateCheck = await enforceRateLimit(req, "ADMIN_PRESIGN", (session.user as { id?: string }).id);
+    if (rateCheck.blocked && rateCheck.response) {
+      return rateCheck.response;
     }
 
     let body: PresignRequestBody;

@@ -1,4 +1,6 @@
+// FILE: src/lib/services/course.service.ts
 import prisma from "@/lib/db/client";
+import { CacheService } from "@/lib/cache/cache.service";
 
 /**
  * 课程创建输入接口
@@ -37,7 +39,7 @@ export const CourseService = {
       throw new Error("请填写完整的课程信息并至少添加一个章节");
     }
 
-    return await prisma.course.create({
+    const created = await prisma.course.create({
       data: {
         title: data.title,
         description: data.description,
@@ -65,6 +67,28 @@ export const CourseService = {
         } : undefined,
       },
     });
+
+    await CacheService.del("courses:list").catch(() => {});
+    return created;
+  },
+
+  /**
+   * 根据 ID 查询课程详情（优先读取 Redis 缓存，TTL 300 秒）
+   * @param id 课程 ID
+   */
+  async getCourseById(id: string) {
+    const cacheKey = `course:${id}`;
+    return await CacheService.getOrSet(cacheKey, 300, async () => {
+      return await prisma.course.findUnique({
+        where: { id },
+        include: {
+          lessons: {
+            orderBy: { order: "asc" },
+          },
+          resources: true,
+        },
+      });
+    });
   },
 
   /**
@@ -74,7 +98,7 @@ export const CourseService = {
    * @returns 包含成功状态的事务执行结果
    */
   async updateCourse(id: string, data: UpdateCourseInput) {
-    return await prisma.$transaction(async (tx) => {
+    const updated = await prisma.$transaction(async (tx) => {
       // 1. 更新课程主体元数据
       await tx.course.update({
         where: { id },
@@ -117,6 +141,9 @@ export const CourseService = {
         },
       });
     });
+
+    await CacheService.del([`course:${id}`, "courses:list"]).catch(() => {});
+    return updated;
   },
 
   /**
@@ -125,12 +152,15 @@ export const CourseService = {
    * @param id 课程的唯一 ID
    */
   async deleteCourse(id: string) {
-    return await prisma.$transaction(async (tx) => {
+    const deleted = await prisma.$transaction(async (tx) => {
       // 必须手动处理关联删除以确保事务完整性
       await tx.lesson.deleteMany({ where: { courseId: id } });
       await tx.resource.deleteMany({ where: { courseId: id } });
       await tx.order.deleteMany({ where: { courseId: id } });
       return await tx.course.delete({ where: { id } });
     });
+
+    await CacheService.del([`course:${id}`, "courses:list"]).catch(() => {});
+    return deleted;
   },
 };
