@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.0](https://github.com/chen-yu-cy/SinoFlow/compare/v0.2.0...v0.3.0) (2026-11-04)
+
+
+### Features
+
+* **caddy:** enable HTTPS for grafana via subdomain and update admin iframe resolver ([88b86ee](https://github.com/chen-yu-cy/SinoFlow/commit/88b86eed4ad394a7b94ca53d2a456673e99bb4b6))
+* **caddy:** enable HTTPS for grafana via subdomain and update admin iframe resolver ([072a89b](https://github.com/chen-yu-cy/SinoFlow/commit/072a89b1527b93aa87d1ec3d764db0622a1aff69))
+* **monitoring:** add caddy access logging, automated grafana traffic dashboard, and admin monitoring view ([89a755f](https://github.com/chen-yu-cy/SinoFlow/commit/89a755f020415d9ecaab1f65f723fa98204ffccc))
+* **monitoring:** add caddy access logging, automated grafana traffic dashboard, and admin monitoring view ([ff1c7da](https://github.com/chen-yu-cy/SinoFlow/commit/ff1c7dadddbba01ff3b133ca15a2259d667d2288))
+
 ## [0.2.0](https://github.com/chen-yu-cy/SinoFlow/compare/v0.1.0...v0.2.0) (2026-11-04)
 
 
