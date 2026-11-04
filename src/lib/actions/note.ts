@@ -17,7 +17,7 @@ export async function getNotesAction(lessonId: string) {
   try {
     const notes = await NoteService.getNotesByLesson(session.user.id, lessonId);
     return { success: true, notes };
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error({ err: error, lessonId, userId: session.user.id }, "获取课时笔记失败");
     return { error: "获取笔记失败，请稍后重试" };
   }
@@ -45,7 +45,7 @@ export async function createNoteAction(lessonId: string, content: string, timest
       Math.floor(timestamp)
     );
     return { success: true, note };
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error({ err: error, lessonId, userId: session.user.id }, "创建笔记失败");
     return { error: "记录笔记失败，请稍后重试" };
   }
@@ -63,8 +63,31 @@ export async function deleteNoteAction(noteId: string) {
   try {
     await NoteService.deleteNote(session.user.id, noteId);
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "删除笔记失败，请稍后重试";
     logger.error({ err: error, noteId, userId: session.user.id }, "删除笔记失败");
-    return { error: error.message || "删除笔记失败，请稍后重试" };
+    return { error: errorMessage };
+  }
+}
+
+/**
+ * 管理员强制删除违规笔记
+ */
+export async function deleteNoteAsAdminAction(noteId: string) {
+  const session = await auth();
+  const userRole = (session?.user as { role?: string } | undefined)?.role;
+
+  if (!session?.user?.id || userRole !== "ADMIN") {
+    return { error: "无权执行此操作，仅限管理员" };
+  }
+
+  try {
+    await NoteService.deleteNoteAsAdmin(noteId);
+    logger.info({ adminId: session.user.id, noteId }, "管理员删除了学员笔记");
+    return { success: true };
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "删除笔记失败，请稍后重试";
+    logger.error({ err: error, noteId, adminId: session.user.id }, "管理员删除笔记失败");
+    return { error: errorMessage };
   }
 }

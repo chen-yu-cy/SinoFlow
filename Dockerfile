@@ -28,7 +28,7 @@ RUN npm run build
 
 # Stage 3: Production runner with FFmpeg & Prisma
 FROM node:20-alpine AS runner
-RUN apk add --no-cache ffmpeg openssl
+RUN apk add --no-cache ffmpeg openssl curl
 
 WORKDIR /app
 
