@@ -2,8 +2,9 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Save, Plus, Eye, EyeOff, Trash2, Video, CheckCircle2, Image as ImageIcon } from "lucide-react";
+import { Save, Plus, Eye, EyeOff, Trash2, Video, CheckCircle2, Image as ImageIcon, Loader2 } from "lucide-react";
 import { createCourse, updateCourse } from "@/lib/actions/course";
+import { extractVideoMetadataAndThumbnail, uploadFileViaPresignedUrl } from "@/lib/storage/client-upload";
 
 interface LessonData {
   title: string;
@@ -52,6 +53,7 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
   const [isFree, setIsFree] = useState(initialData?.isFree || false);
   const [showFreeConfirm, setShowFreeConfirm] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<Record<number, number>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
@@ -60,32 +62,69 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
     if (!file) return;
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
+    setUploadProgress((prev) => ({ ...prev, [index]: 0 }));
 
     try {
       console.log(`[Frontend] 正在上传第 ${index + 1} 章节视频:`, file.name);
-      const res = await fetch("/api/admin/upload", {
-        method: "POST",
-        body: formData,
-      });
-      
-      if (!res.ok) throw new Error("服务器响应错误");
-      
-      const data = await res.json();
-      console.log("[Frontend] 上传成功，服务器返回:", data);
-      
-      if (data.url) {
+
+      // 1. 本地提取视频第一秒画面作为封面，以及视频时长
+      const { duration: extractedDuration, thumbnailBlob } = await extractVideoMetadataAndThumbnail(file);
+
+      let videoPublicUrl = "";
+      let thumbPublicUrl = "";
+      let finalDuration: number | null = extractedDuration || null;
+
+      // 2. 尝试 S3/MinIO 预签名直传 (方案一：0 服务器带宽与内存开销)
+      try {
+        if (thumbnailBlob) {
+          const thumbUpload = await uploadFileViaPresignedUrl(thumbnailBlob, {
+            filename: `${file.name.replace(/\.[^/.]+$/, "")}-thumb.jpg`,
+            contentType: "image/jpeg",
+            folder: "covers",
+          });
+          thumbPublicUrl = thumbUpload.publicUrl;
+        }
+
+        const videoUpload = await uploadFileViaPresignedUrl(file, {
+          filename: file.name,
+          contentType: file.type || "video/mp4",
+          folder: "videos",
+          onProgress: (percent) => {
+            setUploadProgress((prev) => ({ ...prev, [index]: percent }));
+          },
+        });
+        videoPublicUrl = videoUpload.publicUrl;
+      } catch (s3Err) {
+        console.warn("[Frontend] S3/MinIO 直传失败，尝试回退至本地服务器上传接口:", s3Err);
+        // 回退至本地 /api/admin/upload 接口
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await fetch("/api/admin/upload", {
+          method: "POST",
+          body: formData,
+        });
+        if (!res.ok) throw new Error("服务器响应错误");
+        const data = await res.json();
+        videoPublicUrl = data.url;
+        thumbPublicUrl = data.thumbnail || "";
+        if (data.duration) finalDuration = data.duration;
+      }
+
+      if (videoPublicUrl) {
         const newLessons = [...lessons];
-        newLessons[index].videoUrl = data.url;
-        newLessons[index].thumbnail = data.thumbnail; // 将生成的缩略图存入章节
-        newLessons[index].duration = data.duration;   // 保存获取到的视频时长
+        newLessons[index].videoUrl = videoPublicUrl;
+        if (thumbPublicUrl) {
+          newLessons[index].thumbnail = thumbPublicUrl;
+        }
+        if (finalDuration) {
+          newLessons[index].duration = finalDuration;
+        }
         setLessons(newLessons);
-        
+
         // 逻辑：如果课程当前没有封面，自动使用第一个上传成功的视频封面
-        if (!thumbnail && data.thumbnail) {
-          console.log("[Frontend] 自动应用课程封面:", data.thumbnail);
-          setThumbnail(data.thumbnail);
+        if (!thumbnail && thumbPublicUrl) {
+          console.log("[Frontend] 自动应用课程封面:", thumbPublicUrl);
+          setThumbnail(thumbPublicUrl);
         }
       }
     } catch (err) {
@@ -93,6 +132,11 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
       alert("上传或视频处理失败，请检查服务器日志");
     } finally {
       setUploading(false);
+      setUploadProgress((prev) => {
+        const next = { ...prev };
+        delete next[index];
+        return next;
+      });
     }
   };
 
@@ -400,8 +444,38 @@ const CourseForm = ({ initialData }: CourseFormProps) => {
 
               <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
                 <div style={{ position: "relative", flexShrink: 0 }}>
-                  <button type="button" style={{ padding: "0.5rem 1rem", border: "1px solid #ddd", background: "#f8f9fa", borderRadius: "8px", fontSize: "0.85rem", cursor: "pointer", fontWeight: "600" }}>选择视频</button>
-                  <input type="file" accept="video/*" onChange={(e) => handleFileUpload(e, index)} style={{ position: "absolute", top: 0, left: 0, opacity: 0, width: "100%", height: "100%", cursor: "pointer" }} />
+                  <button
+                    type="button"
+                    disabled={uploading}
+                    style={{
+                      padding: "0.5rem 1rem",
+                      border: "1px solid #ddd",
+                      background: uploadProgress[index] !== undefined ? "var(--primary-light, #e7f5ff)" : "#f8f9fa",
+                      borderRadius: "8px",
+                      fontSize: "0.85rem",
+                      cursor: uploading ? "not-allowed" : "pointer",
+                      fontWeight: "600",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.3rem",
+                    }}
+                  >
+                    {uploadProgress[index] !== undefined ? (
+                      <>
+                        <Loader2 size={14} className="animate-spin" />
+                        上传中 {uploadProgress[index]}%
+                      </>
+                    ) : (
+                      "选择视频"
+                    )}
+                  </button>
+                  <input
+                    type="file"
+                    accept="video/*"
+                    disabled={uploading}
+                    onChange={(e) => handleFileUpload(e, index)}
+                    style={{ position: "absolute", top: 0, left: 0, opacity: 0, width: "100%", height: "100%", cursor: uploading ? "not-allowed" : "pointer" }}
+                  />
                 </div>
                 
                 {lesson.videoUrl && (

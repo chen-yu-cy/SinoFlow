@@ -66,10 +66,13 @@ src/
 - [x] **中优先级**: 将用户与认证领域逻辑重构至 `UserService`。
   - *目标*: 将 `registerUser` 和 `verifyAdminPassword` 中的加密与数据库写入逻辑从 Action 层迁往 `lib/services/user.service.ts`。
   - *价值*: 实现密码处理逻辑的集中管理，提升可测试性，并为未来多平台（Web/CLI）复用打下基础。
-- [ ] **部署与安全**: 引入云端私有存储与 CDN URL 签名鉴权。
-  - *目标*: 将视频和封面等媒体资源从本地 `public/uploads` 迁移至云端私有对象存储 (如阿里云 OSS / 腾讯云 COS)，并开启 CDN URL 鉴权防盗链。
-  - *实现方案*: 在 Next.js 服务端校验登录及购买状态后，使用共享私钥实时计算并生成带有时效性签名参数 (如 `auth_key`) 的视频播放链接，由 CDN 边缘节点验证合法性并完成内容分发。
-  - *价值*: 极大降低服务器磁盘与带宽压力，有效防止视频资源被非法抓包、共享和盗刷。
+- [x] **存储与视频体系**: 引入 S3/OSS 兼容对象存储与客户端预签名直传 (方案一)。
+  - *目标*: 彻底摆脱服务器本地磁盘存储瓶颈，实现大视频文件直通云端私有存储，并开启 CDN URL 签名鉴权防盗链。
+  - *实现方案*:
+    1. **直传接口**: 新增 `POST /api/admin/upload/presign`，服务端校验 ADMIN 权限后签发有时效性的 S3 预签名直传 URL (Presigned PUT URL)。
+    2. **前端体验**: 管理员后台上传视频时，利用 HTML5 `<video>` + `<canvas>` 本地秒级提取第一帧封面与时长，并通过预签名 URL 直接推送到云端存储桶，配备 0%~100% 真实上传进度条。
+    3. **播放鉴权**: 在 Next.js 播放端校验登录与课程购买状态，使用共享私钥实时生成带有时效性签名参数 (如 `auth_key`) 的视频播放链接，由 CDN 边缘节点验证合法性并完成内容分发。
+  - *价值*: 极大降低服务器磁盘与带宽压力（Next.js 服务器 0 带宽消耗），支持超大文件稳定上传与进度展示，并有效防止音视频资源被非法抓包和盗刷。
 - [ ] **运维与通知**: Watchtower 自动部署集成 Telegram 通知。
   - *目标*: 当 Watchtower 检测到 GHCR 新镜像并完成自动更新重启后，通过 Shoutrrr 自动向指定的 Telegram 机器人/群组发送部署通知。
   - *配置项*: 在 `docker-compose.yml` 中支持 `WATCHTOWER_NOTIFICATIONS=shoutrrr` 与 `WATCHTOWER_NOTIFICATION_URL=telegram://<bot-token>@telegram/?channels=<chat-id>`。
