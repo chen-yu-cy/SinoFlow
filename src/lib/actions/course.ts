@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { CourseService, type CreateCourseInput, type UpdateCourseInput } from "@/lib/services/course.service";
 import prisma from "@/lib/db/client";
 import { logger } from "@/lib/logger";
+import { CacheService } from "@/lib/cache/cache.service";
 
 /**
  * 课程相关 Server Actions
@@ -105,6 +106,9 @@ export async function toggleCourseFeaturedAction(courseId: string, isFeatured: b
       where: { id: courseId },
       data: { isFeatured },
     });
+
+    // 剔除首页精选与列表缓存
+    await CacheService.invalidatePattern("courses:*").catch(() => {});
 
     logger.info({ courseId, isFeatured }, "[Course Action] 切换课程精选状态成功");
 

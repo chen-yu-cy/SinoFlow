@@ -1,34 +1,18 @@
 // FILE: src/app/page.tsx
 import React from "react";
 import CourseCard from "@/components/course/course-card";
-import prisma from "@/lib/db/client";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { getTranslation } from "@/lib/i18n";
+import { CourseService } from "@/lib/services/course.service";
 
 const HomePage = async () => {
   const session = await auth();
   const isAdmin = (session?.user as any)?.role === "ADMIN";
   const { t } = await getTranslation();
 
-  // 1. 优先拉取标记为精选的课程
-  const featuredCourses = await prisma.course.findMany({
-    where: { isFeatured: true },
-    orderBy: { createdAt: 'desc' },
-    take: 4
-  });
-
-  let courses = [...featuredCourses];
-
-  // 2. 如果不足 4 个，则用最新的非精选课程来补全
-  if (courses.length < 4) {
-    const additionalCourses = await prisma.course.findMany({
-      where: { isFeatured: false },
-      orderBy: { createdAt: 'desc' },
-      take: 4 - courses.length
-    });
-    courses = [...courses, ...additionalCourses];
-  }
+  // 优先从 Redis 缓存拉取精选与最新推荐课程 (TTL 300s，高并发秒级响应)
+  const courses = await CourseService.getFeaturedCourses(4);
 
   return (
     <div>

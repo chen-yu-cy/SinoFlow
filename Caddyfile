@@ -4,6 +4,13 @@
     max_size 2048MB
   }
 
+  # 启用高效 Zstandard 与 Gzip 压缩，显著降低跨国传输带宽与 TTFB
+  encode zstd gzip
+
+  # 针对 Next.js 哈希静态资源配置 1 年长效不变缓存
+  @static path /_next/static/*
+  header @static Cache-Control "public, max-age=31536000, immutable"
+
   log {
     output stdout
     format json

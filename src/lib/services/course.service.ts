@@ -68,7 +68,7 @@ export const CourseService = {
       },
     });
 
-    await CacheService.del("courses:list").catch(() => {});
+    await CacheService.invalidatePattern("courses:*").catch(() => {});
     return created;
   },
 
@@ -87,6 +87,44 @@ export const CourseService = {
           },
           resources: true,
         },
+      });
+    });
+  },
+
+  /**
+   * 获取首页精选与最新推荐课程（优先读取 Redis 缓存，TTL 300 秒）
+   * @param limit 获取数量上限，默认 4 门
+   */
+  async getFeaturedCourses(limit: number = 4) {
+    const cacheKey = `courses:featured:${limit}`;
+    return await CacheService.getOrSet(cacheKey, 300, async () => {
+      const featured = await prisma.course.findMany({
+        where: { isFeatured: true },
+        orderBy: { createdAt: "desc" },
+        take: limit,
+      });
+
+      if (featured.length < limit) {
+        const additional = await prisma.course.findMany({
+          where: { isFeatured: false },
+          orderBy: { createdAt: "desc" },
+          take: limit - featured.length,
+        });
+        return [...featured, ...additional];
+      }
+
+      return featured;
+    });
+  },
+
+  /**
+   * 获取课程大厅默认课程全列表（无关键词筛选时优先读取 Redis 缓存，TTL 300 秒）
+   */
+  async getDefaultCourseList() {
+    const cacheKey = "courses:default_list";
+    return await CacheService.getOrSet(cacheKey, 300, async () => {
+      return await prisma.course.findMany({
+        orderBy: { createdAt: "desc" },
       });
     });
   },
@@ -142,7 +180,8 @@ export const CourseService = {
       });
     });
 
-    await CacheService.del([`course:${id}`, "courses:list"]).catch(() => {});
+    await CacheService.del(`course:${id}`).catch(() => {});
+    await CacheService.invalidatePattern("courses:*").catch(() => {});
     return updated;
   },
 
@@ -160,7 +199,8 @@ export const CourseService = {
       return await tx.course.delete({ where: { id } });
     });
 
-    await CacheService.del([`course:${id}`, "courses:list"]).catch(() => {});
+    await CacheService.del(`course:${id}`).catch(() => {});
+    await CacheService.invalidatePattern("courses:*").catch(() => {});
     return deleted;
   },
 };

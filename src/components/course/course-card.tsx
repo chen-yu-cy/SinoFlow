@@ -95,7 +95,13 @@ const CourseCard = ({ id, title, description, price, level, duration, isFree, th
         <Link href={`/courses/${id}`} style={{ display: "block", textDecoration: "none", flexShrink: 0 }}>
           <div className="course-card-list-thumb">
             {thumbnail ? (
-              <img src={thumbnail} alt={title} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+              <img
+                src={thumbnail}
+                alt={title}
+                loading="lazy"
+                decoding="async"
+                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              />
             ) : (
               <>
                 <BookOpen size={32} strokeWidth={1} style={{ marginBottom: "0.5rem" }} />
@@ -171,7 +177,14 @@ const CourseCard = ({ id, title, description, price, level, duration, isFree, th
           cursor: "pointer"
         }}>
           {thumbnail ? (
-            <img src={thumbnail} alt={title} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.5s" }} className="card-image" />
+            <img
+              src={thumbnail}
+              alt={title}
+              loading="lazy"
+              decoding="async"
+              style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.5s" }}
+              className="card-image"
+            />
           ) : (
             <>
               <BookOpen size={40} strokeWidth={1} style={{ marginBottom: "0.5rem" }} />

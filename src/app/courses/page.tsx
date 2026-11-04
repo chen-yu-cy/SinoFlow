@@ -4,6 +4,7 @@ import prisma from "@/lib/db/client";
 import { auth } from "@/lib/auth";
 import CourseFilters from "@/components/course/course-filters";
 import { getTranslation } from "@/lib/i18n";
+import { CourseService } from "@/lib/services/course.service";
 
 interface AllCoursesPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -30,10 +31,13 @@ const AllCoursesPage = async ({ searchParams }: AllCoursesPageProps) => {
     where.level = level;
   }
 
-  const courses = await prisma.course.findMany({
-    where,
-    orderBy: { createdAt: 'desc' }
-  });
+  const isDefaultQuery = !q && (!level || level === '全部');
+  const courses = isDefaultQuery
+    ? await CourseService.getDefaultCourseList()
+    : await prisma.course.findMany({
+        where,
+        orderBy: { createdAt: 'desc' }
+      });
 
   const filterLevels = [
     { value: "全部", label: t("courseFilters.levelAll") },
