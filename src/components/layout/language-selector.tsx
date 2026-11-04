@@ -61,9 +61,9 @@ export function LanguageSelector({ currentLocale }: { currentLocale: string }) {
           position: "absolute",
           top: "calc(100% + 6px)",
           right: 0,
-          background: "#fff",
+          background: "var(--surface-card)",
           borderRadius: "10px",
-          boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+          boxShadow: "var(--card-shadow)",
           border: "1px solid var(--border-color)",
           padding: "0.4rem",
           display: "flex",
@@ -76,7 +76,7 @@ export function LanguageSelector({ currentLocale }: { currentLocale: string }) {
             onClick={() => handleSelect("zh")}
             style={{
               background: currentLocale === "zh" ? "var(--primary-light)" : "none",
-              color: currentLocale === "zh" ? "var(--primary)" : "#495057",
+              color: currentLocale === "zh" ? "var(--primary)" : "var(--text-secondary)",
               border: "none",
               borderRadius: "6px",
               padding: "0.5rem 0.75rem",
@@ -87,7 +87,7 @@ export function LanguageSelector({ currentLocale }: { currentLocale: string }) {
               transition: "background 0.2s"
             }}
             onMouseEnter={(e) => {
-              if (currentLocale !== "zh") e.currentTarget.style.background = "#f8f9fa";
+              if (currentLocale !== "zh") e.currentTarget.style.background = "var(--surface-muted)";
             }}
             onMouseLeave={(e) => {
               if (currentLocale !== "zh") e.currentTarget.style.background = "none";
@@ -99,7 +99,7 @@ export function LanguageSelector({ currentLocale }: { currentLocale: string }) {
             onClick={() => handleSelect("en")}
             style={{
               background: currentLocale === "en" ? "var(--primary-light)" : "none",
-              color: currentLocale === "en" ? "var(--primary)" : "#495057",
+              color: currentLocale === "en" ? "var(--primary)" : "var(--text-secondary)",
               border: "none",
               borderRadius: "6px",
               padding: "0.5rem 0.75rem",
@@ -110,7 +110,7 @@ export function LanguageSelector({ currentLocale }: { currentLocale: string }) {
               transition: "background 0.2s"
             }}
             onMouseEnter={(e) => {
-              if (currentLocale !== "en") e.currentTarget.style.background = "#f8f9fa";
+              if (currentLocale !== "en") e.currentTarget.style.background = "var(--surface-muted)";
             }}
             onMouseLeave={(e) => {
               if (currentLocale !== "en") e.currentTarget.style.background = "none";
@@ -122,7 +122,7 @@ export function LanguageSelector({ currentLocale }: { currentLocale: string }) {
             onClick={() => handleSelect("es")}
             style={{
               background: currentLocale === "es" ? "var(--primary-light)" : "none",
-              color: currentLocale === "es" ? "var(--primary)" : "#495057",
+              color: currentLocale === "es" ? "var(--primary)" : "var(--text-secondary)",
               border: "none",
               borderRadius: "6px",
               padding: "0.5rem 0.75rem",
@@ -133,7 +133,7 @@ export function LanguageSelector({ currentLocale }: { currentLocale: string }) {
               transition: "background 0.2s"
             }}
             onMouseEnter={(e) => {
-              if (currentLocale !== "es") e.currentTarget.style.background = "#f8f9fa";
+              if (currentLocale !== "es") e.currentTarget.style.background = "var(--surface-muted)";
             }}
             onMouseLeave={(e) => {
               if (currentLocale !== "es") e.currentTarget.style.background = "none";

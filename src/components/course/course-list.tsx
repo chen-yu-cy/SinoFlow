@@ -16,7 +16,7 @@ const CourseList = ({ initialCourses }: CourseListProps) => {
         <h3 style={{ fontSize: "1.75rem", margin: 0 }}>精选课程</h3>
         <div style={{ 
           display: "flex", 
-          background: "#e9ecef", 
+          background: "var(--surface-subtle)", 
           padding: "0.25rem", 
           borderRadius: "6px",
           gap: "0.25rem"
@@ -27,11 +27,12 @@ const CourseList = ({ initialCourses }: CourseListProps) => {
               padding: "0.4rem 0.8rem", 
               border: "none", 
               borderRadius: "4px",
-              background: layout === "grid" ? "#fff" : "transparent",
+              background: layout === "grid" ? "var(--surface-card)" : "transparent",
+              color: "var(--foreground-rgb)",
               cursor: "pointer",
               fontSize: "0.85rem",
               fontWeight: layout === "grid" ? "600" : "normal",
-              boxShadow: layout === "grid" ? "0 2px 4px rgba(0,0,0,0.05)" : "none"
+              boxShadow: layout === "grid" ? "0 2px 4px rgba(0,0,0,0.08)" : "none"
             }}
           >
             网格显示
@@ -42,11 +43,12 @@ const CourseList = ({ initialCourses }: CourseListProps) => {
               padding: "0.4rem 0.8rem", 
               border: "none", 
               borderRadius: "4px",
-              background: layout === "list" ? "#fff" : "transparent",
+              background: layout === "list" ? "var(--surface-card)" : "transparent",
+              color: "var(--foreground-rgb)",
               cursor: "pointer",
               fontSize: "0.85rem",
               fontWeight: layout === "list" ? "600" : "normal",
-              boxShadow: layout === "list" ? "0 2px 4px rgba(0,0,0,0.05)" : "none"
+              boxShadow: layout === "list" ? "0 2px 4px rgba(0,0,0,0.08)" : "none"
             }}
           >
             列表显示

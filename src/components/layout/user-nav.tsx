@@ -82,9 +82,9 @@ const UserNav = ({ user, translations }: UserNavProps) => {
           alignItems: "center", 
           gap: "0.5rem", 
           padding: "0.4rem 0.8rem", 
-          background: user.impersonatorEmail ? "#fff9db" : (isOpen ? "#e9ecef" : "#f1f3f5"), 
+          background: user.impersonatorEmail ? "var(--warning-light)" : (isOpen ? "var(--surface-muted)" : "var(--surface-subtle)"), 
           borderRadius: "20px",
-          border: user.impersonatorEmail ? "1px solid #ffe3e3" : "none",
+          border: user.impersonatorEmail ? "1px solid var(--warning)" : "1px solid var(--border-color)",
           cursor: "pointer",
           transition: "all 0.2s",
           outline: "none"
@@ -107,18 +107,18 @@ const UserNav = ({ user, translations }: UserNavProps) => {
           {user.impersonatorEmail && (
             <span style={{ 
               fontSize: "0.7rem", 
-              background: "#fff9db", 
-              color: "#f59f00", 
+              background: "var(--warning-light)", 
+              color: "var(--warning)", 
               padding: "0.1rem 0.4rem", 
               borderRadius: "10px", 
-              border: "1px solid #ffe066",
+              border: "1px solid var(--warning)",
               fontWeight: "bold"
             }}>
               模拟中
             </span>
           )}
         </span>
-        <ChevronDown size={14} style={{ transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s", color: "#adb5bd" }} />
+        <ChevronDown size={14} style={{ transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s", color: "var(--text-muted)" }} />
       </button>
 
       {isOpen && (
@@ -127,20 +127,20 @@ const UserNav = ({ user, translations }: UserNavProps) => {
           top: "calc(100% + 8px)", 
           right: 0, 
           width: "220px", 
-          background: "#fff", 
+          background: "var(--surface-card)", 
           borderRadius: "12px", 
-          boxShadow: "0 10px 25px rgba(0,0,0,0.1), 0 0 1px rgba(0,0,0,0.1)",
+          boxShadow: "var(--card-shadow)",
           padding: "0.5rem",
           zIndex: 1000,
           border: "1px solid var(--border-color)",
           animation: "fadeIn 0.2s ease-out"
         }}>
           {/* User Info Header */}
-          <div style={{ padding: "0.75rem 1rem", borderBottom: "1px solid #f1f3f5", marginBottom: "0.5rem" }}>
+          <div style={{ padding: "0.75rem 1rem", borderBottom: "1px solid var(--border-subtle)", marginBottom: "0.5rem" }}>
             <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--foreground-rgb)" }}>{user.name}</div>
-            <div style={{ fontSize: "0.75rem", color: "#adb5bd", overflow: "hidden", textOverflow: "ellipsis" }}>{user.email}</div>
+            <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis" }}>{user.email}</div>
             {user.impersonatorEmail && (
-              <div style={{ fontSize: "0.7rem", color: "#f59f00", marginTop: "0.25rem", fontWeight: "500" }}>
+              <div style={{ fontSize: "0.7rem", color: "var(--warning)", marginTop: "0.25rem", fontWeight: "500" }}>
                 原管理员: {user.impersonatorEmail}
               </div>
             )}
@@ -156,11 +156,11 @@ const UserNav = ({ user, translations }: UserNavProps) => {
                 gap: "0.75rem", 
                 padding: "0.75rem 1rem", 
                 borderRadius: "8px", 
-                color: "#f59f00", 
+                color: "var(--warning)", 
                 fontWeight: 600,
                 fontSize: "0.9rem",
                 cursor: "pointer",
-                background: "#fff9db",
+                background: "var(--warning-light)",
                 marginBottom: "0.5rem",
                 transition: "opacity 0.2s"
               }} 
@@ -203,7 +203,7 @@ const UserNav = ({ user, translations }: UserNavProps) => {
               cursor: "pointer",
               transition: "background 0.2s"
             }} className="dropdown-item-hover">
-              <BookOpen size={18} color="#adb5bd" /> {t.myLearning}
+              <BookOpen size={18} color="var(--text-muted)" /> {t.myLearning}
             </div>
           </Link>
 
@@ -219,7 +219,7 @@ const UserNav = ({ user, translations }: UserNavProps) => {
               cursor: "pointer",
               transition: "background 0.2s"
             }} className="dropdown-item-hover">
-              <Settings size={18} color="#adb5bd" /> {t.settings}
+              <Settings size={18} color="var(--text-muted)" /> {t.settings}
             </div>
           </Link>
 
@@ -235,7 +235,7 @@ const UserNav = ({ user, translations }: UserNavProps) => {
               fontSize: "0.9rem",
               cursor: "pointer",
               marginTop: "0.5rem",
-              borderTop: "1px solid #f1f3f5"
+              borderTop: "1px solid var(--border-subtle)"
             }}
             className="dropdown-item-hover"
           >
@@ -244,7 +244,7 @@ const UserNav = ({ user, translations }: UserNavProps) => {
 
           <style jsx>{`
             .dropdown-item-hover:hover {
-              background-color: #f8f9fa;
+              background-color: var(--surface-muted);
             }
             @keyframes fadeIn {
               from { opacity: 0; transform: translateY(-10px); }

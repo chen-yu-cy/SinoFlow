@@ -47,29 +47,29 @@ export default function NotesFeatureIntroPage() {
         }}>
           <Sparkles size={14} /> 核心特色功能首发介绍
         </div>
-        <h2 style={{ fontSize: "2.75rem", fontWeight: "900", margin: "0 0 1rem 0", color: "#1a1e21" }} className="font-serif-zh-en">
+        <h2 style={{ fontSize: "2.75rem", fontWeight: "900", margin: "0 0 1rem 0", color: "var(--foreground-rgb)" }} className="font-serif-zh-en">
           随堂时间戳笔记功能
         </h2>
-        <p style={{ color: "#6c757d", fontSize: "1.1rem", maxWidth: "600px", margin: "0 auto", lineHeight: "1.6" }}>
+        <p style={{ color: "var(--text-muted)", fontSize: "1.1rem", maxWidth: "600px", margin: "0 auto", lineHeight: "1.6" }}>
           打破传统视频学习的遗忘曲线，为您定制“即记即查、一键回溯”的沉浸式复习闭环。
         </p>
       </div>
 
       {/* Interactive Simulation Dashboard */}
       <div style={{ 
-        background: "#fff", 
+        background: "var(--surface-card)", 
         borderRadius: "16px", 
         border: "1px solid var(--border-color)", 
         boxShadow: "var(--card-shadow)",
         overflow: "hidden",
         marginBottom: "4rem"
       }}>
-        <div style={{ padding: "1.25rem 2rem", background: "#fcfcfc", borderBottom: "1px solid var(--border-color)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ padding: "1.25rem 2rem", background: "var(--surface-muted)", borderBottom: "1px solid var(--border-color)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
             <span style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#ff4d4f" }}></span>
-            <span style={{ fontSize: "0.9rem", fontWeight: "700", color: "#495057" }}>💡 功能体验：点击下方笔记时间戳试一试</span>
+            <span style={{ fontSize: "0.9rem", fontWeight: "700", color: "var(--text-secondary)" }}>💡 功能体验：点击下方笔记时间戳试一试</span>
           </div>
-          <span style={{ fontSize: "0.8rem", color: "#adb5bd", fontWeight: "600" }}>交互式模拟器</span>
+          <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: "600" }}>交互式模拟器</span>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2px", background: "var(--border-color)" }}>
@@ -141,8 +141,8 @@ export default function NotesFeatureIntroPage() {
           </div>
 
           {/* Notes List Screen */}
-          <div style={{ background: "#fff", padding: "1.5rem" }}>
-            <h4 style={{ margin: "0 0 1rem 0", display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "1rem", color: "#212529" }}>
+          <div style={{ background: "var(--surface-card)", padding: "1.5rem" }}>
+            <h4 style={{ margin: "0 0 1rem 0", display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "1rem", color: "var(--foreground-rgb)" }}>
               <PenTool size={18} color="var(--primary)" /> 随堂学习笔记
             </h4>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
@@ -155,8 +155,8 @@ export default function NotesFeatureIntroPage() {
                     style={{
                       padding: "0.75rem 1rem",
                       borderRadius: "8px",
-                      border: `1px solid ${isActive ? "var(--primary)" : "#e9ecef"}`,
-                      background: isActive ? "var(--primary-light)" : "#fcfcfc",
+                      border: `1px solid ${isActive ? "var(--primary)" : "var(--border-subtle)"}`,
+                      background: isActive ? "var(--primary-light)" : "var(--surface-muted)",
                       cursor: "pointer",
                       transition: "all 0.2s",
                       transform: isActive ? "scale(1.02)" : "scale(1)"
@@ -168,7 +168,7 @@ export default function NotesFeatureIntroPage() {
                         fontFamily: "monospace", 
                         fontWeight: "700", 
                         color: "var(--primary)",
-                        background: "rgba(200, 16, 46, 0.08)",
+                        background: "var(--primary-light)",
                         padding: "0.1rem 0.4rem",
                         borderRadius: "4px"
                       }}>
@@ -176,7 +176,7 @@ export default function NotesFeatureIntroPage() {
                       </span>
                       {isActive && <span style={{ fontSize: "0.7rem", color: "var(--primary)", fontWeight: "600" }}>正在回溯该章节</span>}
                     </div>
-                    <p style={{ margin: 0, fontSize: "0.85rem", color: "#343a40", lineHeight: "1.4" }}>
+                    <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--foreground-rgb)", lineHeight: "1.4" }}>
                       {note.text}
                     </p>
                   </div>
@@ -189,26 +189,26 @@ export default function NotesFeatureIntroPage() {
 
       {/* Feature Cards Grid */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1.5rem", marginBottom: "4rem" }}>
-        <div style={{ background: "#fff", padding: "1.75rem", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
+        <div style={{ background: "var(--surface-card)", padding: "1.75rem", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
           <div style={{ color: "var(--primary)", marginBottom: "0.75rem" }}><Clock size={24} /></div>
           <h4 style={{ margin: "0 0 0.5rem 0", fontSize: "1.1rem", fontWeight: "700" }}>时间戳极速定位</h4>
-          <p style={{ margin: 0, fontSize: "0.9rem", color: "#6c757d", lineHeight: "1.5" }}>
+          <p style={{ margin: 0, fontSize: "0.9rem", color: "var(--text-muted)", lineHeight: "1.5" }}>
             学习笔记深度关联播放器。点击列表中时间戳，直接瞬移拉回原视频时间点，无需耗时反复拖动寻找。
           </p>
         </div>
         
-        <div style={{ background: "#fff", padding: "1.75rem", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
+        <div style={{ background: "var(--surface-card)", padding: "1.75rem", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
           <div style={{ color: "var(--primary)", marginBottom: "0.75rem" }}><PenTool size={24} /></div>
           <h4 style={{ margin: "0 0 0.5rem 0", fontSize: "1.1rem", fontWeight: "700" }}>边看边记零打扰</h4>
-          <p style={{ margin: 0, fontSize: "0.9rem", color: "#6c757d", lineHeight: "1.5" }}>
+          <p style={{ margin: 0, fontSize: "0.9rem", color: "var(--text-muted)", lineHeight: "1.5" }}>
             精心打磨毛玻璃操控栏与专属 Tab 交互体验，实时记录不打断观课思路，完美沉浸体验。
           </p>
         </div>
 
-        <div style={{ background: "#fff", padding: "1.75rem", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
+        <div style={{ background: "var(--surface-card)", padding: "1.75rem", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
           <div style={{ color: "var(--primary)", marginBottom: "0.75rem" }}><Lightbulb size={24} /></div>
           <h4 style={{ margin: "0 0 0.5rem 0", fontSize: "1.1rem", fontWeight: "700" }}>智能备考伴侣</h4>
-          <p style={{ margin: 0, fontSize: "0.9rem", color: "#6c757d", lineHeight: "1.5" }}>
+          <p style={{ margin: 0, fontSize: "0.9rem", color: "var(--text-muted)", lineHeight: "1.5" }}>
             针对汉语学习特质（发音、词义、社论长难句）深度集成，为高效掌握高水平应用筑牢根基。
           </p>
         </div>
@@ -225,7 +225,7 @@ export default function NotesFeatureIntroPage() {
         <h3 style={{ margin: "0 0 0.75rem 0", fontSize: "1.75rem", fontWeight: "800", color: "var(--primary)" }} className="font-serif-zh-en">
           加入权威平台，定制你的高效汉语课
         </h3>
-        <p style={{ margin: "0 0 2rem 0", color: "#495057", fontSize: "0.95rem", lineHeight: "1.6", maxWidth: "550px", marginInline: "auto" }}>
+        <p style={{ margin: "0 0 2rem 0", color: "var(--text-secondary)", fontSize: "0.95rem", lineHeight: "1.6", maxWidth: "550px", marginInline: "auto" }}>
           时间戳随堂笔记目前针对所有付费已购学员全面开放。购买任意课程，即可完美解锁该特权以及专属课后辅导资料。
         </p>
         <div style={{ display: "flex", justifyContent: "center", gap: "1rem" }}>

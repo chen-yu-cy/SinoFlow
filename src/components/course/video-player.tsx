@@ -12,8 +12,16 @@ import {
   Minimize, 
   RotateCcw, 
   RotateCw, 
-  Settings 
+  Settings,
+  MessageSquare
 } from "lucide-react";
+import { scrollToPurchaseSection } from "@/components/course/purchase-notice";
+
+export interface VideoNoteMarker {
+  id: string;
+  content: string;
+  timestamp: number;
+}
 
 interface VideoPlayerProps {
   url: string;
@@ -22,8 +30,10 @@ interface VideoPlayerProps {
   isLimitedPreview?: boolean;
   previewLimitRatio?: number; // 默认 0.3 即 30%
   seekToTime?: number | null;
+  seekTrigger?: number;
   onSeekProcessed?: () => void;
   onTimeUpdate?: (time: number) => void;
+  notes?: VideoNoteMarker[];
 }
 
 const VideoPlayer = ({ 
@@ -33,8 +43,10 @@ const VideoPlayer = ({
   isLimitedPreview = false, 
   previewLimitRatio = 0.3,
   seekToTime = null,
+  seekTrigger = 0,
   onSeekProcessed,
-  onTimeUpdate
+  onTimeUpdate,
+  notes = []
 }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -51,6 +63,8 @@ const VideoPlayer = ({
   const [showRateMenu, setShowRateMenu] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [previewFinished, setPreviewFinished] = useState(false);
+  const [showNoteOverlay, setShowNoteOverlay] = useState(true);
+  const [hoveredNoteId, setHoveredNoteId] = useState<string | null>(null);
 
   // 视频源加载逻辑 (兼容 HLS 与 MP4)
   useEffect(() => {
@@ -101,10 +115,12 @@ const VideoPlayer = ({
     if (!video) return;
     if (seekToTime !== undefined && seekToTime !== null) {
       let targetTime = seekToTime;
+      let hitLimit = false;
       if (isLimitedPreview && video.duration) {
         const limitTime = video.duration * previewLimitRatio;
         if (targetTime >= limitTime) {
           targetTime = limitTime;
+          hitLimit = true;
           setPreviewFinished(true);
           video.pause();
           setIsPlaying(false);
@@ -114,9 +130,12 @@ const VideoPlayer = ({
       }
       video.currentTime = targetTime;
       setCurrentTime(targetTime);
+      if (!hitLimit && video.paused) {
+        video.play().then(() => setIsPlaying(true)).catch(() => {});
+      }
       onSeekProcessed?.();
     }
-  }, [seekToTime, isLimitedPreview, previewLimitRatio, onSeekProcessed]);
+  }, [seekToTime, seekTrigger, isLimitedPreview, previewLimitRatio, onSeekProcessed]);
 
   // 全屏状态改变监听
   useEffect(() => {
@@ -333,6 +352,33 @@ const VideoPlayer = ({
   };
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const activeNotes = notes.filter(
+    (note) => currentTime >= note.timestamp && currentTime <= note.timestamp + 4.5
+  );
+
+  const jumpToTimestamp = (timestamp: number) => {
+    const video = videoRef.current;
+    if (!video) return;
+    let targetTime = timestamp;
+    if (isLimitedPreview && video.duration) {
+      const limitTime = video.duration * previewLimitRatio;
+      if (targetTime >= limitTime) {
+        targetTime = limitTime;
+        setPreviewFinished(true);
+        video.pause();
+        setIsPlaying(false);
+        video.currentTime = targetTime;
+        setCurrentTime(targetTime);
+        return;
+      }
+      setPreviewFinished(false);
+    }
+    video.currentTime = targetTime;
+    setCurrentTime(targetTime);
+    if (video.paused) {
+      video.play().then(() => setIsPlaying(true)).catch(() => {});
+    }
+  };
 
   return (
     <div 
@@ -368,6 +414,65 @@ const VideoPlayer = ({
           cursor: "pointer"
         }}
       />
+
+      {/* 随堂笔记实时弹幕浮层 (播放至笔记时间点自动浮现 4.5 秒) */}
+      {showNoteOverlay && !previewFinished && activeNotes.length > 0 && (
+        <div
+          className="video-note-danmaku-layer"
+          style={{
+            position: "absolute",
+            top: "16px",
+            left: "16px",
+            right: "16px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            gap: "8px",
+            pointerEvents: "none",
+            zIndex: 12
+          }}
+        >
+          {activeNotes.map((note) => (
+            <div
+              key={note.id}
+              style={{
+                background: "rgba(20, 23, 26, 0.85)",
+                backdropFilter: "blur(8px)",
+                borderLeft: "3px solid #fcc419",
+                border: "1px solid rgba(252, 196, 25, 0.35)",
+                color: "#fff",
+                padding: "0.45rem 0.9rem",
+                borderRadius: "20px",
+                fontSize: "0.88rem",
+                fontWeight: "600",
+                maxWidth: "85%",
+                boxShadow: "0 6px 20px rgba(0, 0, 0, 0.4)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.5rem"
+              }}
+            >
+              <span
+                style={{
+                  color: "#fcc419",
+                  fontFamily: "monospace",
+                  fontSize: "0.8rem",
+                  fontWeight: "700",
+                  background: "rgba(252, 196, 25, 0.15)",
+                  padding: "0.1rem 0.45rem",
+                  borderRadius: "10px",
+                  flexShrink: 0
+                }}
+              >
+                📝 {formatTime(note.timestamp)}
+              </span>
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {note.content}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* 居中超大播放/暂停按钮遮罩层 (在非播放状态下悬浮显示，若试看结束则不显示) */}
       {!isPlaying && !previewFinished && (
@@ -443,12 +548,9 @@ const VideoPlayer = ({
             已购学员可享受 HLS 级别防盗链及全部配套学习资料，助您高效掌握汉语精髓。
           </p>
           <button 
+            type="button"
             onClick={() => {
-              // 触发平滑滚动到购买入口
-              const purchaseSection = document.getElementById("purchase-section") || document.querySelector("button.btn-primary");
-              if (purchaseSection) {
-                purchaseSection.scrollIntoView({ behavior: "smooth" });
-              }
+              void scrollToPurchaseSection();
             }}
             className="btn-primary" 
             style={{ 
@@ -456,7 +558,8 @@ const VideoPlayer = ({
               borderRadius: "20px", 
               fontSize: "0.9rem",
               fontWeight: "600",
-              boxShadow: "0 6px 15px rgba(200, 16, 46, 0.3)"
+              boxShadow: "0 6px 15px rgba(200, 16, 46, 0.3)",
+              cursor: "pointer"
             }}
           >
             立即解锁全部章节
@@ -490,6 +593,68 @@ const VideoPlayer = ({
           <div style={{ position: "absolute", left: 0, right: 0, height: "4px", background: "rgba(255,255,255,0.2)", borderRadius: "2px" }} />
           {/* 已学完的红色彩条 */}
           <div style={{ position: "absolute", left: 0, width: `${progressPercent}%`, height: "4px", background: "var(--primary)", borderRadius: "2px" }} />
+
+          {/* 随堂笔记进度条金色锚点标记 */}
+          {duration > 0 && notes.map((note) => {
+            const notePercent = Math.min(100, Math.max(0, (note.timestamp / duration) * 100));
+            const isHovered = hoveredNoteId === note.id;
+            return (
+              <div
+                key={note.id}
+                className="video-note-marker"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  jumpToTimestamp(note.timestamp);
+                }}
+                onMouseEnter={() => setHoveredNoteId(note.id)}
+                onMouseLeave={() => setHoveredNoteId(null)}
+                style={{
+                  position: "absolute",
+                  left: `${notePercent}%`,
+                  width: isHovered ? "12px" : "9px",
+                  height: isHovered ? "12px" : "9px",
+                  background: "#fcc419",
+                  border: "2px solid #fff",
+                  borderRadius: "50%",
+                  transform: "translateX(-50%)",
+                  zIndex: 7,
+                  cursor: "pointer",
+                  boxShadow: "0 0 8px rgba(252, 196, 25, 0.85)",
+                  transition: "all 0.15s ease"
+                }}
+              >
+                {isHovered && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: "16px",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      background: "rgba(20, 23, 26, 0.96)",
+                      color: "#fff",
+                      padding: "5px 10px",
+                      borderRadius: "6px",
+                      fontSize: "11px",
+                      fontWeight: "600",
+                      whiteSpace: "nowrap",
+                      maxWidth: "220px",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      pointerEvents: "none",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.45)",
+                      border: "1px solid rgba(252, 196, 25, 0.4)"
+                    }}
+                  >
+                    <span style={{ color: "#fcc419", marginRight: "4px" }}>
+                      [{formatTime(note.timestamp)}]
+                    </span>
+                    {note.content}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
           {/* 试看截止线指示标记 */}
           {isLimitedPreview && (
             <div 
@@ -604,8 +769,8 @@ const VideoPlayer = ({
             </span>
           </div>
 
-          {/* 右侧控制：音量控制，倍速选择，全屏控制 */}
-          <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+          {/* 右侧控制：音量控制，笔记弹幕开关，倍速选择，全屏控制 */}
+          <div style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
             {/* 音量大小调节 */}
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <button 
@@ -616,6 +781,7 @@ const VideoPlayer = ({
               </button>
               <input
                 type="range"
+                className="video-volume-slider"
                 min={0}
                 max={1}
                 step={0.05}
@@ -632,6 +798,29 @@ const VideoPlayer = ({
                 }}
               />
             </div>
+
+            {/* 随堂笔记弹幕开关 */}
+            <button
+              type="button"
+              onClick={() => setShowNoteOverlay((prev) => !prev)}
+              title={showNoteOverlay ? "关闭随堂笔记弹幕" : "开启随堂笔记弹幕"}
+              style={{
+                background: showNoteOverlay ? "rgba(252, 196, 25, 0.2)" : "rgba(255,255,255,0.1)",
+                border: showNoteOverlay ? "1px solid rgba(252, 196, 25, 0.5)" : "1px solid rgba(255,255,255,0.15)",
+                borderRadius: "20px",
+                padding: "0.2rem 0.7rem",
+                fontSize: "0.78rem",
+                fontWeight: "700",
+                color: showNoteOverlay ? "#fcc419" : "rgba(255,255,255,0.65)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.3rem",
+                transition: "all 0.2s ease"
+              }}
+            >
+              <MessageSquare size={12} /> 弹幕 {showNoteOverlay ? "ON" : "OFF"}
+            </button>
 
             {/* 播放倍速控制 */}
             <div style={{ position: "relative" }}>

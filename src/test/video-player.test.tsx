@@ -1,7 +1,8 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, act } from '@testing-library/react'
+import { render, act, fireEvent } from '@testing-library/react'
 import VideoPlayer from '@/components/course/video-player'
+import PurchaseNotice from '@/components/course/purchase-notice'
 import Hls from 'hls.js'
 
 // Mock hls.js
@@ -109,6 +110,66 @@ describe('VideoPlayer Component', () => {
     expect(container.textContent).toContain('仅允许免费试看前 30%')
 
     pauseSpy.mockRestore()
+  })
+
+  it('应该在进度条渲染笔记锚点并在播放到对应时间戳时展示随堂笔记弹幕浮层', async () => {
+    const sampleNotes = [
+      { id: 'note-1', content: '重点声调规则记录', timestamp: 15 },
+    ]
+    const { container } = render(<VideoPlayer url={mockUrl} notes={sampleNotes} />)
+    const videoElement = container.querySelector('video')!
+
+    Object.defineProperty(videoElement, 'duration', { value: 100, writable: true })
+    Object.defineProperty(videoElement, 'currentTime', { value: 16, writable: true })
+
+    await act(async () => {
+      videoElement.dispatchEvent(new Event('loadedmetadata'))
+      videoElement.dispatchEvent(new Event('timeupdate'))
+    })
+
+    // 进度条上应渲染金色笔记圆点锚点
+    const marker = container.querySelector('.video-note-marker')
+    expect(marker).toBeTruthy()
+
+    // 视频画面上方应展示实时笔记弹幕浮层
+    const danmakuLayer = container.querySelector('.video-note-danmaku-layer')
+    expect(danmakuLayer).toBeTruthy()
+    expect(danmakuLayer?.textContent).toContain('重点声调规则记录')
+  })
+
+  it('当触发外部 seekToTime 与 seekTrigger 时应跳转到对应秒数并自动播放', async () => {
+    const { container, rerender } = render(
+      <VideoPlayer url={mockUrl} seekToTime={null} seekTrigger={0} />
+    )
+    const videoElement = container.querySelector('video')!
+    const playSpy = vi.spyOn(videoElement, 'play').mockResolvedValue()
+
+    rerender(<VideoPlayer url={mockUrl} seekToTime={42} seekTrigger={1} />)
+
+    expect(videoElement.currentTime).toBe(42)
+    expect(playSpy).toHaveBeenCalled()
+
+    playSpy.mockRestore()
+  })
+
+  it('PurchaseNotice 点击 Unlock All 按钮应平滑滚动至 #purchase-section', async () => {
+    const purchaseSection = document.createElement('section')
+    purchaseSection.id = 'purchase-section'
+    const buyBtn = document.createElement('button')
+    purchaseSection.appendChild(buyBtn)
+    document.body.appendChild(purchaseSection)
+
+    const scrollSpy = vi.fn().mockReturnValue(Promise.resolve())
+    purchaseSection.scrollIntoView = scrollSpy
+
+    const { getByText } = render(
+      <PurchaseNotice price={99} labels={{ unlockAll: 'Unlock All Content Now' }} />
+    )
+
+    fireEvent.click(getByText('Unlock All Content Now'))
+    expect(scrollSpy).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' })
+
+    document.body.removeChild(purchaseSection)
   })
 })
 

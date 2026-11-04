@@ -151,7 +151,7 @@ const HomePage = async () => {
       <section style={{ 
         marginTop: "5rem", 
         padding: "3rem", 
-        background: "#fff", 
+        background: "var(--surface-card)", 
         borderRadius: "12px", 
         border: "1px solid var(--border-color)",
         textAlign: "center"

@@ -1,9 +1,9 @@
 // FILE: src/components/course/lesson-content.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
-import VideoPlayer from "@/components/course/video-player";
-import PurchaseNotice from "@/components/course/purchase-notice";
+import React, { useState, useEffect, useRef } from "react";
+import VideoPlayer, { VideoNoteMarker } from "@/components/course/video-player";
+import PurchaseNotice, { scrollToPurchaseSection, scrollIntoViewAsync } from "@/components/course/purchase-notice";
 import { PlayCircle, Lock, Info, BookText, FileText, Download, PenTool } from "lucide-react";
 import { toggleLessonProgressAction } from "@/lib/actions/progress";
 import { getNotesAction, createNoteAction, deleteNoteAction } from "@/lib/actions/note";
@@ -62,12 +62,22 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
   
   // 笔记相关状态
   const [activeTab, setActiveTab] = useState<"intro" | "notes">("intro");
-  const [notes, setNotes] = useState<any[]>([]);
+  const [notes, setNotes] = useState<VideoNoteMarker[]>([]);
   const [noteContent, setNoteContent] = useState("");
   const [currentVideoTime, setCurrentVideoTime] = useState(0);
   const [seekToTime, setSeekToTime] = useState<number | null>(null);
+  const [seekTrigger, setSeekTrigger] = useState(0);
+  const videoWrapperRef = useRef<HTMLDivElement>(null);
 
   const currentLesson = course.lessons[currentLessonIndex];
+
+  const handleNoteJump = async (timestamp: number) => {
+    setSeekToTime(timestamp);
+    setSeekTrigger((prev) => prev + 1);
+    if (videoWrapperRef.current) {
+      await scrollIntoViewAsync(videoWrapperRef.current, { behavior: "smooth", block: "center" });
+    }
+  };
 
   // 监听课时切换，重新加载笔记
   useEffect(() => {
@@ -190,10 +200,10 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
   const progressPercentage = Math.round((completedLessonsCount / (course.lessons.length || 1)) * 100);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '3rem', alignItems: 'start' }}>
+    <div className="lesson-content-grid">
       {/* Main Content: Video and Description */}
-      <section>
-        <div style={{ marginBottom: "2rem" }}>
+      <section style={{ minInlineSize: 0 }}>
+        <div ref={videoWrapperRef} style={{ marginBottom: "2rem" }}>
           {canViewCurrentLesson ? (
             <VideoPlayer 
               url={currentLesson?.videoUrl || ""} 
@@ -201,8 +211,10 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
               onEnded={handleVideoEnded}
               isLimitedPreview={!hasFullAccess && currentLesson?.isPreview}
               seekToTime={seekToTime}
+              seekTrigger={seekTrigger}
               onSeekProcessed={() => setSeekToTime(null)}
               onTimeUpdate={(time) => setCurrentVideoTime(time)}
+              notes={notes}
             />
           ) : (
             <PurchaseNotice 
@@ -224,12 +236,12 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
           </div>
         )}
 
-        <h1 style={{ fontSize: "2.5rem", marginBottom: "1.5rem", fontWeight: "800" }}>
+        <h1 style={{ fontSize: "clamp(1.5rem, 4vw, 2.5rem)", marginBottom: "1.5rem", fontWeight: "800" }}>
           {canViewCurrentLesson ? (currentLesson?.title || course.title) : course.title}
         </h1>
         
         {/* Tab 栏切换 */}
-        <div style={{ display: "flex", borderBottom: "2px solid #e9ecef", marginBottom: "1.5rem" }}>
+        <div style={{ display: "flex", borderBottom: "2px solid var(--border-subtle)", marginBottom: "1.5rem" }}>
           <button 
             onClick={() => setActiveTab("intro")}
             style={{
@@ -237,7 +249,7 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
               background: "none",
               border: "none",
               borderBottom: activeTab === "intro" ? "3px solid var(--primary)" : "none",
-              color: activeTab === "intro" ? "var(--primary)" : "#6c757d",
+              color: activeTab === "intro" ? "var(--primary)" : "var(--text-muted)",
               fontWeight: "700",
               cursor: "pointer",
               fontSize: "1rem",
@@ -255,7 +267,7 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
               background: "none",
               border: "none",
               borderBottom: activeTab === "notes" ? "3px solid var(--primary)" : "none",
-              color: activeTab === "notes" ? "var(--primary)" : "#6c757d",
+              color: activeTab === "notes" ? "var(--primary)" : "var(--text-muted)",
               fontWeight: "700",
               cursor: "pointer",
               fontSize: "1rem",
@@ -270,18 +282,18 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
 
         {/* Tab 内容区 */}
         {activeTab === "intro" ? (
-          <div style={{ background: "#fff", padding: "2rem", borderRadius: "12px", border: "1px solid var(--border-color)", boxShadow: "var(--card-shadow)" }}>
+          <div style={{ background: "var(--surface-card)", padding: "2rem", borderRadius: "12px", border: "1px solid var(--border-color)", boxShadow: "var(--card-shadow)" }}>
             <h3 style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem", marginTop: 0 }}>
               <Info size={20} color="var(--primary)" /> {t.introTitle}
             </h3>
-            <p style={{ color: '#495057', lineHeight: '1.8', fontSize: "1.05rem", margin: 0 }}>{course.description}</p>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: '1.8', fontSize: "1.05rem", margin: 0 }}>{course.description}</p>
           </div>
         ) : (
-          <div style={{ background: "#fff", padding: "2rem", borderRadius: "12px", border: "1px solid var(--border-color)", boxShadow: "var(--card-shadow)" }}>
+          <div style={{ background: "var(--surface-card)", padding: "2rem", borderRadius: "12px", border: "1px solid var(--border-color)", boxShadow: "var(--card-shadow)" }}>
             {!hasFullAccess ? (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "2.5rem 1rem" }}>
                 <div style={{ 
-                  background: "rgba(200, 16, 46, 0.06)", 
+                  background: "var(--primary-light)", 
                   color: "var(--primary)", 
                   padding: "1rem", 
                   borderRadius: "50%", 
@@ -291,18 +303,16 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                 }}>
                   <Lock size={32} />
                 </div>
-                <h4 style={{ margin: "0 0 0.75rem 0", fontSize: "1.3rem", fontWeight: "800", color: "#212529" }}>
+                <h4 style={{ margin: "0 0 0.75rem 0", fontSize: "1.3rem", fontWeight: "800", color: "var(--foreground-rgb)" }}>
                   专属随堂笔记功能
                 </h4>
-                <p style={{ margin: "0 0 1.5rem 0", color: "#6c757d", fontSize: "0.95rem", maxWidth: "420px", lineHeight: "1.6" }}>
+                <p style={{ margin: "0 0 1.5rem 0", color: "var(--text-muted)", fontSize: "0.95rem", maxWidth: "420px", lineHeight: "1.6" }}>
                   购买该课程后即可解锁时间戳记笔记特权！支持在播放至任意时间一键截取记录，点击时间戳快速定位跳转视频，为您定制最高效的复习通路。
                 </p>
                 <button 
+                  type="button"
                   onClick={() => {
-                    const purchaseSection = document.getElementById("purchase-section") || document.querySelector("button.btn-primary");
-                    if (purchaseSection) {
-                      purchaseSection.scrollIntoView({ behavior: "smooth" });
-                    }
+                    void scrollToPurchaseSection();
                   }}
                   className="btn-primary" 
                   style={{ 
@@ -310,7 +320,8 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                     borderRadius: "20px", 
                     fontSize: "0.9rem",
                     fontWeight: "600",
-                    boxShadow: "0 6px 15px rgba(200, 16, 46, 0.25)"
+                    boxShadow: "0 6px 15px rgba(200, 16, 46, 0.25)",
+                    cursor: "pointer"
                   }}
                 >
                   立即购买解锁完整特权
@@ -323,12 +334,12 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                 </h3>
                 
                 {/* 笔记编辑卡片 */}
-                <div style={{ background: "#f8f9fa", padding: "1.25rem", borderRadius: "8px", border: "1px solid #e9ecef", marginBottom: "1.5rem" }}>
+                <div style={{ background: "var(--surface-muted)", padding: "1.25rem", borderRadius: "8px", border: "1px solid var(--border-subtle)", marginBottom: "1.5rem" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-                    <span style={{ fontSize: "0.9rem", color: "#495057", fontWeight: "600" }}>
+                    <span style={{ fontSize: "0.9rem", color: "var(--text-secondary)", fontWeight: "600" }}>
                       记录时间戳: <span style={{ color: "var(--primary)", fontFamily: "monospace", fontSize: "1rem" }}>{formatTime(currentVideoTime)}</span>
                     </span>
-                    <span style={{ fontSize: "0.8rem", color: "#6c757d" }}>
+                    <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
                       (视频播放时会自动追踪当前时间点)
                     </span>
                   </div>
@@ -341,7 +352,7 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                       minHeight: "100px",
                       padding: "0.75rem",
                       borderRadius: "6px",
-                      border: "1px solid #ced4da",
+                      border: "1px solid var(--input-border)",
                       outline: "none",
                       fontSize: "0.95rem",
                       resize: "vertical",
@@ -372,7 +383,7 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
 
                 {/* 笔记列表展示 */}
                 {notes.length === 0 ? (
-                  <p style={{ textAlign: "center", color: "#868e96", fontStyle: "italic", margin: "2rem 0" }}>
+                  <p style={{ textAlign: "center", color: "var(--text-muted)", fontStyle: "italic", margin: "2rem 0" }}>
                     暂无本节笔记，开始在上方写下你的第一条笔记吧！
                   </p>
                 ) : (
@@ -380,56 +391,75 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                     {notes.map((note) => (
                       <div 
                         key={note.id}
+                        onClick={() => {
+                          void handleNoteJump(note.timestamp);
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = "var(--primary)";
+                          e.currentTarget.style.boxShadow = "0 4px 12px rgba(200, 16, 46, 0.08)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = "var(--border-subtle)";
+                          e.currentTarget.style.boxShadow = "none";
+                        }}
+                        title="点击跳转到对应视频时间点播放"
                         style={{
                           padding: "1rem 1.25rem",
                           borderRadius: "8px",
-                          border: "1px solid #e9ecef",
-                          background: "#fff",
+                          border: "1px solid var(--border-subtle)",
+                          background: "var(--surface-card)",
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "flex-start",
-                          gap: "1.5rem"
+                          gap: "1.5rem",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease"
                         }}
                       >
                         <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", flex: 1 }}>
-                          <span 
-                            onClick={() => setSeekToTime(note.timestamp)}
-                            style={{
-                              fontSize: "0.85rem",
-                              color: "var(--primary)",
-                              fontWeight: "700",
-                              fontFamily: "monospace",
-                              background: "rgba(200, 16, 46, 0.06)",
-                              padding: "0.2rem 0.6rem",
-                              borderRadius: "4px",
-                              alignSelf: "flex-start",
-                              cursor: "pointer",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "0.25rem"
-                            }}
-                            title="点击跳转到视频时间"
-                          >
-                            ⏱️ {formatTime(note.timestamp)}
-                          </span>
-                          <p style={{ margin: 0, fontSize: "0.95rem", color: "#343a40", whiteSpace: "pre-wrap", lineHeight: "1.6" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                            <span 
+                              style={{
+                                fontSize: "0.85rem",
+                                color: "var(--primary)",
+                                fontWeight: "700",
+                                fontFamily: "monospace",
+                                background: "var(--primary-light)",
+                                padding: "0.2rem 0.65rem",
+                                borderRadius: "4px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.3rem"
+                              }}
+                            >
+                              ⏱️ {formatTime(note.timestamp)}
+                            </span>
+                            <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: "600" }}>
+                              ▶ 点击跳转播放
+                            </span>
+                          </div>
+                          <p style={{ margin: 0, fontSize: "0.95rem", color: "var(--foreground-rgb)", whiteSpace: "pre-wrap", lineHeight: "1.6" }}>
                             {note.content}
                           </p>
                         </div>
                         <button 
-                          onClick={() => handleDeleteNote(note.id)}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void handleDeleteNote(note.id);
+                          }}
                           style={{
                             background: "none",
                             border: "none",
-                            color: "#adb5bd",
+                            color: "var(--text-muted)",
                             cursor: "pointer",
-                            padding: 0,
+                            padding: "0.25rem 0.5rem",
                             fontSize: "0.85rem",
                             fontWeight: "600",
                             transition: "color 0.2s"
                           }}
                           onMouseEnter={(e) => e.currentTarget.style.color = "var(--primary)"}
-                          onMouseLeave={(e) => e.currentTarget.style.color = "#adb5bd"}
+                          onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-muted)"}
                         >
                           删除
                         </button>
@@ -445,20 +475,20 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
 
       {/* Sidebar: Lesson List */}
       <aside>
-        <div style={{ background: "#fff", border: '1px solid var(--border-color)', borderRadius: '12px', overflow: 'hidden', boxShadow: "var(--card-shadow)", position: "sticky", top: "100px" }}>
+        <div style={{ background: "var(--surface-card)", border: '1px solid var(--border-color)', borderRadius: '12px', overflow: 'hidden', boxShadow: "var(--card-shadow)", position: "sticky", top: "100px" }}>
           
           {/* Sidebar Header & Progress Bar */}
-          <div style={{ padding: '1.25rem 1.5rem', background: '#f8f9fa', borderBottom: '1px solid var(--border-color)' }}>
+          <div style={{ padding: '1.25rem 1.5rem', background: 'var(--surface-muted)', borderBottom: '1px solid var(--border-color)' }}>
             <h3 style={{ margin: "0 0 0.75rem 0", display: "flex", alignItems: "center", gap: "0.6rem" }}>
               <PlayCircle size={20} /> {t.curriculumTitle}
             </h3>
             {hasFullAccess && (
               <div style={{ marginTop: "0.5rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", color: "#6c757d", marginBottom: "0.3rem", fontWeight: "600" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", color: "var(--text-muted)", marginBottom: "0.3rem", fontWeight: "600" }}>
                   <span>{t.progressTitle}: {progressPercentage}%</span>
                   <span>{completedLessonsCount} / {course.lessons.length}</span>
                 </div>
-                <div style={{ width: "100%", height: "6px", background: "#dee2e6", borderRadius: "3px", overflow: "hidden" }}>
+                <div style={{ width: "100%", height: "6px", background: "var(--surface-subtle)", borderRadius: "3px", overflow: "hidden" }}>
                   <div style={{ width: `${progressPercentage}%`, height: "100%", background: "var(--success)", transition: "width 0.3s ease" }}></div>
                 </div>
               </div>
@@ -477,7 +507,7 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                   onClick={() => handleLessonClick(index)}
                   style={{ 
                     padding: '1.25rem 1.5rem', 
-                    borderBottom: index === course.lessons.length - 1 ? 'none' : '1px solid #f1f3f5', 
+                    borderBottom: index === course.lessons.length - 1 ? 'none' : '1px solid var(--border-subtle)', 
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -510,8 +540,8 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                       width: '28px', 
                       height: '28px', 
                       borderRadius: '50%', 
-                      background: isActive ? "var(--primary)" : (isLocked ? '#f1f3f5' : 'var(--success-light)'), 
-                      color: isActive ? "#fff" : (isLocked ? '#adb5bd' : 'var(--success)'),
+                      background: isActive ? "var(--primary)" : (isLocked ? 'var(--surface-subtle)' : 'var(--success-light)'), 
+                      color: isActive ? "#fff" : (isLocked ? 'var(--text-muted)' : 'var(--success)'),
                       display: 'flex', 
                       alignItems: 'center', 
                       justifyContent: 'center',
@@ -539,8 +569,8 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                     {lesson.duration && (
                       <span style={{ 
                         fontSize: "0.75rem", 
-                        color: "#8c9299",
-                        background: "#f1f3f5",
+                        color: "var(--text-muted)",
+                        background: "var(--surface-subtle)",
                         padding: "0.15rem 0.45rem",
                         borderRadius: "12px",
                         fontWeight: "600",
@@ -551,12 +581,12 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                     )}
 
                     {isLocked ? (
-                      <Lock size={16} color="#adb5bd" />
+                      <Lock size={16} color="var(--text-muted)" />
                     ) : (
                       lesson.isPreview && !hasFullAccess ? (
                         <span style={{ fontSize: "0.7rem", color: "var(--success)", fontWeight: "bold", border: "1px solid var(--success)", padding: "0.1rem 0.4rem", borderRadius: "4px" }}>试看</span>
                       ) : (
-                        <PlayCircle size={18} color={isActive ? "var(--primary)" : "#adb5bd"} />
+                        <PlayCircle size={18} color={isActive ? "var(--primary)" : "var(--text-muted)"} />
                       )
                     )}
                   </div>
@@ -566,13 +596,13 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
           </ul>
 
           {/* 配套学习资料 (Resources) 区域 */}
-          <div style={{ padding: '1.5rem', background: '#fcfcfc', borderTop: '1px solid var(--border-color)' }}>
+          <div style={{ padding: '1.5rem', background: 'var(--surface-muted)', borderTop: '1px solid var(--border-color)' }}>
             <h3 style={{ margin: "0 0 1rem 0", display: "flex", alignItems: "center", gap: "0.6rem", fontSize: "1.1rem", fontWeight: "700", color: "var(--foreground-rgb)" }}>
               <FileText size={18} color="var(--primary)" /> {t.resourcesTitle}
             </h3>
 
             {(!course.resources || course.resources.length === 0) ? (
-              <p style={{ margin: 0, fontSize: "0.9rem", color: "#868e96", fontStyle: "italic" }}>
+              <p style={{ margin: 0, fontSize: "0.9rem", color: "var(--text-muted)", fontStyle: "italic" }}>
                 {t.noResources}
               </p>
             ) : (
@@ -585,8 +615,8 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                       key={res.id}
                       style={{
                         padding: "0.75rem 1rem",
-                        background: "#fff",
-                        border: "1px solid #e9ecef",
+                        background: "var(--surface-card)",
+                        border: "1px solid var(--border-subtle)",
                         borderRadius: "8px",
                         display: "flex",
                         alignItems: "center",
@@ -604,7 +634,7 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                       }}
                       onMouseLeave={(e) => {
                         if (hasFullAccess) {
-                          e.currentTarget.style.borderColor = "#e9ecef";
+                          e.currentTarget.style.borderColor = "var(--border-subtle)";
                           e.currentTarget.style.boxShadow = "none";
                           e.currentTarget.style.transform = "none";
                         }
@@ -618,13 +648,13 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", overflow: "hidden", flex: 1 }}>
-                        <FileText size={20} color={hasFullAccess ? "var(--primary)" : "#adb5bd"} style={{ flexShrink: 0 }} />
+                        <FileText size={20} color={hasFullAccess ? "var(--primary)" : "var(--text-muted)"} style={{ flexShrink: 0 }} />
                         <div style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
-                          <span style={{ fontSize: "0.9rem", fontWeight: "600", color: "#343a40", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <span style={{ fontSize: "0.9rem", fontWeight: "600", color: "var(--foreground-rgb)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {res.title}
                           </span>
                           {res.fileSize && (
-                            <span style={{ fontSize: "0.75rem", color: "#868e96", marginTop: "0.15rem" }}>
+                            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "0.15rem" }}>
                               {res.fileSize}
                             </span>
                           )}

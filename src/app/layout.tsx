@@ -1,3 +1,4 @@
+// FILE: src/app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
 import { auth } from "@/lib/auth";
@@ -6,6 +7,7 @@ import { BookOpen, Home, LayoutDashboard, HelpCircle } from "lucide-react";
 import UserNav from "@/components/layout/user-nav";
 import { getTranslation } from "@/lib/i18n";
 import { LanguageSelector } from "@/components/layout/language-selector";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Inter, Plus_Jakarta_Sans, Playfair_Display } from "next/font/google";
 
 const inter = Inter({
@@ -40,19 +42,27 @@ const RootLayout = async ({
   const { t, locale } = await getTranslation();
 
   return (
-    <html lang={locale} className={`${inter.variable} ${plusJakarta.variable} ${playfair.variable}`}>
+    <html lang={locale} className={`${inter.variable} ${plusJakarta.variable} ${playfair.variable}`} suppressHydrationWarning>
+      <head>
+        <meta name="color-scheme" content="light dark" suppressHydrationWarning />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{const m=document.querySelector('meta[name="color-scheme"]');if(m){m.content=localStorage.getItem("color-scheme")??"light dark";}}catch(e){}`,
+          }}
+        />
+      </head>
       <body>
         <header>
-          <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "64px", padding: "0 2rem" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "3rem" }}>
+          <div className="container site-header-inner">
+            <div className="site-brand-and-nav">
               <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "0.25rem" }}>
                 {/* Balanced Hollow Logo */}
-                <svg width="40" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginLeft: "-5px" }}>
+                <svg width="40" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginLeft: "-5px", display: "block" }}>
                   <path d="M22.5 11C22.5 8.5 20.5 7 17.5 7H13.5C10.5 7 8.5 8.5 8.5 11C8.5 13.5 10.5 14.5 14 15L18 16C21.5 16.5 23.5 17.5 23.5 20.5C23.5 23.5 21.5 25 18.5 25H14.5C11.5 25 9.5 23.5 9.5 21" stroke="var(--primary)" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <h1 style={{ color: "var(--foreground-rgb)", fontSize: "1.6rem", fontWeight: "900", letterSpacing: "-1px", margin: 0 }}>SinoFlow</h1>
+                <h1 style={{ color: "var(--foreground-rgb)", fontSize: "clamp(1.25rem, 3.5vw, 1.6rem)", fontWeight: "900", letterSpacing: "-1px", margin: 0 }}>SinoFlow</h1>
               </Link>
-              <div style={{ display: "flex", gap: "2rem", fontSize: "0.95rem", fontWeight: 500 }}>
+              <nav className="site-nav-links">
                 <Link href="/" className="nav-link" style={{ display: "flex", alignItems: "center", gap: "0.4rem", textDecoration: "none", color: "inherit" }}>
                   <Home size={18} strokeWidth={2} /> {t("nav.home")}
                 </Link>
@@ -64,9 +74,10 @@ const RootLayout = async ({
                     <LayoutDashboard size={18} strokeWidth={2} /> {t("nav.myCourses")}
                   </Link>
                 )}
-              </div>
+              </nav>
             </div>
-            <div style={{ display: "flex", gap: "1.25rem", alignItems: "center" }}>
+            <div className="site-nav-actions">
+              <ThemeToggle />
               <Link 
                 href="/support" 
                 title={t("nav.support") || "帮助与支持"}
@@ -93,9 +104,9 @@ const RootLayout = async ({
                 />
               ) : (
                 <>
-                  <Link href="/login" className="nav-link" style={{ fontSize: "0.95rem", fontWeight: 500, textDecoration: "none" }}>{t("nav.login")}</Link>
+                  <Link href="/login" className="nav-link" style={{ fontSize: "0.9rem", fontWeight: 500, textDecoration: "none" }}>{t("nav.login")}</Link>
                   <Link href="/register">
-                    <button className="btn-primary" style={{ padding: "0.5rem 1.5rem", borderRadius: "20px" }}>{t("nav.register")}</button>
+                    <button className="btn-primary" style={{ padding: "0.45rem 1.15rem", borderRadius: "20px", fontSize: "0.9rem" }}>{t("nav.register")}</button>
                   </Link>
                 </>
               )}

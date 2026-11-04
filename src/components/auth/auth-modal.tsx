@@ -127,12 +127,12 @@ export const AuthModal = ({ initialMode, translations: t }: AuthModalProps) => {
         style={{
           width: "100%",
           maxWidth: "420px",
-          background: "rgba(255, 255, 255, 0.95)",
+          background: "var(--surface-card)",
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
           borderRadius: "16px",
-          border: "1px solid rgba(255, 255, 255, 0.5)",
-          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.15)",
+          border: "1px solid var(--border-color)",
+          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.25)",
           padding: "2.5rem 2rem",
           position: "relative",
           display: "flex",
@@ -150,7 +150,7 @@ export const AuthModal = ({ initialMode, translations: t }: AuthModalProps) => {
             border: "none",
             background: "none",
             cursor: "pointer",
-            color: "#6c757d",
+            color: "var(--text-muted)",
             padding: "0.25rem",
             borderRadius: "50%",
             display: "flex",
@@ -196,11 +196,11 @@ export const AuthModal = ({ initialMode, translations: t }: AuthModalProps) => {
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
           {mode === "register" && (
             <div>
-              <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.85rem", fontWeight: 600, color: "#495057" }}>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.85rem", fontWeight: 600, color: "var(--text-secondary)" }}>
                 {t.nameLabel}
               </label>
               <div style={{ position: "relative" }}>
-                <User size={16} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "#adb5bd" }} />
+                <User size={16} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
                 <input 
                   name="name" 
                   type="text" 
@@ -209,9 +209,9 @@ export const AuthModal = ({ initialMode, translations: t }: AuthModalProps) => {
                     width: "100%", 
                     padding: "0.75rem 1rem 0.75rem 2.5rem", 
                     borderRadius: "8px", 
-                    border: "1px solid #dee2e6",
+                    border: "1px solid var(--input-border)",
                     fontSize: "0.95rem",
-                    background: "#f8f9fa",
+                    background: "var(--surface-muted)",
                     transition: "all 0.2s"
                   }} 
                   required 
@@ -221,11 +221,11 @@ export const AuthModal = ({ initialMode, translations: t }: AuthModalProps) => {
           )}
 
           <div>
-            <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.85rem", fontWeight: 600, color: "#495057" }}>
+            <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.85rem", fontWeight: 600, color: "var(--text-secondary)" }}>
               {t.emailLabel}
             </label>
             <div style={{ position: "relative" }}>
-              <Mail size={16} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "#adb5bd" }} />
+              <Mail size={16} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
               <input 
                 name="email" 
                 type="email" 
@@ -234,9 +234,9 @@ export const AuthModal = ({ initialMode, translations: t }: AuthModalProps) => {
                   width: "100%", 
                   padding: "0.75rem 1rem 0.75rem 2.5rem", 
                   borderRadius: "8px", 
-                  border: "1px solid #dee2e6",
+                  border: "1px solid var(--input-border)",
                   fontSize: "0.95rem",
-                  background: "#f8f9fa",
+                  background: "var(--surface-muted)",
                   transition: "all 0.2s"
                 }} 
                 required 
@@ -245,11 +245,11 @@ export const AuthModal = ({ initialMode, translations: t }: AuthModalProps) => {
           </div>
 
           <div>
-            <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.85rem", fontWeight: 600, color: "#495057" }}>
+            <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.85rem", fontWeight: 600, color: "var(--text-secondary)" }}>
               {t.passwordLabel}
             </label>
             <div style={{ position: "relative" }}>
-              <Lock size={16} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "#adb5bd" }} />
+              <Lock size={16} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
               <input 
                 name="password" 
                 type="password" 
@@ -258,9 +258,9 @@ export const AuthModal = ({ initialMode, translations: t }: AuthModalProps) => {
                   width: "100%", 
                   padding: "0.75rem 1rem 0.75rem 2.5rem", 
                   borderRadius: "8px", 
-                  border: "1px solid #dee2e6",
+                  border: "1px solid var(--input-border)",
                   fontSize: "0.95rem",
-                  background: "#f8f9fa",
+                  background: "var(--surface-muted)",
                   transition: "all 0.2s"
                 }} 
                 required 
