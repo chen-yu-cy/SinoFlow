@@ -1,7 +1,7 @@
 // FILE: src/test/note.service.test.ts
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NoteService } from "@/lib/services/note.service";
-import { getNotesAction, createNoteAction, deleteNoteAction } from "@/lib/actions/note";
+import { getNotesAction, createNoteAction, deleteNoteAction, deleteNoteAsAdminAction } from "@/lib/actions/note";
 import prisma from "@/lib/db/client";
 import { auth } from "@/lib/auth";
 
@@ -77,6 +77,69 @@ describe("Note Support System Tests", () => {
         });
       });
     });
+
+    describe("deleteNoteAsAdmin", () => {
+      it("管理员应该能成功删除任何用户的笔记", async () => {
+        const mockNote = { id: "n1", userId: "u_other", content: "Spam note" };
+        (prisma.note.findUnique as any).mockResolvedValue(mockNote);
+        (prisma.note.delete as any).mockResolvedValue(mockNote);
+
+        const result = await NoteService.deleteNoteAsAdmin("n1");
+        expect(result).toEqual(mockNote);
+        expect(prisma.note.delete).toHaveBeenCalledWith({ where: { id: "n1" } });
+      });
+
+      it("若待删除笔记不存在，应该抛出错误", async () => {
+        (prisma.note.findUnique as any).mockResolvedValue(null);
+
+        await expect(NoteService.deleteNoteAsAdmin("non-existent")).rejects.toThrow("笔记不存在");
+        expect(prisma.note.delete).not.toHaveBeenCalled();
+      });
+    });
+
+    describe("getAllNotesForAdmin", () => {
+      it("应该调用 prisma.note.findMany 包含关联关系并按创建时间倒序返回", async () => {
+        const mockList = [
+          {
+            id: "n1",
+            content: "Note 1",
+            timestamp: 10,
+            user: { id: "u1", name: "Alice", email: "alice@test.com" },
+            lesson: { id: "l1", title: "Lesson 1", course: { id: "c1", title: "Course 1" } },
+          },
+        ];
+        (prisma.note.findMany as any).mockResolvedValue(mockList);
+
+        const result = await NoteService.getAllNotesForAdmin();
+        expect(result).toEqual(mockList);
+        expect(prisma.note.findMany).toHaveBeenCalledWith({
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+            lesson: {
+              select: {
+                id: true,
+                title: true,
+                course: {
+                  select: {
+                    id: true,
+                    title: true,
+                  },
+                },
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
+      });
+    });
   });
 
   describe("Note Server Actions", () => {
@@ -146,6 +209,39 @@ describe("Note Support System Tests", () => {
         const result = await deleteNoteAction("n1");
         expect(result.success).toBe(true);
         expect(prisma.note.delete).toHaveBeenCalledWith({ where: { id: "n1" } });
+      });
+    });
+
+    describe("deleteNoteAsAdminAction", () => {
+      it("未登录时应被拦截", async () => {
+        (auth as any).mockResolvedValue(null);
+        const result = await deleteNoteAsAdminAction("n1");
+        expect(result.error).toBe("无权执行此操作，仅限管理员");
+      });
+
+      it("非管理员用户应被拦截", async () => {
+        (auth as any).mockResolvedValue({ user: { id: "u1", role: "STUDENT" } });
+        const result = await deleteNoteAsAdminAction("n1");
+        expect(result.error).toBe("无权执行此操作，仅限管理员");
+      });
+
+      it("管理员用户应该能成功删除任何笔记", async () => {
+        (auth as any).mockResolvedValue({ user: { id: "admin_1", role: "ADMIN" } });
+        const mockNote = { id: "n1", content: "Violating note" };
+        (prisma.note.findUnique as any).mockResolvedValue(mockNote);
+        (prisma.note.delete as any).mockResolvedValue(mockNote);
+
+        const result = await deleteNoteAsAdminAction("n1");
+        expect(result.success).toBe(true);
+        expect(prisma.note.delete).toHaveBeenCalledWith({ where: { id: "n1" } });
+      });
+
+      it("笔记不存在时应该优雅返回错误提示", async () => {
+        (auth as any).mockResolvedValue({ user: { id: "admin_1", role: "ADMIN" } });
+        (prisma.note.findUnique as any).mockResolvedValue(null);
+
+        const result = await deleteNoteAsAdminAction("n1");
+        expect(result.error).toBe("笔记不存在");
       });
     });
   });

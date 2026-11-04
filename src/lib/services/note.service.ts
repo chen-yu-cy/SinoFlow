@@ -64,4 +64,54 @@ export const NoteService = {
       },
     });
   },
+
+  /**
+   * 管理员强制删除违规笔记 / 弹幕
+   * @param noteId 笔记 ID
+   */
+  async deleteNoteAsAdmin(noteId: string) {
+    const note = await prisma.note.findUnique({
+      where: { id: noteId },
+    });
+
+    if (!note) {
+      throw new Error("笔记不存在");
+    }
+
+    return await prisma.note.delete({
+      where: { id: noteId },
+    });
+  },
+
+  /**
+   * 管理员获取系统所有随堂笔记/弹幕列表
+   */
+  async getAllNotesForAdmin() {
+    return await prisma.note.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        lesson: {
+          select: {
+            id: true,
+            title: true,
+            course: {
+              select: {
+                id: true,
+                title: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  },
 };

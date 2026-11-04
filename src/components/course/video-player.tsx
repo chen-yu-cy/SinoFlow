@@ -355,6 +355,8 @@ const VideoPlayer = ({
   const activeNotes = notes.filter(
     (note) => currentTime >= note.timestamp && currentTime <= note.timestamp + 4.5
   );
+  // 多轨道防重叠：最多同屏展示 3 条弹幕，避免遮挡视线
+  const visibleNotes = activeNotes.slice(0, 3);
 
   const jumpToTimestamp = (timestamp: number) => {
     const video = videoRef.current;
@@ -415,8 +417,8 @@ const VideoPlayer = ({
         }}
       />
 
-      {/* 随堂笔记实时弹幕浮层 (播放至笔记时间点自动浮现 4.5 秒) */}
-      {showNoteOverlay && !previewFinished && activeNotes.length > 0 && (
+      {/* 随堂笔记实时弹幕浮层 (播放至笔记时间点自动浮现 4.5 秒，限制最多同屏 3 条并错落分轨防重叠) */}
+      {showNoteOverlay && !previewFinished && visibleNotes.length > 0 && (
         <div
           className="video-note-danmaku-layer"
           style={{
@@ -432,11 +434,11 @@ const VideoPlayer = ({
             zIndex: 12
           }}
         >
-          {activeNotes.map((note) => (
+          {visibleNotes.map((note, idx) => (
             <div
               key={note.id}
               style={{
-                background: "rgba(20, 23, 26, 0.85)",
+                background: "rgba(20, 23, 26, 0.88)",
                 backdropFilter: "blur(8px)",
                 borderLeft: "3px solid #fcc419",
                 border: "1px solid rgba(252, 196, 25, 0.35)",
@@ -449,7 +451,9 @@ const VideoPlayer = ({
                 boxShadow: "0 6px 20px rgba(0, 0, 0, 0.4)",
                 display: "inline-flex",
                 alignItems: "center",
-                gap: "0.5rem"
+                gap: "0.5rem",
+                marginLeft: `${(idx % 3) * 24}px`,
+                transition: "margin-left 0.3s ease, opacity 0.3s ease"
               }}
             >
               <span
@@ -471,6 +475,20 @@ const VideoPlayer = ({
               </span>
             </div>
           ))}
+          {activeNotes.length > 3 && (
+            <div
+              style={{
+                fontSize: "0.75rem",
+                color: "rgba(255, 255, 255, 0.7)",
+                background: "rgba(0, 0, 0, 0.5)",
+                padding: "2px 8px",
+                borderRadius: "10px",
+                marginLeft: "48px"
+              }}
+            >
+              还有 {activeNotes.length - 3} 条笔记...
+            </div>
+          )}
         </div>
       )}
 
