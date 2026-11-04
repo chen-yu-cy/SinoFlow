@@ -4,6 +4,7 @@
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db/client";
 import { ProgressService } from "@/lib/services/progress.service";
+import { CourseService } from "@/lib/services/course.service";
 import { OrderStatus } from "@prisma/client";
 import { logger } from "@/lib/logger";
 
@@ -28,10 +29,8 @@ export async function toggleLessonProgressAction(lessonId: string, completed: bo
       return { error: "课时不存在" };
     }
 
-    // 2. 权限校验：管理员，免费课程，或已购买课程的学员，或该课时是免费试看课时
-    const course = await prisma.course.findUnique({
-      where: { id: lesson.courseId },
-    });
+    // 2. 权限校验：管理员，免费课程，或已购买课程的学员，或该课时是免费试看课时（优先从 Redis 获取）
+    const course = await CourseService.getCourseById(lesson.courseId);
 
     const isAdmin = (session.user as any).role === "ADMIN";
     let hasAccess = isAdmin || lesson.isPreview || !!course?.isFree;

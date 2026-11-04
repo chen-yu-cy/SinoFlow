@@ -70,6 +70,28 @@ describe('CourseService', () => {
     })
   })
 
+  describe('invalidateCourseCache', () => {
+    it('当传入 courseId 时应该同时清除详情缓存与课程列表模式缓存', async () => {
+      vi.spyOn(CacheService, 'del').mockResolvedValue()
+      vi.spyOn(CacheService, 'invalidatePattern').mockResolvedValue()
+
+      await CourseService.invalidateCourseCache('c1')
+
+      expect(CacheService.del).toHaveBeenCalledWith('course:c1')
+      expect(CacheService.invalidatePattern).toHaveBeenCalledWith('courses:*')
+    })
+
+    it('当未传 courseId 时仅清除课程列表模式缓存', async () => {
+      vi.spyOn(CacheService, 'del').mockResolvedValue()
+      vi.spyOn(CacheService, 'invalidatePattern').mockResolvedValue()
+
+      await CourseService.invalidateCourseCache()
+
+      expect(CacheService.del).not.toHaveBeenCalled()
+      expect(CacheService.invalidatePattern).toHaveBeenCalledWith('courses:*')
+    })
+  })
+
   describe('deleteCourse', () => {
     it('应该使用事务执行级联删除并清除缓存', async () => {
       vi.spyOn(CacheService, 'del').mockResolvedValue()

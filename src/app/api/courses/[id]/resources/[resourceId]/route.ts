@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db/client";
+import { CourseService } from "@/lib/services/course.service";
 import { OrderStatus } from "@prisma/client";
 import path from "path";
 import fs from "fs";
@@ -50,9 +51,7 @@ export async function GET(
       return NextResponse.json({ error: "请先登录" }, { status: 401 });
     }
 
-    const course = await prisma.course.findUnique({
-      where: { id: courseId },
-    });
+    const course = await CourseService.getCourseById(courseId);
 
     if (!course) {
       return NextResponse.json({ error: "课程不存在" }, { status: 404 });

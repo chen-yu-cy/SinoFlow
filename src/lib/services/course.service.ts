@@ -68,8 +68,21 @@ export const CourseService = {
       },
     });
 
-    await CacheService.invalidatePattern("courses:*").catch(() => {});
+    await this.invalidateCourseCache();
     return created;
+  },
+
+  /**
+   * 课程及关联章节/资料缓存失效广播
+   * 清除指定课程详情缓存 (`course:${courseId}`) 以及全站课程列表缓存 (`courses:*`)，
+   * 确保课程主体、关联课时 (Lesson) 或配套学习资料 (Resource) 发生任何变动时的数据一致性。
+   * @param courseId 可选的课程 ID，传入时同时剔除详情缓存
+   */
+  async invalidateCourseCache(courseId?: string): Promise<void> {
+    if (courseId) {
+      await CacheService.del(`course:${courseId}`).catch(() => {});
+    }
+    await CacheService.invalidatePattern("courses:*").catch(() => {});
   },
 
   /**
@@ -180,8 +193,7 @@ export const CourseService = {
       });
     });
 
-    await CacheService.del(`course:${id}`).catch(() => {});
-    await CacheService.invalidatePattern("courses:*").catch(() => {});
+    await this.invalidateCourseCache(id);
     return updated;
   },
 
@@ -199,8 +211,7 @@ export const CourseService = {
       return await tx.course.delete({ where: { id } });
     });
 
-    await CacheService.del(`course:${id}`).catch(() => {});
-    await CacheService.invalidatePattern("courses:*").catch(() => {});
+    await this.invalidateCourseCache(id);
     return deleted;
   },
 };
