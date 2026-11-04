@@ -52,6 +52,8 @@ services:
         GIT_SHA: ${GIT_SHA:-local}
     restart: always
     logging: *default-logging
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     ports:
       - "3000:3000"
     environment:
@@ -115,6 +117,19 @@ services:
       - ./dashboards:/etc/grafana/provisioning/dashboards/json:ro
     depends_on:
       - loki
+
+  watchtower:
+    image: containrrr/watchtower:latest
+    restart: always
+    logging: *default-logging
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_LABEL_ENABLE=true
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=60
+    depends_on:
+      - app
 
 volumes:
   postgres_data:
