@@ -1,3 +1,4 @@
+// FILE: src/app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
 import { auth } from "@/lib/auth";
@@ -6,6 +7,7 @@ import { BookOpen, Home, LayoutDashboard, HelpCircle } from "lucide-react";
 import UserNav from "@/components/layout/user-nav";
 import { getTranslation } from "@/lib/i18n";
 import { LanguageSelector } from "@/components/layout/language-selector";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Inter, Plus_Jakarta_Sans, Playfair_Display } from "next/font/google";
 
 const inter = Inter({
@@ -40,7 +42,15 @@ const RootLayout = async ({
   const { t, locale } = await getTranslation();
 
   return (
-    <html lang={locale} className={`${inter.variable} ${plusJakarta.variable} ${playfair.variable}`}>
+    <html lang={locale} className={`${inter.variable} ${plusJakarta.variable} ${playfair.variable}`} suppressHydrationWarning>
+      <head>
+        <meta name="color-scheme" content="light dark" suppressHydrationWarning />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{const m=document.querySelector('meta[name="color-scheme"]');if(m){m.content=localStorage.getItem("color-scheme")??"light dark";}}catch(e){}`,
+          }}
+        />
+      </head>
       <body>
         <header>
           <div className="container site-header-inner">
@@ -67,6 +77,7 @@ const RootLayout = async ({
               </nav>
             </div>
             <div className="site-nav-actions">
+              <ThemeToggle />
               <Link 
                 href="/support" 
                 title={t("nav.support") || "帮助与支持"}

@@ -1,17 +1,215 @@
+/* FILE: src/app/globals.css */
 :root {
-  --foreground-rgb: 33, 37, 41;
-  --background-paper: #fdfcf7; /* 古典宣纸白/暖白色 */
-  --primary: #c8102e; /* 报刊红 */
-  --primary-light: rgba(200, 16, 46, 0.05); /* 古典淡红底 */
-  --success: #28a745;
-  --success-light: #e6f4ea;
-  --warning: #f59f00;
-  --warning-light: #fff9db;
-  --secondary: #6c757d;
+  /* Raw Light Tokens (Classical Xuan Paper & Crimson Ink) */
+  --fg-light: #212529;
+  --bg-paper-light: #fdfcf7;
+  --surface-card-light: #ffffff;
+  --surface-muted-light: #f8f9fa;
+  --surface-subtle-light: #f1f3f5;
+  --text-secondary-light: #495057;
+  --text-muted-light: #6c757d;
+  --primary-raw-light: #c8102e;
+  --primary-tint-light: rgba(200, 16, 46, 0.06);
+  --success-raw-light: #28a745;
+  --success-tint-light: #e6f4ea;
+  --warning-raw-light: #f59f00;
+  --warning-tint-light: #fff9db;
+  --duration-bg-light: #fff3cd;
+  --duration-text-light: #856404;
+  --border-raw-light: rgba(44, 62, 80, 0.1);
+  --border-subtle-light: #e9ecef;
+  --input-border-light: #ced4da;
+  --header-bg-light: rgba(253, 252, 247, 0.95);
+  --hero-bg-light: #fbf9f3;
+  --marquee-bg-light: rgba(253, 252, 247, 0.4);
+  --thumb-bg-start-light: #f8f9fa;
+  --thumb-bg-end-light: #e9ecef;
+
+  /* Raw Dark Tokens (Deep Songyan Night Ink & Warm Vermilion) */
+  --fg-dark: #f1f3f5;
+  --bg-paper-dark: #0f1318;
+  --surface-card-dark: #181e26;
+  --surface-muted-dark: #1f2732;
+  --surface-subtle-dark: #27313f;
+  --text-secondary-dark: #ced4da;
+  --text-muted-dark: #949fa8;
+  --primary-raw-dark: #ff4d67;
+  --primary-tint-dark: rgba(255, 77, 103, 0.16);
+  --success-raw-dark: #40c057;
+  --success-tint-dark: rgba(64, 192, 87, 0.16);
+  --warning-raw-dark: #fcc419;
+  --warning-tint-dark: rgba(252, 196, 25, 0.16);
+  --duration-bg-dark: rgba(252, 196, 25, 0.16);
+  --duration-text-dark: #ffd43b;
+  --border-raw-dark: rgba(255, 255, 255, 0.14);
+  --border-subtle-dark: rgba(255, 255, 255, 0.1);
+  --input-border-dark: rgba(255, 255, 255, 0.22);
+  --header-bg-dark: rgba(15, 19, 24, 0.92);
+  --hero-bg-dark: #151b23;
+  --marquee-bg-dark: rgba(24, 30, 38, 0.55);
+  --thumb-bg-start-dark: #1d2530;
+  --thumb-bg-end-dark: #141a22;
+
+  /* Default (Light) Semantic Tokens */
+  --color-scheme: light;
+  --foreground-rgb: var(--fg-light);
+  --background-paper: var(--bg-paper-light);
+  --surface-card: var(--surface-card-light);
+  --surface-muted: var(--surface-muted-light);
+  --surface-subtle: var(--surface-subtle-light);
+  --text-secondary: var(--text-secondary-light);
+  --text-muted: var(--text-muted-light);
+  --primary: var(--primary-raw-light);
+  --primary-light: var(--primary-tint-light);
+  --success: var(--success-raw-light);
+  --success-light: var(--success-tint-light);
+  --warning: var(--warning-raw-light);
+  --warning-light: var(--warning-tint-light);
+  --duration-bg: var(--duration-bg-light);
+  --duration-text: var(--duration-text-light);
+  --secondary: var(--text-muted);
   --accent: #ffc107;
-  --border-color: rgba(44, 62, 80, 0.08); /* 偏古典水墨的细描边 */
-  --card-shadow: 0 10px 25px rgba(44, 62, 80, 0.035), 0 1px 3px rgba(44, 62, 80, 0.015); /* 黛墨柔散影 */
+  --border-color: var(--border-raw-light);
+  --border-subtle: var(--border-subtle-light);
+  --input-border: var(--input-border-light);
+  --header-bg: var(--header-bg-light);
+  --hero-bg: var(--hero-bg-light);
+  --marquee-bg: var(--marquee-bg-light);
+  --thumb-bg-start: var(--thumb-bg-start-light);
+  --thumb-bg-end: var(--thumb-bg-end-light);
+  --card-shadow: 0 10px 25px rgba(44, 62, 80, 0.035), 0 1px 3px rgba(44, 62, 80, 0.015);
   --max-width: 1200px;
+
+  /* MANDATORY: Fallback for browsers without light-dark() support */
+  @media (prefers-color-scheme: dark) {
+    --color-scheme: dark;
+    --foreground-rgb: var(--fg-dark);
+    --background-paper: var(--bg-paper-dark);
+    --surface-card: var(--surface-card-dark);
+    --surface-muted: var(--surface-muted-dark);
+    --surface-subtle: var(--surface-subtle-dark);
+    --text-secondary: var(--text-secondary-dark);
+    --text-muted: var(--text-muted-dark);
+    --primary: var(--primary-raw-dark);
+    --primary-light: var(--primary-tint-dark);
+    --success: var(--success-raw-dark);
+    --success-light: var(--success-tint-dark);
+    --warning: var(--warning-raw-dark);
+    --warning-light: var(--warning-tint-dark);
+    --duration-bg: var(--duration-bg-dark);
+    --duration-text: var(--duration-text-dark);
+    --border-color: var(--border-raw-dark);
+    --border-subtle: var(--border-subtle-dark);
+    --input-border: var(--input-border-dark);
+    --header-bg: var(--header-bg-dark);
+    --hero-bg: var(--hero-bg-dark);
+    --marquee-bg: var(--marquee-bg-dark);
+    --thumb-bg-start: var(--thumb-bg-start-dark);
+    --thumb-bg-end: var(--thumb-bg-end-dark);
+    --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  /* MANDATORY: Automatically adapt native UI to user system preferences */
+  color-scheme: light dark;
+  accent-color: var(--primary);
+
+  &:has(> head > meta[name="color-scheme"][content="dark"]) {
+    color-scheme: dark;
+    --color-scheme: dark;
+    --foreground-rgb: var(--fg-dark);
+    --background-paper: var(--bg-paper-dark);
+    --surface-card: var(--surface-card-dark);
+    --surface-muted: var(--surface-muted-dark);
+    --surface-subtle: var(--surface-subtle-dark);
+    --text-secondary: var(--text-secondary-dark);
+    --text-muted: var(--text-muted-dark);
+    --primary: var(--primary-raw-dark);
+    --primary-light: var(--primary-tint-dark);
+    --success: var(--success-raw-dark);
+    --success-light: var(--success-tint-dark);
+    --warning: var(--warning-raw-dark);
+    --warning-light: var(--warning-tint-dark);
+    --duration-bg: var(--duration-bg-dark);
+    --duration-text: var(--duration-text-dark);
+    --border-color: var(--border-raw-dark);
+    --border-subtle: var(--border-subtle-dark);
+    --input-border: var(--input-border-dark);
+    --header-bg: var(--header-bg-dark);
+    --hero-bg: var(--hero-bg-dark);
+    --marquee-bg: var(--marquee-bg-dark);
+    --thumb-bg-start: var(--thumb-bg-start-dark);
+    --thumb-bg-end: var(--thumb-bg-end-dark);
+    --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  &:has(> head > meta[name="color-scheme"][content="light"]) {
+    color-scheme: light;
+    --color-scheme: light;
+    --foreground-rgb: var(--fg-light);
+    --background-paper: var(--bg-paper-light);
+    --surface-card: var(--surface-card-light);
+    --surface-muted: var(--surface-muted-light);
+    --surface-subtle: var(--surface-subtle-light);
+    --text-secondary: var(--text-secondary-light);
+    --text-muted: var(--text-muted-light);
+    --primary: var(--primary-raw-light);
+    --primary-light: var(--primary-tint-light);
+    --success: var(--success-raw-light);
+    --success-light: var(--success-tint-light);
+    --warning: var(--warning-raw-light);
+    --warning-light: var(--warning-tint-light);
+    --duration-bg: var(--duration-bg-light);
+    --duration-text: var(--duration-text-light);
+    --border-color: var(--border-raw-light);
+    --border-subtle: var(--border-subtle-light);
+    --input-border: var(--input-border-light);
+    --header-bg: var(--header-bg-light);
+    --hero-bg: var(--hero-bg-light);
+    --marquee-bg: var(--marquee-bg-light);
+    --thumb-bg-start: var(--thumb-bg-start-light);
+    --thumb-bg-end: var(--thumb-bg-end-light);
+    --card-shadow: 0 10px 25px rgba(44, 62, 80, 0.035), 0 1px 3px rgba(44, 62, 80, 0.015);
+  }
+
+  @supports (color: light-dark(white, black)) {
+    --foreground-rgb: light-dark(var(--fg-light), var(--fg-dark));
+    --background-paper: light-dark(var(--bg-paper-light), var(--bg-paper-dark));
+    --surface-card: light-dark(var(--surface-card-light), var(--surface-card-dark));
+    --surface-muted: light-dark(var(--surface-muted-light), var(--surface-muted-dark));
+    --surface-subtle: light-dark(var(--surface-subtle-light), var(--surface-subtle-dark));
+    --text-secondary: light-dark(var(--text-secondary-light), var(--text-secondary-dark));
+    --text-muted: light-dark(var(--text-muted-light), var(--text-muted-dark));
+    --primary: light-dark(var(--primary-raw-light), var(--primary-raw-dark));
+    --primary-light: light-dark(var(--primary-tint-light), var(--primary-tint-dark));
+    --success: light-dark(var(--success-raw-light), var(--success-raw-dark));
+    --success-light: light-dark(var(--success-tint-light), var(--success-tint-dark));
+    --warning: light-dark(var(--warning-raw-light), var(--warning-raw-dark));
+    --warning-light: light-dark(var(--warning-tint-light), var(--warning-tint-dark));
+    --duration-bg: light-dark(var(--duration-bg-light), var(--duration-bg-dark));
+    --duration-text: light-dark(var(--duration-text-light), var(--duration-text-dark));
+    --border-color: light-dark(var(--border-raw-light), var(--border-raw-dark));
+    --border-subtle: light-dark(var(--border-subtle-light), var(--border-subtle-dark));
+    --input-border: light-dark(var(--input-border-light), var(--input-border-dark));
+    --header-bg: light-dark(var(--header-bg-light), var(--header-bg-dark));
+    --hero-bg: light-dark(var(--hero-bg-light), var(--hero-bg-dark));
+    --marquee-bg: light-dark(var(--marquee-bg-light), var(--marquee-bg-dark));
+    --thumb-bg-start: light-dark(var(--thumb-bg-start-light), var(--thumb-bg-start-dark));
+    --thumb-bg-end: light-dark(var(--thumb-bg-end-light), var(--thumb-bg-end-dark));
+  }
+
+  @media (forced-colors: active) {
+    --foreground-rgb: CanvasText;
+    --background-paper: Canvas;
+    --surface-card: Canvas;
+    --surface-muted: Canvas;
+    --surface-subtle: Canvas;
+    --text-secondary: CanvasText;
+    --text-muted: GrayText;
+    --primary: Highlight;
+    --border-color: CanvasText;
+    --border-subtle: GrayText;
+    --input-border: ButtonBorder;
+  }
 }
 
 html {
@@ -26,11 +224,16 @@ button, input, select, textarea {
   font-family: inherit;
 }
 
+input, select, textarea {
+  background-color: var(--surface-card);
+  color: var(--foreground-rgb);
+}
+
 body {
   color: var(--foreground-rgb);
   background-color: var(--background-paper);
-  /* 古典微黄纸张肌理 */
-  background-image: radial-gradient(rgba(44, 62, 80, 0.015) 0.5px, transparent 0.5px);
+  /* 古典纸张/水墨肌理 */
+  background-image: radial-gradient(var(--border-color) 0.5px, transparent 0.5px);
   background-size: 24px 24px;
   margin: 0;
   font-family: var(--font-inter), "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans CN", sans-serif;
@@ -47,11 +250,85 @@ header {
   position: sticky;
   top: 0;
   z-index: 100;
-  /* 融入宣纸色的半透明页眉 */
-  background: rgba(253, 252, 247, 0.95);
+  background: var(--header-bg);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-color);
   box-shadow: 0 4px 12px rgba(44, 62, 80, 0.02);
+}
+
+/* Visually hidden helper for screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Theme Toggle Button & Non-Color Branching */
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  cursor: pointer;
+  transition: color 0.2s, background-color 0.2s, border-color 0.2s;
+}
+
+.theme-toggle-btn:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  background-color: var(--surface-muted);
+}
+
+.theme-toggle-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Fallback branching for .if-light / .if-dark */
+.if-dark {
+  display: none !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(:has(> head > meta[name="color-scheme"][content="light"])) .if-light {
+    display: none !important;
+  }
+  :root:not(:has(> head > meta[name="color-scheme"][content="light"])) .if-dark {
+    display: inline-flex !important;
+  }
+}
+
+:root:has(> head > meta[name="color-scheme"][content="dark"]) .if-light {
+  display: none !important;
+}
+
+:root:has(> head > meta[name="color-scheme"][content="dark"]) .if-dark {
+  display: inline-flex !important;
+}
+
+@container not style(--color-scheme: dark) {
+  .if-dark {
+    display: none !important;
+  }
+}
+
+@container not style(--color-scheme: light) {
+  .if-light {
+    display: none !important;
+  }
 }
 
 .container {
@@ -63,7 +340,7 @@ header {
 
 main {
   min-height: calc(100vh - 120px);
-  padding: 2rem 0; /* Vertical only, horizontal by container */
+  padding-block: 2rem; /* Vertical only, horizontal by container */
 }
 
 footer {
@@ -105,7 +382,7 @@ footer {
 }
 
 .skeleton-pulse {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, var(--surface-subtle) 25%, var(--surface-muted) 50%, var(--surface-subtle) 75%);
   background-size: 200% 100%;
   animation: skeleton-loading 1.5s infinite;
 }
@@ -173,17 +450,15 @@ input:focus, select:focus, textarea:focus {
 .hero-gradient-wrapper {
   position: relative;
   overflow: hidden;
-  /* 古典宣纸色/微黄暖白 */
-  background-color: #fbf9f3;
-  /* 极细微的古典纸张纹理效果 */
-  background-image: radial-gradient(rgba(44, 62, 80, 0.02) 1px, transparent 0);
+  background-color: var(--hero-bg);
+  background-image: radial-gradient(var(--border-color) 1px, transparent 0);
   background-size: 16px 16px;
-  border: 1px solid rgba(44, 62, 80, 0.08);
+  border: 1px solid var(--border-color);
   border-radius: 24px;
   padding: 2.5rem 2rem 1.5rem 2rem;
   margin-top: 1rem;
   margin-bottom: 2rem;
-  box-shadow: 0 15px 35px rgba(44, 62, 80, 0.03);
+  box-shadow: var(--card-shadow);
 }
 
 .hero-bg-glow-1 {
@@ -225,7 +500,7 @@ input:focus, select:focus, textarea:focus {
   align-items: center;
   gap: 0.5rem;
   /* 古朴朱砂浅红底 */
-  background: rgba(200, 16, 46, 0.05);
+  background: var(--primary-light);
   color: var(--primary);
   font-weight: 600;
   font-size: 0.85rem;
@@ -233,7 +508,7 @@ input:focus, select:focus, textarea:focus {
   padding: 0.35rem 1rem;
   border-radius: 9999px;
   margin-bottom: 1.5rem;
-  border: 1px solid rgba(200, 16, 46, 0.12);
+  border: 1px solid rgba(200, 16, 46, 0.18);
   text-transform: uppercase;
 }
 
@@ -241,7 +516,7 @@ input:focus, select:focus, textarea:focus {
   font-size: clamp(1.75rem, 5vw, 2.75rem);
   line-height: 1.15;
   font-weight: 700;
-  color: #1a1e21; /* 偏古典水墨的书写黑 */
+  color: var(--foreground-rgb);
   margin-bottom: 0.75rem;
   letter-spacing: -0.02em;
 }
@@ -255,7 +530,7 @@ input:focus, select:focus, textarea:focus {
 .hero-subtitle {
   font-size: clamp(0.95rem, 2.5vw, 1.1rem);
   line-height: 1.6;
-  color: #5a626a; /* 黛灰色 */
+  color: var(--text-secondary);
   max-width: 640px;
   margin: 0 auto 1.5rem auto;
 }
@@ -271,8 +546,8 @@ input:focus, select:focus, textarea:focus {
 
 .btn-secondary-outline {
   background-color: transparent;
-  color: #495057;
-  border: 1px solid #ced4da;
+  color: var(--text-secondary);
+  border: 1px solid var(--input-border);
   padding: 0.6rem 1.5rem;
   border-radius: 20px;
   font-weight: 600;
@@ -282,8 +557,8 @@ input:focus, select:focus, textarea:focus {
 }
 
 .btn-secondary-outline:hover {
-  background-color: rgba(44, 62, 80, 0.02);
-  border-color: #6c757d;
+  background-color: var(--surface-muted);
+  border-color: var(--text-muted);
   transform: translateY(-1px);
 }
 
@@ -299,7 +574,7 @@ input:focus, select:focus, textarea:focus {
   align-items: center;
   gap: 0.4rem;
   margin-top: 1.5rem;
-  color: #8c9299;
+  color: var(--text-muted);
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 1px;
@@ -323,9 +598,9 @@ input:focus, select:focus, textarea:focus {
   position: relative;
   margin-top: 1.5rem;
   padding: 0.75rem 0;
-  border-top: 1px dashed rgba(44, 62, 80, 0.08);
-  border-bottom: 1px dashed rgba(44, 62, 80, 0.08);
-  background: rgba(253, 252, 247, 0.4);
+  border-top: 1px dashed var(--border-color);
+  border-bottom: 1px dashed var(--border-color);
+  background: var(--marquee-bg);
 }
 
 .marquee-content {
@@ -345,13 +620,13 @@ input:focus, select:focus, textarea:focus {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.85rem;
-  color: #495057;
+  color: var(--text-secondary);
   font-weight: 600;
-  background: #fff;
+  background: var(--surface-card);
   padding: 0.5rem 1rem;
   border-radius: 20px;
-  border: 1px solid rgba(44, 62, 80, 0.06);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.01);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.03);
   white-space: nowrap;
 }
 
@@ -366,7 +641,7 @@ input:focus, select:focus, textarea:focus {
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  color: #6c757d;
+  color: var(--text-muted);
   padding: 0.4rem;
   border-radius: 50%;
   transition: all 0.2s;
@@ -374,7 +649,7 @@ input:focus, select:focus, textarea:focus {
 
 .support-nav-icon:hover {
   color: var(--primary) !important;
-  background: #f8f9fa;
+  background: var(--surface-muted);
 }
 
 /* ==========================================================================
@@ -426,7 +701,7 @@ input:focus, select:focus, textarea:focus {
 
 /* Course Card List View */
 .course-card-list {
-  background: #fff;
+  background: var(--surface-card);
   border-radius: 12px;
   overflow: clip;
   box-shadow: var(--card-shadow);
@@ -441,15 +716,15 @@ input:focus, select:focus, textarea:focus {
 .course-card-list-thumb {
   width: 240px;
   aspect-ratio: 16 / 9;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, var(--thumb-bg-start) 0%, var(--thumb-bg-end) 100%);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #adb5bd;
+  color: var(--text-muted);
   font-size: 0.8rem;
-  border: 1px solid #eee;
+  border: 1px solid var(--border-subtle);
   overflow: clip;
   cursor: pointer;
 }
@@ -461,7 +736,7 @@ input:focus, select:focus, textarea:focus {
 
 .course-card-list-cta {
   width: 200px;
-  border-inline-start: 1px solid #eee;
+  border-inline-start: 1px solid var(--border-subtle);
   padding-inline-start: 2rem;
   display: flex;
   flex-direction: column;
@@ -527,7 +802,7 @@ input:focus, select:focus, textarea:focus {
     width: 100%;
     justify-content: space-around;
     padding-block-start: 0.45rem;
-    border-block-start: 1px solid rgba(44, 62, 80, 0.06);
+    border-block-start: 1px solid var(--border-subtle);
     gap: 0.75rem;
     font-size: 0.88rem;
   }
@@ -550,7 +825,7 @@ input:focus, select:focus, textarea:focus {
   .course-card-list-cta {
     width: 100%;
     border-inline-start: none;
-    border-block-start: 1px solid #eee;
+    border-block-start: 1px solid var(--border-subtle);
     padding-inline-start: 0;
     padding-block-start: 1rem;
     flex-direction: row;

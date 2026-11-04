@@ -1,3 +1,4 @@
+// FILE: src/components/ui/skeleton.tsx
 import React from "react";
 
 const Skeleton = ({ width, height, borderRadius = "4px" }: { width?: string; height?: string; borderRadius?: string }) => {
@@ -6,7 +7,7 @@ const Skeleton = ({ width, height, borderRadius = "4px" }: { width?: string; hei
       width: width || "100%", 
       height: height || "1rem", 
       borderRadius,
-      backgroundColor: "#e9ecef",
+      backgroundColor: "var(--surface-subtle)",
       marginBottom: "0.5rem"
     }} />
   );
@@ -15,7 +16,7 @@ const Skeleton = ({ width, height, borderRadius = "4px" }: { width?: string; hei
 export const CourseCardSkeleton = () => {
   return (
     <div style={{
-      background: "#fff",
+      background: "var(--surface-card)",
       borderRadius: "8px",
       overflow: "hidden",
       border: "1px solid var(--border-color)",

@@ -58,7 +58,7 @@ const CourseFilters = ({ levels, placeholder, filterLabel, resetLabel }: CourseF
       flexDirection: "column", 
       gap: "1.5rem", 
       marginBottom: "3rem",
-      background: "#fff",
+      background: "var(--surface-card)",
       padding: "1.5rem",
       borderRadius: "12px",
       border: "1px solid var(--border-color)",
@@ -67,7 +67,7 @@ const CourseFilters = ({ levels, placeholder, filterLabel, resetLabel }: CourseF
       <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
         {/* Search Input */}
         <div style={{ flex: "1 1 220px", minInlineSize: 0, position: "relative" }}>
-          <Search size={18} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "#adb5bd" }} />
+          <Search size={18} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
           <input 
             type="text" 
             placeholder={placeholder} 
@@ -77,7 +77,7 @@ const CourseFilters = ({ levels, placeholder, filterLabel, resetLabel }: CourseF
               width: "100%", 
               padding: "0.75rem 1rem 0.75rem 2.75rem", 
               borderRadius: "8px", 
-              border: "1px solid #ddd",
+              border: "1px solid var(--input-border)",
               fontSize: "0.95rem"
             }}
           />
@@ -85,14 +85,14 @@ const CourseFilters = ({ levels, placeholder, filterLabel, resetLabel }: CourseF
             <X 
               size={16} 
               onClick={() => setQuery("")}
-              style={{ position: "absolute", right: "1rem", top: "50%", transform: "translateY(-50%)", color: "#adb5bd", cursor: "pointer" }} 
+              style={{ position: "absolute", right: "1rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", cursor: "pointer" }} 
             />
           )}
         </div>
 
         {/* Level Selector */}
         <div className="course-filter-pills">
-          <div style={{ color: "#6c757d", fontSize: "0.9rem", marginRight: "0.5rem", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+          <div style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginRight: "0.5rem", display: "flex", alignItems: "center", gap: "0.3rem" }}>
             <Filter size={16} /> {filterLabel}
           </div>
           {levels.map((lvl) => (
@@ -103,9 +103,9 @@ const CourseFilters = ({ levels, placeholder, filterLabel, resetLabel }: CourseF
                 padding: "0.5rem 1rem",
                 borderRadius: "20px",
                 border: "1px solid",
-                borderColor: activeLevel === lvl.value ? "var(--primary)" : "#dee2e6",
+                borderColor: activeLevel === lvl.value ? "var(--primary)" : "var(--input-border)",
                 background: activeLevel === lvl.value ? "var(--primary-light)" : "transparent",
-                color: activeLevel === lvl.value ? "var(--primary)" : "#6c757d",
+                color: activeLevel === lvl.value ? "var(--primary)" : "var(--text-secondary)",
                 fontSize: "0.85rem",
                 fontWeight: activeLevel === lvl.value ? "700" : "500",
                 cursor: "pointer",

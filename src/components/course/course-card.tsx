@@ -75,7 +75,7 @@ const CourseCard = ({ id, title, description, price, level, duration, isFree, th
       case "Advanced":
         return { bg: "var(--primary-light)", color: "var(--primary)" };
       default:
-        return { bg: "#f1f3f5", color: "#495057" };
+        return { bg: "var(--surface-subtle)", color: "var(--text-secondary)" };
     }
   };
 
@@ -110,17 +110,17 @@ const CourseCard = ({ id, title, description, price, level, duration, isFree, th
             <span style={{ fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "0.3rem", padding: "0.2rem 0.6rem", background: levelBg, borderRadius: "4px", color: levelColor, fontWeight: 600 }}>
               <BarChart size={14} /> {getLevelLabel()}
             </span>
-            <span style={{ fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "0.3rem", padding: "0.2rem 0.6rem", background: "#fff3cd", borderRadius: "4px", color: "#856404", fontWeight: 600 }}>
+            <span style={{ fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "0.3rem", padding: "0.2rem 0.6rem", background: "var(--duration-bg)", borderRadius: "4px", color: "var(--duration-text)", fontWeight: 600 }}>
               <Clock size={14} /> {getDurationLabel()}
             </span>
           </div>
           <h4 style={{ margin: "0 0 0.75rem 0", fontSize: "clamp(1.1rem, 3vw, 1.3rem)", color: "var(--foreground-rgb)", fontWeight: "700" }}>{title}</h4>
-          <p style={{ margin: "0", fontSize: "0.95rem", color: "#6c757d", lineHeight: "1.6" }}>{description}</p>
+          <p style={{ margin: "0", fontSize: "0.95rem", color: "var(--text-muted)", lineHeight: "1.6" }}>{description}</p>
         </div>
 
         <div className="course-card-list-cta">
           <div>
-            <div style={{ fontSize: "0.8rem", color: "#adb5bd", marginBottom: "0.2rem" }}>{t.priceLabel}</div>
+            <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginBottom: "0.2rem" }}>{t.priceLabel}</div>
             <span style={{ fontSize: "1.75rem", fontWeight: "800", color: "var(--primary)" }}>
               {isFree ? (t as any).free || "免费" : `¥${price.toFixed(2)}`}
             </span>
@@ -138,7 +138,7 @@ const CourseCard = ({ id, title, description, price, level, duration, isFree, th
   // Default Grid Layout
   return (
     <div className="course-card" style={{
-      background: "#fff",
+      background: "var(--surface-card)",
       borderRadius: "12px",
       overflow: "hidden",
       boxShadow: "var(--card-shadow)",
@@ -149,7 +149,7 @@ const CourseCard = ({ id, title, description, price, level, duration, isFree, th
     }}>
       {/* Admin Quick Edit Floating Icon */}
       {isAdmin && (
-        <Link href={`/admin/courses/${id}/edit`} target="_blank" style={{ position: "absolute", top: "1rem", right: "1rem", zIndex: 10, background: "rgba(255,255,255,0.9)", padding: "0.4rem", borderRadius: "50%", display: "flex", color: "var(--primary)", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }} title="快速编辑">
+        <Link href={`/admin/courses/${id}/edit`} target="_blank" style={{ position: "absolute", top: "1rem", right: "1rem", zIndex: 10, background: "var(--surface-card)", padding: "0.4rem", borderRadius: "50%", display: "flex", color: "var(--primary)", boxShadow: "0 2px 8px rgba(0,0,0,0.15)" }} title="快速编辑">
           <Edit size={18} />
         </Link>
       )}
@@ -159,15 +159,15 @@ const CourseCard = ({ id, title, description, price, level, duration, isFree, th
         <div style={{
           width: "100%",
           aspectRatio: "16/9",
-          background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+          background: "linear-gradient(135deg, var(--thumb-bg-start) 0%, var(--thumb-bg-end) 100%)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          color: "#adb5bd",
+          color: "var(--text-muted)",
           fontSize: "0.9rem",
           overflow: "hidden",
-          borderBottom: "1px solid #f1f3f5",
+          borderBottom: "1px solid var(--border-subtle)",
           cursor: "pointer"
         }}>
           {thumbnail ? (
@@ -202,9 +202,9 @@ const CourseCard = ({ id, title, description, price, level, duration, isFree, th
             alignItems: "center",
             gap: "0.3rem",
             padding: "0.2rem 0.5rem", 
-            background: "#fff3cd", 
+            background: "var(--duration-bg)", 
             borderRadius: "4px",
-            color: "#856404",
+            color: "var(--duration-text)",
             fontWeight: 600
           }}>
             <Clock size={12} /> {getDurationLabel()}
@@ -215,7 +215,7 @@ const CourseCard = ({ id, title, description, price, level, duration, isFree, th
         <p style={{ 
           margin: "0 0 1.5rem 0", 
           fontSize: "0.85rem", 
-          color: "#6c757d", 
+          color: "var(--text-muted)", 
           display: "-webkit-box", 
           WebkitLineClamp: 2, 
           WebkitBoxOrient: "vertical", 
@@ -227,11 +227,11 @@ const CourseCard = ({ id, title, description, price, level, duration, isFree, th
 
         {progress && (
           <div style={{ marginTop: "auto", marginBottom: "1rem" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", color: "#6c757d", marginBottom: "0.4rem", fontWeight: "500" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: "0.4rem", fontWeight: "500" }}>
               <span>{completedText} {progress.completedCount}/{progress.totalCount} {lessonsText}</span>
               <span style={{ fontWeight: "700", color: "var(--success)" }}>{Math.round((progress.completedCount / (progress.totalCount || 1)) * 100)}%</span>
             </div>
-            <div style={{ width: "100%", height: "6px", background: "#e9ecef", borderRadius: "3px", overflow: "hidden" }}>
+            <div style={{ width: "100%", height: "6px", background: "var(--surface-subtle)", borderRadius: "3px", overflow: "hidden" }}>
               <div style={{ width: `${(progress.completedCount / (progress.totalCount || 1)) * 100}%`, height: "100%", background: "var(--success)", transition: "width 0.4s ease-out" }}></div>
             </div>
           </div>
@@ -243,7 +243,7 @@ const CourseCard = ({ id, title, description, price, level, duration, isFree, th
           justifyContent: "space-between", 
           alignItems: "center",
           paddingTop: "1.25rem",
-          borderTop: "1px solid #f8f9fa"
+          borderTop: "1px solid var(--border-subtle)"
         }}>
           <span style={{ fontSize: "1.4rem", fontWeight: "800", color: "var(--primary)" }}>
             {isFree ? (t as any).free || "免费" : `¥${price.toFixed(2)}`}

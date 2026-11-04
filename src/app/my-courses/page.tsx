@@ -80,13 +80,13 @@ const MyCoursesPage = async () => {
         <div style={{ 
           textAlign: "center", 
           padding: "5rem 2rem", 
-          background: "#fff", 
+          background: "var(--surface-card)", 
           borderRadius: "12px",
           border: "1px solid var(--border-color)" 
         }}>
           <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>📚</div>
           <h3>{t("myCourses.noCourses")}</h3>
-          <p style={{ color: "#6c757d", marginBottom: "2rem" }}>{t("myCourses.noCoursesSubtitle")}</p>
+          <p style={{ color: "var(--text-muted)", marginBottom: "2rem" }}>{t("myCourses.noCoursesSubtitle")}</p>
           <a href="/" className="btn-primary" style={{ textDecoration: "none" }}>{t("myCourses.browseCourses")}</a>
         </div>
       )}

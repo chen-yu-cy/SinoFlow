@@ -260,7 +260,7 @@ export const SupportPortal = ({ userEmail, initialTickets, translations }: Suppo
         <div>
           {submitSuccess ? (
             <div style={{
-              background: "#fff",
+              background: "var(--surface-card)",
               border: "1px solid var(--border-color)",
               borderRadius: "12px",
               boxShadow: "var(--card-shadow)",
@@ -271,13 +271,13 @@ export const SupportPortal = ({ userEmail, initialTickets, translations }: Suppo
                 width: "60px",
                 height: "60px",
                 borderRadius: "50%",
-                background: "#e6f4ea",
+                background: "var(--success-light)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 margin: "0 auto 1.5rem auto"
               }}>
-                <CheckCircle size={32} color="#28a745" />
+                <CheckCircle size={32} color="var(--success)" />
               </div>
               <h3 style={{ fontSize: "1.4rem", fontWeight: "700", marginBottom: "0.5rem" }}>{t.successTitle}</h3>
               <p style={{ color: "var(--secondary)", fontSize: "0.9rem", lineHeight: "1.6", marginBottom: "2rem" }}>
@@ -293,7 +293,8 @@ export const SupportPortal = ({ userEmail, initialTickets, translations }: Suppo
                     padding: "0.75rem",
                     borderRadius: "6px",
                     cursor: "pointer",
-                    fontWeight: "600"
+                    fontWeight: "600",
+                    color: "var(--foreground-rgb)"
                   }}
                 >
                   {t.btnSubmitMore}
@@ -309,7 +310,7 @@ export const SupportPortal = ({ userEmail, initialTickets, translations }: Suppo
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{
-              background: "#fff",
+              background: "var(--surface-card)",
               border: "1px solid var(--border-color)",
               borderRadius: "12px",
               boxShadow: "var(--card-shadow)",
@@ -317,8 +318,8 @@ export const SupportPortal = ({ userEmail, initialTickets, translations }: Suppo
             }}>
               {error && (
                 <div style={{
-                  background: "#fff0f0",
-                  color: "#fa5252",
+                  background: "var(--primary-light)",
+                  color: "var(--primary)",
                   padding: "0.75rem 1rem",
                   borderRadius: "8px",
                   display: "flex",
@@ -333,7 +334,7 @@ export const SupportPortal = ({ userEmail, initialTickets, translations }: Suppo
               )}
 
               <div style={{ marginBottom: "1.25rem" }}>
-                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#495057", marginBottom: "0.5rem" }}>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "var(--text-secondary)", marginBottom: "0.5rem" }}>
                   {t.labelEmail}
                 </label>
                 <input
@@ -344,9 +345,9 @@ export const SupportPortal = ({ userEmail, initialTickets, translations }: Suppo
                     width: "100%",
                     padding: "0.75rem 1rem",
                     borderRadius: "6px",
-                    border: "1px solid #dee2e6",
-                    background: "#f1f3f5",
-                    color: "#6c757d",
+                    border: "1px solid var(--border-subtle)",
+                    background: "var(--surface-subtle)",
+                    color: "var(--text-muted)",
                     fontSize: "0.9rem",
                     cursor: "not-allowed"
                   }}
@@ -354,7 +355,7 @@ export const SupportPortal = ({ userEmail, initialTickets, translations }: Suppo
               </div>
 
               <div style={{ marginBottom: "1.25rem" }}>
-                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#495057", marginBottom: "0.5rem" }}>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "var(--text-secondary)", marginBottom: "0.5rem" }}>
                   {t.labelTitle}
                 </label>
                 <input
@@ -368,7 +369,7 @@ export const SupportPortal = ({ userEmail, initialTickets, translations }: Suppo
                     width: "100%",
                     padding: "0.75rem 1rem",
                     borderRadius: "6px",
-                    border: "1px solid #dee2e6",
+                    border: "1px solid var(--input-border)",
                     fontSize: "0.9rem",
                     outline: "none",
                     transition: "border-color 0.2s"
@@ -377,7 +378,7 @@ export const SupportPortal = ({ userEmail, initialTickets, translations }: Suppo
               </div>
 
               <div style={{ marginBottom: "2rem" }}>
-                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#495057", marginBottom: "0.5rem" }}>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "var(--text-secondary)", marginBottom: "0.5rem" }}>
                   {t.labelContent}
                 </label>
                 <textarea
@@ -391,7 +392,7 @@ export const SupportPortal = ({ userEmail, initialTickets, translations }: Suppo
                     width: "100%",
                     padding: "0.75rem 1rem",
                     borderRadius: "6px",
-                    border: "1px solid #dee2e6",
+                    border: "1px solid var(--input-border)",
                     fontSize: "0.9rem",
                     outline: "none",
                     resize: "vertical",
@@ -436,7 +437,7 @@ export const SupportPortal = ({ userEmail, initialTickets, translations }: Suppo
         <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start", flexDirection: "column" }}>
           {tickets.length === 0 ? (
             <div style={{
-              background: "#fff",
+              background: "var(--surface-card)",
               border: "1px solid var(--border-color)",
               borderRadius: "12px",
               boxShadow: "var(--card-shadow)",
@@ -444,9 +445,9 @@ export const SupportPortal = ({ userEmail, initialTickets, translations }: Suppo
               textAlign: "center",
               width: "100%"
             }}>
-              <ClipboardList size={40} color="#adb5bd" style={{ marginBottom: "1rem" }} />
-              <h4 style={{ margin: "0 0 0.5rem 0", color: "#495057" }}>{t.historyEmpty}</h4>
-              <p style={{ margin: 0, color: "#868e96", fontSize: "0.9rem" }}>{t.historyEmptyDesc}</p>
+              <ClipboardList size={40} color="var(--text-muted)" style={{ marginBottom: "1rem" }} />
+              <h4 style={{ margin: "0 0 0.5rem 0", color: "var(--text-secondary)" }}>{t.historyEmpty}</h4>
+              <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.9rem" }}>{t.historyEmptyDesc}</p>
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "1rem", width: "100%" }}>
@@ -456,7 +457,7 @@ export const SupportPortal = ({ userEmail, initialTickets, translations }: Suppo
                   <div
                     key={ticket.id}
                     style={{
-                      background: "#fff",
+                      background: "var(--surface-card)",
                       border: "1px solid var(--border-color)",
                       borderRadius: "12px",
                       boxShadow: "var(--card-shadow)",
@@ -473,7 +474,7 @@ export const SupportPortal = ({ userEmail, initialTickets, translations }: Suppo
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "0.5rem" }}>
                       <div>
                         <h4 style={{ margin: "0 0 0.5rem 0", fontSize: "1.05rem", fontWeight: "700" }}>{ticket.title}</h4>
-                        <div style={{ display: "flex", gap: "1rem", fontSize: "0.8rem", color: "#868e96" }}>
+                        <div style={{ display: "flex", gap: "1rem", fontSize: "0.8rem", color: "var(--text-muted)" }}>
                           <span style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
                             <Calendar size={12} />
                             {new Date(ticket.createdAt).toLocaleDateString()}
@@ -489,19 +490,19 @@ export const SupportPortal = ({ userEmail, initialTickets, translations }: Suppo
                       <div style={{
                         marginTop: "1.25rem",
                         paddingTop: "1.25rem",
-                        borderTop: "1px solid #f1f3f5",
+                        borderTop: "1px solid var(--border-subtle)",
                         cursor: "default"
                       }} onClick={(e) => e.stopPropagation()}>
                         
                         <div style={{ marginBottom: "1.25rem" }}>
-                          <div style={{ fontSize: "0.75rem", color: "#adb5bd", marginBottom: "0.5rem" }}>{t.labelHistoryTimeline}</div>
+                          <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: "0.5rem" }}>{t.labelHistoryTimeline}</div>
                           
                           <div style={{
                             display: "flex",
                             flexDirection: "column",
                             gap: "0.75rem",
-                            background: "#fafbfc",
-                            border: "1px solid #e9ecef",
+                            background: "var(--surface-muted)",
+                            border: "1px solid var(--border-subtle)",
                             borderRadius: "8px",
                             padding: "0.75rem",
                             maxHeight: "300px",
@@ -516,13 +517,13 @@ export const SupportPortal = ({ userEmail, initialTickets, translations }: Suppo
                                   style={{
                                     alignSelf: isMe ? "flex-end" : "flex-start",
                                     maxWidth: "85%",
-                                    background: isMe ? "var(--primary-light)" : "#fff",
-                                    border: isMe ? "1px solid rgba(200,16,46,0.1)" : "1px solid #e9ecef",
+                                    background: isMe ? "var(--primary-light)" : "var(--surface-card)",
+                                    border: isMe ? "1px solid rgba(200,16,46,0.2)" : "1px solid var(--border-subtle)",
                                     padding: "0.5rem 0.75rem",
                                     borderRadius: "8px",
                                     fontSize: "0.85rem",
                                     lineHeight: "1.5",
-                                    boxShadow: "0 1px 2px rgba(0,0,0,0.01)"
+                                    boxShadow: "0 1px 2px rgba(0,0,0,0.03)"
                                   }}
                                 >
                                   <div style={{
@@ -530,15 +531,15 @@ export const SupportPortal = ({ userEmail, initialTickets, translations }: Suppo
                                     justifyContent: "space-between",
                                     gap: "1.5rem",
                                     fontSize: "0.7rem",
-                                    color: "#adb5bd",
+                                    color: "var(--text-muted)",
                                     marginBottom: "0.25rem"
                                   }}>
-                                    <span style={{ fontWeight: "700", color: isMe ? "var(--primary)" : "#6c757d" }}>
+                                    <span style={{ fontWeight: "700", color: isMe ? "var(--primary)" : "var(--text-secondary)" }}>
                                       {isMe ? t.senderMe : t.senderStaff}
                                     </span>
                                     <span>{new Date(msg.createdAt).toLocaleString()}</span>
                                   </div>
-                                  <div style={{ whiteSpace: "pre-wrap", color: "#212529" }}>{msg.content}</div>
+                                  <div style={{ whiteSpace: "pre-wrap", color: "var(--foreground-rgb)" }}>{msg.content}</div>
                                 </div>
                               );
                             })}
@@ -547,8 +548,8 @@ export const SupportPortal = ({ userEmail, initialTickets, translations }: Suppo
 
                         {/* 学员追问输入框 */}
                         {ticket.status !== "CLOSED" ? (
-                          <div style={{ borderTop: "1px solid #eee", paddingTop: "1rem" }}>
-                            <div style={{ fontSize: "0.75rem", color: "#adb5bd", marginBottom: "0.4rem" }}>{t.followupLabel}</div>
+                          <div style={{ borderTop: "1px solid var(--border-subtle)", paddingTop: "1rem" }}>
+                            <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: "0.4rem" }}>{t.followupLabel}</div>
                             <div style={{ display: "flex", gap: "0.5rem" }}>
                               <textarea
                                 placeholder={t.followupPlaceholder}
@@ -560,7 +561,7 @@ export const SupportPortal = ({ userEmail, initialTickets, translations }: Suppo
                                   flex: 1,
                                   padding: "0.5rem 0.75rem",
                                   borderRadius: "6px",
-                                  border: "1px solid #dee2e6",
+                                  border: "1px solid var(--input-border)",
                                   fontSize: "0.85rem",
                                   outline: "none",
                                   resize: "none",

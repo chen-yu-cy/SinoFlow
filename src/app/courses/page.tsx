@@ -90,10 +90,10 @@ const AllCoursesPage = async ({ searchParams }: AllCoursesPageProps) => {
         <div style={{ 
           textAlign: "center", 
           padding: "5rem 2rem", 
-          background: "#fff", 
+          background: "var(--surface-card)", 
           borderRadius: "12px", 
           border: "1px solid var(--border-color)",
-          color: "#6c757d"
+          color: "var(--text-muted)"
         }}>
           <p style={{ fontSize: "1.2rem" }}>{t("courses.noCourses")}</p>
           <p>{t("courses.noCoursesSubtitle")}</p>

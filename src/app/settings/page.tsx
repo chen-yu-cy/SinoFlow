@@ -41,7 +41,7 @@ export default async function SettingsPage() {
   };
 
   return (
-    <main style={{ padding: "3rem 1rem", minHeight: "80vh", background: "#f8f9fa" }}>
+    <main style={{ padding: "3rem 1rem", minHeight: "80vh" }}>
       <SettingsForm 
         user={{
           name: session.user.name,

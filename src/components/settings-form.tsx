@@ -131,31 +131,31 @@ export const SettingsForm = ({ user, translations }: SettingsFormProps) => {
 
       {/* Main Settings Card */}
       <div style={{
-        background: "#fff",
+        background: "var(--surface-card)",
         borderRadius: "16px",
-        boxShadow: "0 8px 30px rgba(0,0,0,0.05)",
+        boxShadow: "var(--card-shadow)",
         border: "1px solid var(--border-color)",
         overflow: "hidden"
       }}>
         {/* Card Header */}
         <div style={{
           padding: "2rem",
-          borderBottom: "1px solid #f1f3f5",
-          background: "linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)"
+          borderBottom: "1px solid var(--border-subtle)",
+          background: "var(--surface-muted)"
         }}>
           <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--foreground-rgb)", margin: "0 0 0.5rem 0" }}>
             {translations.pageTitle}
           </h1>
-          <p style={{ fontSize: "0.9rem", color: "#868e96", margin: 0 }}>
+          <p style={{ fontSize: "0.9rem", color: "var(--text-muted)", margin: 0 }}>
             {translations.pageSubtitle}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} style={{ padding: "2rem", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
           {/* Read-only User Details Section */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem", paddingBottom: "1.5rem", borderBottom: "1px solid #f1f3f5" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem", paddingBottom: "1.5rem", borderBottom: "1px solid var(--border-subtle)" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#495057" }}>
+              <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-secondary)" }}>
                 {translations.labelName}
               </label>
               <div style={{
@@ -164,17 +164,17 @@ export const SettingsForm = ({ user, translations }: SettingsFormProps) => {
                 gap: "0.75rem",
                 padding: "0.75rem 1rem",
                 borderRadius: "8px",
-                background: "#f8f9fa",
-                border: "1px solid #e9ecef",
-                color: "#868e96"
+                background: "var(--surface-muted)",
+                border: "1px solid var(--border-subtle)",
+                color: "var(--text-muted)"
               }}>
-                <User size={18} color="#adb5bd" />
+                <User size={18} color="var(--text-muted)" />
                 <span style={{ fontSize: "0.9rem" }}>{user.name || "N/A"}</span>
               </div>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#495057" }}>
+              <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-secondary)" }}>
                 {translations.labelEmail}
               </label>
               <div style={{
@@ -183,11 +183,11 @@ export const SettingsForm = ({ user, translations }: SettingsFormProps) => {
                 gap: "0.75rem",
                 padding: "0.75rem 1rem",
                 borderRadius: "8px",
-                background: "#f8f9fa",
-                border: "1px solid #e9ecef",
-                color: "#868e96"
+                background: "var(--surface-muted)",
+                border: "1px solid var(--border-subtle)",
+                color: "var(--text-muted)"
               }}>
-                <Mail size={18} color="#adb5bd" />
+                <Mail size={18} color="var(--text-muted)" />
                 <span style={{ fontSize: "0.9rem" }}>{user.email || "N/A"}</span>
               </div>
             </div>
@@ -201,7 +201,7 @@ export const SettingsForm = ({ user, translations }: SettingsFormProps) => {
 
             {/* Current Password */}
             <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#495057" }}>
+              <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-secondary)" }}>
                 {translations.labelCurrentPassword} <span style={{ color: "#fa5252" }}>*</span>
               </label>
               <div style={{ position: "relative" }}>
@@ -243,7 +243,7 @@ export const SettingsForm = ({ user, translations }: SettingsFormProps) => {
 
             {/* New Password */}
             <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#495057" }}>
+              <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-secondary)" }}>
                 {translations.labelNewPassword} <span style={{ color: "#fa5252" }}>*</span>
               </label>
               <div style={{ position: "relative" }}>
@@ -285,7 +285,7 @@ export const SettingsForm = ({ user, translations }: SettingsFormProps) => {
 
             {/* Confirm New Password */}
             <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#495057" }}>
+              <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-secondary)" }}>
                 {translations.labelConfirmNewPassword} <span style={{ color: "#fa5252" }}>*</span>
               </label>
               <div style={{ position: "relative" }}>
