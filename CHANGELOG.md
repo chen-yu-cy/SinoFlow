@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.5.0](https://github.com/chen-yu-cy/SinoFlow/compare/v0.4.0...v0.5.0) (2026-11-05)
+
+
+### Features
+
+* **health:** elevate /api/health with responsive dashboard, service latency & commit link ([9b1c40f](https://github.com/chen-yu-cy/SinoFlow/commit/9b1c40fe0ee3a953550c8ac8a91c94d843544896))
+* **infra:** integrate wireguard vpn service with dynamic public host detection ([#12](https://github.com/chen-yu-cy/SinoFlow/issues/12)) ([3693f76](https://github.com/chen-yu-cy/SinoFlow/commit/3693f76b9e101163e651b929a80bd8f4ac6a4d56))
+* **monitoring:** add container health status wall and uptime panels to grafana hardware dashboard ([#15](https://github.com/chen-yu-cy/SinoFlow/issues/15)) ([63b23d9](https://github.com/chen-yu-cy/SinoFlow/commit/63b23d942389d29054b9c10053429c0851f0bd70))
+* **monitoring:** add end-to-end L7 application health probe and fix container state aggregation ([#18](https://github.com/chen-yu-cy/SinoFlow/issues/18)) ([7518af7](https://github.com/chen-yu-cy/SinoFlow/commit/7518af7bbbdd6676a96c80fca35cab0d5ffe8a48))
+* **monitoring:** integrate cadvisor, prometheus hardware metrics, and coredns internal domain ([#14](https://github.com/chen-yu-cy/SinoFlow/issues/14)) ([4730b24](https://github.com/chen-yu-cy/SinoFlow/commit/4730b24e95224ffc6d3bf2f3bbc91dfffebc2ba9))
+* **ui:** client UI/UX polish across home, course detail, learning center and auth modal ([#20](https://github.com/chen-yu-cy/SinoFlow/issues/20)) ([19f48a9](https://github.com/chen-yu-cy/SinoFlow/commit/19f48a9799f854050745cf1f4ae0bbcfbd5979d4))
+* **video:** add client-side playback telemetry beacon and unify CDN traffic metrics ([#19](https://github.com/chen-yu-cy/SinoFlow/issues/19)) ([494aecb](https://github.com/chen-yu-cy/SinoFlow/commit/494aecb65f9a67bd5bf73c11ad96001b615bdb25))
+
+
+### Bug Fixes
+
+* **infra:** use pgsty/silo and amazon/aws-cli for reliable public s3 images ([7b18306](https://github.com/chen-yu-cy/SinoFlow/commit/7b183067ef2e0191122f6afd33b42378d434ee7b))
+* **monitoring:** wrap traffic metrics in sum aggregation and add vector(0) fallback for empty video logs ([#16](https://github.com/chen-yu-cy/SinoFlow/issues/16)) ([a0198de](https://github.com/chen-yu-cy/SinoFlow/commit/a0198de67f0cf7e599b1e51aaeb2f233912cd988))
+* **telemetry:** extract route constants to lib module to satisfy Next.js route typecheck ([39b1ad3](https://github.com/chen-yu-cy/SinoFlow/commit/39b1ad37224c2abd83320542a20c87afc70265b1))
+* **theme:** polish dark mode colors in admin layout and clean up grafana kiosk mode ([#17](https://github.com/chen-yu-cy/SinoFlow/issues/17)) ([dd9524f](https://github.com/chen-yu-cy/SinoFlow/commit/dd9524f2ca62d674b9059a521f7310e1ad9896fb))
+
+
+### Performance Improvements
+
+* **health:** replace hard reload with visibility-aware silent polling & sanitize error telemetry ([b75738d](https://github.com/chen-yu-cy/SinoFlow/commit/b75738dfd7fcfe859f73c47b054620c82002325f))
+
 ## [0.4.0](https://github.com/chen-yu-cy/SinoFlow/compare/v0.3.0...v0.4.0) (2026-11-05)
 
 
