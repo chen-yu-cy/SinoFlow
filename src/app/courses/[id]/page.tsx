@@ -35,6 +35,14 @@ const CourseDetailPage = async ({ params }: CourseDetailPageProps) => {
     noNotes: t("courseDetail.noNotes") || "暂无本节笔记，开始在上方写下你的第一条笔记吧！",
     instructorTitle: t("courseDetail.instructorTitle") || "特聘主讲名师",
     instructorBadge: t("courseDetail.instructorBadge") || "国家级报业资深教学专家",
+    notesFeatureTitle: t("courseDetail.notesFeatureTitle") || "专属随堂笔记功能",
+    notesFeatureDesc: t("courseDetail.notesFeatureDesc") || "购买该课程后即可解锁时间戳记笔记特权！支持在播放至任意时间一键截取记录，点击时间戳快速定位跳转视频，为您定制最高效的复习通路。",
+    unlockNotesBtn: t("courseDetail.unlockNotesBtn") || "立即购买解锁完整特权",
+    timestampTrack: t("courseDetail.timestampTrack") || "记录时间戳:",
+    autoTrackHint: t("courseDetail.autoTrackHint") || "(视频播放时会自动追踪当前时间点)",
+    noteInputPlaceholder: t("courseDetail.noteInputPlaceholder") || "在此记录本课时的知识点、心得或疑问...",
+    noteJumpHint: t("courseDetail.noteJumpHint") || "点击跳转到对应视频时间点播放",
+    jumpFeedback: t("courseDetail.jumpFeedback") || "⏱️ 已定位到 {time} 继续播放",
   };
 
   const course = await CourseService.getCourseById(id);
