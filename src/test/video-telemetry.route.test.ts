@@ -1,7 +1,9 @@
 // FILE: src/test/video-telemetry.route.test.ts
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { POST, OPTIONS } from "@/app/api/telemetry/video/route";
+import { POST, OPTIONS, MAX_BYTES_PER_REPORT, MAX_FRAGMENTS_PER_REPORT } from "@/app/api/telemetry/video/route";
 import { logger } from "@/lib/logger";
+import { enforceRateLimit } from "@/lib/security/rate-limit-guard";
+import { NextResponse } from "next/server";
 
 vi.mock("@/lib/logger", () => ({
   logger: {
@@ -12,9 +14,14 @@ vi.mock("@/lib/logger", () => ({
   },
 }));
 
+vi.mock("@/lib/security/rate-limit-guard", () => ({
+  enforceRateLimit: vi.fn().mockResolvedValue({ blocked: false }),
+}));
+
 describe("Video Telemetry API Route (/api/telemetry/video)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    (enforceRateLimit as ReturnType<typeof vi.fn>).mockResolvedValue({ blocked: false });
   });
 
   it("当请求体不是合法 JSON 时应返回 400", async () => {
@@ -60,6 +67,52 @@ describe("Video Telemetry API Route (/api/telemetry/video)", () => {
     expect(res.status).toBe(400);
     expect(body.success).toBe(false);
     expect(body.error).toContain("fragmentsCount");
+  });
+
+  it("当 bytesLoaded 超过单次熔断上限时应返回 400", async () => {
+    const req = new Request("http://localhost:3000/api/telemetry/video", {
+      method: "POST",
+      body: JSON.stringify({ bytesLoaded: MAX_BYTES_PER_REPORT + 1, fragmentsCount: 5 }),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const res = await POST(req);
+    const body = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(body.success).toBe(false);
+    expect(body.error).toContain("maximum threshold");
+  });
+
+  it("当 fragmentsCount 超过单次熔断上限时应返回 400", async () => {
+    const req = new Request("http://localhost:3000/api/telemetry/video", {
+      method: "POST",
+      body: JSON.stringify({ bytesLoaded: 1000, fragmentsCount: MAX_FRAGMENTS_PER_REPORT + 1 }),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const res = await POST(req);
+    const body = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(body.success).toBe(false);
+    expect(body.error).toContain("maximum threshold");
+  });
+
+  it("当触发 IP 频控限制时应返回 429 拦截响应", async () => {
+    (enforceRateLimit as ReturnType<typeof vi.fn>).mockResolvedValue({
+      blocked: true,
+      response: NextResponse.json({ success: false, error: "Too Many Requests" }, { status: 429 }),
+    });
+
+    const req = new Request("http://localhost:3000/api/telemetry/video", {
+      method: "POST",
+      body: JSON.stringify({ bytesLoaded: 1000, fragmentsCount: 1 }),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(429);
   });
 
   it("当上报外部 CDN 视频流切片时应输出带有 delivery: cdn 的日志并返回 200", async () => {

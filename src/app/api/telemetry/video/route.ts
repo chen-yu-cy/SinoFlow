@@ -1,6 +1,7 @@
 // FILE: src/app/api/telemetry/video/route.ts
 import { NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
+import { enforceRateLimit } from "@/lib/security/rate-limit-guard";
 
 export interface VideoTelemetryPayload {
   courseId?: string;
@@ -11,7 +12,17 @@ export interface VideoTelemetryPayload {
   sourceUrl?: string;
 }
 
+// 单次上报上限熔断：防伪造巨量数据冲击大盘（15秒内单次上限 100MB 与 100 切片）
+export const MAX_BYTES_PER_REPORT = 100 * 1024 * 1024;
+export const MAX_FRAGMENTS_PER_REPORT = 100;
+
 export async function POST(req: Request): Promise<NextResponse> {
+  // 1. IP 频控防刷拦截（普通 API 限流：120 次/分钟）
+  const rateLimit = await enforceRateLimit(req, "GLOBAL");
+  if (rateLimit.blocked && rateLimit.response) {
+    return rateLimit.response;
+  }
+
   try {
     let body: unknown;
     try {
@@ -47,6 +58,21 @@ export async function POST(req: Request): Promise<NextResponse> {
     if (isNaN(fragmentsCount) || fragmentsCount < 0 || !Number.isFinite(fragmentsCount)) {
       return NextResponse.json(
         { success: false, error: "Invalid fragmentsCount value" },
+        { status: 400 }
+      );
+    }
+
+    // 熔断保护：单次上报指标超过合理极值时拒绝
+    if (bytesLoaded > MAX_BYTES_PER_REPORT) {
+      return NextResponse.json(
+        { success: false, error: `Reported bytes exceed maximum threshold (${MAX_BYTES_PER_REPORT})` },
+        { status: 400 }
+      );
+    }
+
+    if (fragmentsCount > MAX_FRAGMENTS_PER_REPORT) {
+      return NextResponse.json(
+        { success: false, error: `Reported fragments exceed maximum threshold (${MAX_FRAGMENTS_PER_REPORT})` },
         { status: 400 }
       );
     }
