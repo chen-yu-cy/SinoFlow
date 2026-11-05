@@ -58,9 +58,17 @@ export async function GET(
       contentType = 'video/MP2T';
     }
 
+    const isMedia = ext === '.mp4' || ext === '.m3u8' || ext === '.ts';
+    const commonHeaders: Record<string, string> = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
+      'Access-Control-Allow-Headers': 'Range, Accept-Encoding, Accept',
+      'Access-Control-Expose-Headers': 'Content-Length, Content-Range, Accept-Ranges',
+    };
+
     const range = req.headers.get('range');
 
-    if (range && ext === '.mp4') {
+    if (range && (ext === '.mp4' || ext === '.ts')) {
       const parts = range.replace(/bytes=/, "").split("-");
       const start = parseInt(parts[0], 10);
       const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
@@ -70,6 +78,7 @@ export async function GET(
         return new NextResponse('Requested Range Not Satisfiable', {
           status: 416,
           headers: {
+            ...commonHeaders,
             'Content-Range': `bytes */${fileSize}`,
           },
         });
@@ -78,9 +87,10 @@ export async function GET(
       const chunksize = (end - start) + 1;
       const fileStream = fs.createReadStream(resolvedPath, { start, end });
 
-      return new NextResponse(fileStream as any, {
+      return new NextResponse(fileStream as unknown as BodyInit, {
         status: 206,
         headers: {
+          ...commonHeaders,
           'Content-Range': `bytes ${start}-${end}/${fileSize}`,
           'Accept-Ranges': 'bytes',
           'Content-Length': chunksize.toString(),
@@ -90,12 +100,13 @@ export async function GET(
       });
     } else {
       const fileStream = fs.createReadStream(resolvedPath);
-      return new NextResponse(fileStream as any, {
+      return new NextResponse(fileStream as unknown as BodyInit, {
         headers: {
+          ...commonHeaders,
           'Content-Length': fileSize.toString(),
           'Content-Type': contentType,
-          // 为缩略图等静态资源设置较长缓存时间以优化前端 LCP 性能
-          'Cache-Control': ext === '.mp4' 
+          'Accept-Ranges': 'bytes',
+          'Cache-Control': isMedia 
             ? 'no-cache, no-store, must-revalidate'
             : 'public, max-age=31536000, immutable',
         },
@@ -105,4 +116,16 @@ export async function GET(
     logger.error({ err: error }, 'Error serving file');
     return new NextResponse('Internal Server Error', { status: 500 });
   }
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
+      'Access-Control-Allow-Headers': 'Range, Accept-Encoding, Accept',
+      'Access-Control-Expose-Headers': 'Content-Length, Content-Range, Accept-Ranges',
+    },
+  });
 }

@@ -215,6 +215,8 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
               onSeekProcessed={() => setSeekToTime(null)}
               onTimeUpdate={(time) => setCurrentVideoTime(time)}
               notes={notes}
+              courseId={course.id}
+              lessonId={currentLesson?.id}
             />
           ) : (
             <PurchaseNotice 

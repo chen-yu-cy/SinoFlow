@@ -38,6 +38,7 @@
     "node_modules",
     "prisma.config.ts",
     "vitest.config.ts",
-    "src/test"
+    "src/test",
+    "public"
   ]
 }

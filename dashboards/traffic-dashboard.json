@@ -95,7 +95,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "sum(sum_over_time({container=~\".*caddy.*\"} | json | request_uri =~ \".*(uploads|\\\\.mp4|\\\\.m3u8|\\\\.ts).*\" | unwrap size [$__range])) or vector(0)",
+          "expr": "(sum(sum_over_time({container=~\".*caddy.*\"} | json | request_uri =~ \".*(uploads|\\\\.mp4|\\\\.m3u8|\\\\.ts).*\" | unwrap size [$__range])) or vector(0)) + (sum(sum_over_time({container=~\".*app.*\"} | json | type = \"video_telemetry\" | delivery = \"cdn\" | unwrap bytesLoaded [$__range])) or vector(0))",
           "queryType": "range",
           "refId": "A"
         }
@@ -293,7 +293,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "sum(count_over_time({container=~\".*caddy.*\"} | json | request_uri =~ \".*(uploads|\\\\.mp4|\\\\.m3u8|\\\\.ts).*\" [$__range])) or vector(0)",
+          "expr": "(sum(count_over_time({container=~\".*caddy.*\"} | json | request_uri =~ \".*(uploads|\\\\.mp4|\\\\.m3u8|\\\\.ts).*\" [$__range])) or vector(0)) + (sum(sum_over_time({container=~\".*app.*\"} | json | type = \"video_telemetry\" | delivery = \"cdn\" | unwrap fragmentsCount [$__range])) or vector(0))",
           "queryType": "range",
           "refId": "A"
         }
@@ -548,6 +548,6 @@
   "timezone": "browser",
   "title": "SinoFlow 视频流量与全站访问监控",
   "uid": "sinoflow-traffic",
-  "version": 2,
+  "version": 4,
   "weekStart": ""
 }
