@@ -25,7 +25,7 @@ export default function AdminMonitoringPage() {
 
   const currentDashboardPath =
     activeTab === "traffic" ? "/d/sinoflow-traffic" : "/d/sinoflow-hardware";
-  const grafanaUrl = `${baseGrafanaHost}${currentDashboardPath}?kiosk=tv`;
+  const grafanaUrl = `${baseGrafanaHost}${currentDashboardPath}?kiosk`;
 
   const handleRefresh = () => {
     setIframeKey(Date.now());
@@ -37,6 +37,7 @@ export default function AdminMonitoringPage() {
       <div
         style={{
           background: "var(--surface-card, #fff)",
+          border: "1px solid var(--border-color, rgba(44, 62, 80, 0.1))",
           padding: "1.5rem 2rem",
           borderRadius: "12px",
           boxShadow: "var(--card-shadow, 0 4px 12px rgba(0,0,0,0.05))",
@@ -63,7 +64,7 @@ export default function AdminMonitoringPage() {
             >
               <Activity size={22} />
             </div>
-            <h1 style={{ fontSize: "1.5rem", fontWeight: "700", margin: 0, color: "var(--text-main, #212529)" }}>
+            <h1 style={{ fontSize: "1.5rem", fontWeight: "700", margin: 0, color: "var(--foreground-rgb, #212529)" }}>
               视频流量与访问监控大盘
             </h1>
           </div>
@@ -94,7 +95,7 @@ export default function AdminMonitoringPage() {
                 borderRadius: "6px",
                 border: "none",
                 background: activeTab === "traffic" ? "var(--surface-card, #fff)" : "transparent",
-                color: activeTab === "traffic" ? "var(--primary, #4c6ef5)" : "var(--text-muted, #495057)",
+                color: activeTab === "traffic" ? "var(--primary, #4c6ef5)" : "var(--text-secondary, #495057)",
                 fontWeight: activeTab === "traffic" ? "600" : "normal",
                 boxShadow: activeTab === "traffic" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
                 cursor: "pointer",
@@ -113,7 +114,7 @@ export default function AdminMonitoringPage() {
                 borderRadius: "6px",
                 border: "none",
                 background: activeTab === "hardware" ? "var(--surface-card, #fff)" : "transparent",
-                color: activeTab === "hardware" ? "var(--primary, #4c6ef5)" : "var(--text-muted, #495057)",
+                color: activeTab === "hardware" ? "var(--primary, #4c6ef5)" : "var(--text-secondary, #495057)",
                 fontWeight: activeTab === "hardware" ? "600" : "normal",
                 boxShadow: activeTab === "hardware" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
                 cursor: "pointer",
@@ -134,7 +135,7 @@ export default function AdminMonitoringPage() {
               borderRadius: "8px",
               border: "1px solid var(--border-color, #dee2e6)",
               background: "var(--surface-muted, #f8f9fa)",
-              color: "var(--text-main, #495057)",
+              color: "var(--foreground-rgb, #495057)",
               fontSize: "0.9rem",
               cursor: "pointer",
             }}
@@ -177,7 +178,7 @@ export default function AdminMonitoringPage() {
             background: "var(--surface-card, #fff)",
             padding: "1rem 1.25rem",
             borderRadius: "10px",
-            border: "1px solid var(--border-color, #e9ecef)",
+            border: "1px solid var(--border-color, rgba(44, 62, 80, 0.1))",
             display: "flex",
             alignItems: "center",
             gap: "0.75rem",
@@ -186,7 +187,7 @@ export default function AdminMonitoringPage() {
           <HardDrive size={20} color="#4c6ef5" />
           <div>
             <div style={{ fontSize: "0.75rem", color: "var(--text-muted, #868e96)" }}>数据采集管道</div>
-            <div style={{ fontSize: "0.9rem", fontWeight: "600" }}>cAdvisor + Prometheus + Loki</div>
+            <div style={{ fontSize: "0.9rem", fontWeight: "600", color: "var(--foreground-rgb, #212529)" }}>cAdvisor + Prometheus + Loki</div>
           </div>
         </div>
         <div
@@ -194,7 +195,7 @@ export default function AdminMonitoringPage() {
             background: "var(--surface-card, #fff)",
             padding: "1rem 1.25rem",
             borderRadius: "10px",
-            border: "1px solid var(--border-color, #e9ecef)",
+            border: "1px solid var(--border-color, rgba(44, 62, 80, 0.1))",
             display: "flex",
             alignItems: "center",
             gap: "0.75rem",
@@ -203,7 +204,7 @@ export default function AdminMonitoringPage() {
           <ShieldCheck size={20} color="#40c057" />
           <div>
             <div style={{ fontSize: "0.75rem", color: "var(--text-muted, #868e96)" }}>监控存储引擎</div>
-            <div style={{ fontSize: "0.9rem", fontWeight: "600" }}>Prometheus TSDB & Loki</div>
+            <div style={{ fontSize: "0.9rem", fontWeight: "600", color: "var(--foreground-rgb, #212529)" }}>Prometheus TSDB & Loki</div>
           </div>
         </div>
         <div
@@ -211,7 +212,7 @@ export default function AdminMonitoringPage() {
             background: "var(--surface-card, #fff)",
             padding: "1rem 1.25rem",
             borderRadius: "10px",
-            border: "1px solid var(--border-color, #e9ecef)",
+            border: "1px solid var(--border-color, rgba(44, 62, 80, 0.1))",
             display: "flex",
             alignItems: "center",
             gap: "0.75rem",
@@ -220,7 +221,7 @@ export default function AdminMonitoringPage() {
           <Activity size={20} color="#fab005" />
           <div>
             <div style={{ fontSize: "0.75rem", color: "var(--text-muted, #868e96)" }}>默认登录账号凭证</div>
-            <div style={{ fontSize: "0.9rem", fontWeight: "600" }}>admin / admin</div>
+            <div style={{ fontSize: "0.9rem", fontWeight: "600", color: "var(--foreground-rgb, #212529)" }}>admin / admin</div>
           </div>
         </div>
       </div>
@@ -229,6 +230,7 @@ export default function AdminMonitoringPage() {
       <div
         style={{
           background: "var(--surface-card, #fff)",
+          border: "1px solid var(--border-color, rgba(44, 62, 80, 0.1))",
           borderRadius: "12px",
           overflow: "hidden",
           boxShadow: "var(--card-shadow, 0 4px 12px rgba(0,0,0,0.05))",
