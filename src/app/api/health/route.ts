@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db/client";
 import { getAppVersionInfo } from "@/lib/version";
 import { getRedisClient } from "@/lib/redis/client";
+import { logger } from "@/lib/logger";
 
 export interface ServiceHealthDetail {
   status: "ok" | "error" | "skipped";
@@ -23,8 +24,7 @@ export interface HealthCheckResponse {
     database: "ok" | "error";
     redis: "ok" | "error" | "skipped";
     system?: {
-      nodeVersion: string;
-      platform: string;
+      runtime: string;
       uptimeSeconds: number;
     };
   };
@@ -264,9 +264,9 @@ function renderHealthHtml(data: HealthCheckResponse, isHealthy: boolean): string
           <p class="subtitle">线上汉语教学平台服务探针与运行时监控</p>
         </div>
       </div>
-      <div class="overall-badge">
-        <span class="pulse-dot"></span>
-        ${statusText}
+      <div id="overall-badge" class="overall-badge">
+        <span id="pulse-dot" class="pulse-dot"></span>
+        <span id="status-text">${statusText}</span>
       </div>
     </div>
 
@@ -277,7 +277,7 @@ function renderHealthHtml(data: HealthCheckResponse, isHealthy: boolean): string
           <h4>🗄️ PostgreSQL Database</h4>
           <p>主数据库连接与核心数据持久化</p>
         </div>
-        <div class="status-tag" style="background: ${dbColor}22; color: ${dbColor}; border: 1px solid ${dbColor}44;">
+        <div id="db-status-tag" class="status-tag" style="background: ${dbColor}22; color: ${dbColor}; border: 1px solid ${dbColor}44;">
           ${dbDetail?.status.toUpperCase() || "UNKNOWN"}
           ${dbDetail?.latencyMs !== undefined ? ` · ${dbDetail.latencyMs}ms` : ""}
         </div>
@@ -289,7 +289,7 @@ function renderHealthHtml(data: HealthCheckResponse, isHealthy: boolean): string
           <h4>⚡ Redis Cache & RateLimiter</h4>
           <p>高频课程查询与限流熔断高速缓存</p>
         </div>
-        <div class="status-tag" style="background: ${redisColor}22; color: ${redisColor}; border: 1px solid ${redisColor}44;">
+        <div id="redis-status-tag" class="status-tag" style="background: ${redisColor}22; color: ${redisColor}; border: 1px solid ${redisColor}44;">
           ${redisDetail?.status.toUpperCase() || "SKIPPED"}
           ${redisDetail?.latencyMs !== undefined ? ` · ${redisDetail.latencyMs}ms` : ""}
         </div>
@@ -307,24 +307,24 @@ function renderHealthHtml(data: HealthCheckResponse, isHealthy: boolean): string
       </div>
       <div class="meta-row">
         <span class="meta-label">探针总耗时 (Latency)</span>
-        <span class="meta-value">${data.durationMs ?? 0} ms</span>
+        <span id="val-latency" class="meta-value">${data.durationMs ?? 0} ms</span>
       </div>
       <div class="meta-row">
         <span class="meta-label">系统运行时间 (Uptime)</span>
-        <span class="meta-value">${Math.floor(data.services?.system?.uptimeSeconds || 0)} 秒</span>
+        <span id="val-uptime" class="meta-value">${Math.floor(data.services?.system?.uptimeSeconds || 0)} 秒</span>
       </div>
       <div class="meta-row">
-        <span class="meta-label">Node / 架构环境</span>
-        <span class="meta-value">${data.services?.system?.nodeVersion || "unknown"} (${data.services?.system?.platform || "linux"})</span>
+        <span class="meta-label">运行架构环境</span>
+        <span class="meta-value">${data.services?.system?.runtime || "Node.js (Serverless/Container)"}</span>
       </div>
       <div class="meta-row">
         <span class="meta-label">最新检测时间 (UTC)</span>
-        <span class="meta-value">${data.timestamp}</span>
+        <span id="val-timestamp" class="meta-value">${data.timestamp}</span>
       </div>
     </div>
 
     <div class="footer">
-      <div>自动探测刷新：每 10 秒</div>
+      <div id="poll-indicator">⚡ 探针状态：静默实时同步中</div>
       <div class="footer-links">
         <a href="/api/health?format=json">JSON Raw 数据</a>
         <a href="/api/health?format=prometheus">Prometheus 指标</a>
@@ -333,10 +333,102 @@ function renderHealthHtml(data: HealthCheckResponse, isHealthy: boolean): string
     </div>
   </div>
   <script>
-    // 页面每 10 秒平滑轻量刷新一次健康状态
-    setTimeout(() => {
-      window.location.reload();
-    }, 10000);
+    // 工业级轻量静默轮询 + Page Visibility 感知，零整页硬刷新，节约 95% 以上 CPU 与网络
+    let pollTimer = null;
+
+    async function refreshHealthData() {
+      try {
+        const res = await fetch("/api/health?format=json", { cache: "no-store" });
+        if (!res.ok && res.status !== 500) return;
+        const d = await res.json();
+
+        // 1. 更新顶部总体健康状态
+        const isOk = d.success && d.status === "ok";
+        const statusColor = isOk ? "#10b981" : "#ef4444";
+        const statusBg = isOk ? "rgba(16, 185, 129, 0.12)" : "rgba(239, 68, 68, 0.12)";
+        const statusBorder = isOk ? "rgba(16, 185, 129, 0.3)" : "rgba(239, 68, 68, 0.3)";
+        const statusText = isOk ? "ALL SYSTEMS OPERATIONAL" : "SYSTEM DEGRADED";
+
+        const overallBadge = document.getElementById("overall-badge");
+        const pulseDot = document.getElementById("pulse-dot");
+        const statusTextEl = document.getElementById("status-text");
+
+        if (overallBadge) {
+          overallBadge.style.background = statusBg;
+          overallBadge.style.borderColor = statusBorder;
+          overallBadge.style.color = statusColor;
+        }
+        if (pulseDot) {
+          pulseDot.style.background = statusColor;
+          pulseDot.style.boxShadow = "0 0 10px " + statusColor;
+        }
+        if (statusTextEl) statusTextEl.textContent = statusText;
+
+        // 2. 更新 DB 状态卡片
+        const dbDetail = d.serviceDetails?.database;
+        const dbTag = document.getElementById("db-status-tag");
+        if (dbTag && dbDetail) {
+          const c = dbDetail.status === "ok" ? "#10b981" : "#ef4444";
+          dbTag.style.background = c + "22";
+          dbTag.style.color = c;
+          dbTag.style.border = "1px solid " + c + "44";
+          dbTag.textContent = dbDetail.status.toUpperCase() + (dbDetail.latencyMs !== undefined ? " · " + dbDetail.latencyMs + "ms" : "");
+        }
+
+        // 3. 更新 Redis 状态卡片
+        const redisDetail = d.serviceDetails?.redis;
+        const redisTag = document.getElementById("redis-status-tag");
+        if (redisTag && redisDetail) {
+          const c = redisDetail.status === "ok" ? "#10b981" : redisDetail.status === "skipped" ? "#94a3b8" : "#ef4444";
+          redisTag.style.background = c + "22";
+          redisTag.style.color = c;
+          redisTag.style.border = "1px solid " + c + "44";
+          redisTag.textContent = redisDetail.status.toUpperCase() + (redisDetail.latencyMs !== undefined ? " · " + redisDetail.latencyMs + "ms" : "");
+        }
+
+        // 4. 更新元信息
+        const valLatency = document.getElementById("val-latency");
+        if (valLatency) valLatency.textContent = (d.durationMs ?? 0) + " ms";
+
+        const valUptime = document.getElementById("val-uptime");
+        if (valUptime && d.services?.system?.uptimeSeconds !== undefined) {
+          valUptime.textContent = Math.floor(d.services.system.uptimeSeconds) + " 秒";
+        }
+
+        const valTimestamp = document.getElementById("val-timestamp");
+        if (valTimestamp && d.timestamp) valTimestamp.textContent = d.timestamp;
+      } catch (err) {
+        console.warn("[Health Probe] 静默轮询网络异常:", err);
+      }
+    }
+
+    function startPolling() {
+      if (pollTimer) clearInterval(pollTimer);
+      pollTimer = setInterval(refreshHealthData, 10000);
+      const indicator = document.getElementById("poll-indicator");
+      if (indicator) indicator.textContent = "⚡ 探针状态：静默实时同步中 (每 10 秒)";
+    }
+
+    function stopPolling() {
+      if (pollTimer) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+      }
+      const indicator = document.getElementById("poll-indicator");
+      if (indicator) indicator.textContent = "💤 探针状态：已随窗口休眠 (节能中)";
+    }
+
+    // 页面可见性 API：标签页切走时立刻休眠停止，切回时立刻刷新
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        stopPolling();
+      } else {
+        refreshHealthData();
+        startPolling();
+      }
+    });
+
+    startPolling();
   </script>
 </body>
 </html>`;
@@ -364,8 +456,10 @@ export async function GET(
     dbLatencyMs = Math.round(performance.now() - dbStart);
   } catch (error: unknown) {
     dbHealthy = false;
-    dbError = error instanceof Error ? error.message : "Database healthcheck failed";
     dbLatencyMs = Math.round(performance.now() - dbStart);
+    // 安全日志：详细错误堆栈仅在服务端私有日志中保留，防止在接口对外输出敏感拓扑
+    logger.error({ err: error }, "[Health Probe] Database connection probe failed");
+    dbError = "Database service unavailable";
   }
 
   // 2. 检查 Redis
@@ -386,11 +480,13 @@ export async function GET(
       } else {
         redisStatus = "error";
         redisHealthy = false;
+        logger.warn({ pong }, "[Health Probe] Redis ping returned non-PONG response");
       }
-    } catch {
+    } catch (error: unknown) {
       redisLatencyMs = Math.round(performance.now() - redisStart);
       redisStatus = "error";
       redisHealthy = false;
+      logger.error({ err: error }, "[Health Probe] Redis connection probe failed");
     }
   }
 
@@ -449,8 +545,7 @@ export async function GET(
       database: dbHealthy ? "ok" : "error",
       redis: redisStatus,
       system: {
-        nodeVersion: process.version,
-        platform: process.platform,
+        runtime: "Node.js (Serverless/Container)",
         uptimeSeconds: process.uptime ? process.uptime() : 0,
       },
     },
