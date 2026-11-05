@@ -151,6 +151,35 @@ services:
       - ./dashboards:/etc/grafana/provisioning/dashboards/json:ro
     depends_on:
       - loki
+      - prometheus
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: always
+    logging: *default-logging
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+    depends_on:
+      - cadvisor
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    restart: always
+    logging: *default-logging
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
+    privileged: true
 
   watchtower:
     image: containrrr/watchtower:latest
@@ -235,6 +264,7 @@ volumes:
   redis_data:
   loki_data:
   grafana_data:
+  prometheus_data:
   caddy_data:
   caddy_config:
   minio_data:
