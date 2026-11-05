@@ -30,6 +30,11 @@ const CourseDetailPage = async ({ params }: CourseDetailPageProps) => {
     unlockDescription: t("courseDetail.unlockDescription") || "加入我们的学习计划，解锁完整的 HLS 加密课程视频，获得权威报社为您准备的专业教材。",
     unlockAll: t("courseDetail.unlockAll") || "立即解锁全部内容",
     paymentSupport: t("courseDetail.paymentSupport") || "支持微信支付 / 支付宝",
+    notesTitle: t("courseDetail.notesTitle") || "我的笔记",
+    saveNote: t("courseDetail.saveNote") || "保存笔记",
+    noNotes: t("courseDetail.noNotes") || "暂无本节笔记，开始在上方写下你的第一条笔记吧！",
+    instructorTitle: t("courseDetail.instructorTitle") || "特聘主讲名师",
+    instructorBadge: t("courseDetail.instructorBadge") || "国家级报业资深教学专家",
   };
 
   const course = await CourseService.getCourseById(id);
@@ -42,7 +47,7 @@ const CourseDetailPage = async ({ params }: CourseDetailPageProps) => {
   // 检查当前用户全权限：免费课程开放给所有人，管理员有上帝视角，普通用户需要检查购买记录
   let hasFullAccess = course.isFree;
   if (!hasFullAccess && session?.user?.id) {
-    if ((session.user as any).role === "ADMIN") {
+    if ((session.user as { role?: string }).role === "ADMIN") {
       hasFullAccess = true;
     } else {
       const order = await prisma.order.findFirst({

@@ -13,7 +13,9 @@
     "featuredCourses": "精选课程",
     "viewAll": "查看全部",
     "authorityTitle": "权威背书",
-    "authorityDesc": "由国家级报社专业团队编写教材，确保语言表达的准确性与时代性。"
+    "authorityDesc": "由国家级报社专业团队编写教材，确保语言表达的准确性与时代性。",
+    "timestampNotes": "⏱️ 了解时间戳笔记",
+    "scrollExplore": "向下滚动探索"
   },
   "courseCard": {
     "priceLabel": "课程价格",
@@ -46,7 +48,12 @@
     "subscribersOnly": "此内容仅限订阅学员观看",
     "unlockDescription": "加入我们的学习计划，解锁完整的 HLS 加密课程视频，获得权威报社为您准备的专业教材。",
     "unlockAll": "立即解锁全部内容",
-    "paymentSupport": "支持微信支付 / 支付宝"
+    "paymentSupport": "支持微信支付 / 支付宝",
+    "notesTitle": "我的笔记",
+    "saveNote": "保存笔记",
+    "noNotes": "暂无本节笔记，开始在上方写下你的第一条笔记吧！",
+    "instructorTitle": "特聘主讲名师",
+    "instructorBadge": "国家级报业资深教学专家"
   },
   "courses": {
     "title": "所有课程",

@@ -8,7 +8,7 @@ import { CourseService } from "@/lib/services/course.service";
 
 const HomePage = async () => {
   const session = await auth();
-  const isAdmin = (session?.user as any)?.role === "ADMIN";
+  const isAdmin = (session?.user as { role?: string })?.role === "ADMIN";
   const { t } = await getTranslation();
 
   // 优先从 Redis 缓存拉取精选与最新推荐课程 (TTL 300s，高并发秒级响应)
@@ -36,7 +36,7 @@ const HomePage = async () => {
               {t("home.viewAll")}
             </Link>
             <Link href="/features/notes" className="btn-secondary-outline" style={{ textDecoration: "none", padding: "0.6rem 1.8rem", borderRadius: "24px" }}>
-              ⏱️ 了解时间戳笔记
+              {t("home.timestampNotes") || "⏱️ 了解时间戳笔记"}
             </Link>
           </div>
 
@@ -79,7 +79,7 @@ const HomePage = async () => {
 
           {/* 往下滚动微光指示 */}
           <a href="#featured-courses" className="hero-scroll-prompt" style={{ textDecoration: "none" }}>
-            <span>向下滚动探索</span>
+            <span>{t("home.scrollExplore") || "向下滚动探索"}</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="m6 9 6 6 6-6"/>
             </svg>

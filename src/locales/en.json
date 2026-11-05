@@ -13,7 +13,9 @@
     "featuredCourses": "Featured Courses",
     "viewAll": "View All",
     "authorityTitle": "Authoritative Support",
-    "authorityDesc": "Course materials compiled by national-level newspaper professional teams, ensuring accurate and contemporary language usage."
+    "authorityDesc": "Course materials compiled by national-level newspaper professional teams, ensuring accurate and contemporary language usage.",
+    "timestampNotes": "⏱️ Explore Timestamp Notes",
+    "scrollExplore": "Scroll Down to Explore"
   },
   "courseCard": {
     "priceLabel": "Course Price",
@@ -46,7 +48,12 @@
     "subscribersOnly": "This content is for subscribers only",
     "unlockDescription": "Join our learning plan to unlock the full HLS encrypted course videos and get professional textbooks prepared by the authoritative press.",
     "unlockAll": "Unlock All Content Now",
-    "paymentSupport": "Supports WeChat Pay / Alipay"
+    "paymentSupport": "Supports WeChat Pay / Alipay",
+    "notesTitle": "My Notes",
+    "saveNote": "Save Note",
+    "noNotes": "No notes yet for this lesson. Write your first note above!",
+    "instructorTitle": "Lead Instructor",
+    "instructorBadge": "National News Agency Senior Expert"
   },
   "courses": {
     "title": "All Courses",
