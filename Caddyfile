@@ -19,10 +19,10 @@
   reverse_proxy app:3000
 }
 
-{$GRAFANA_DOMAIN:grafana.155-248-203-114.sslip.io} {
+{$GRAFANA_DOMAIN:grafana.155-248-203-114.sslip.io}, http://grafana.sinoflow.internal {
   header {
     # 限制仅允许 SinoFlow 主站域名内嵌 iframe，彻底杜绝任意第三方钓鱼网站点击劫持 (Clickjacking)
-    Content-Security-Policy "frame-ancestors 'self' https://155-248-203-114.sslip.io http://localhost:3000 http://localhost"
+    Content-Security-Policy "frame-ancestors 'self' https://155-248-203-114.sslip.io http://localhost:3000 http://localhost http://sinoflow.internal"
   }
   reverse_proxy grafana:3000
 }

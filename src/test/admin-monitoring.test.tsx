@@ -1,7 +1,7 @@
 // FILE: src/test/admin-monitoring.test.tsx
 import { describe, it, expect } from "vitest";
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import AdminMonitoringPage from "@/app/admin/monitoring/page";
 
 describe("AdminMonitoringPage Component", () => {
@@ -28,5 +28,16 @@ describe("AdminMonitoringPage Component", () => {
     const iframe = screen.getByTitle("SinoFlow Traffic Dashboard");
     expect(iframe).toBeDefined();
     expect(iframe.getAttribute("src")).toContain(":3001/d/sinoflow-traffic");
+  });
+
+  it("应该支持在大屏标签页间切换到硬件与容器性能监控", () => {
+    render(<AdminMonitoringPage />);
+    const hardwareTabBtn = screen.getByRole("button", { name: /硬件与容器性能/i });
+    expect(hardwareTabBtn).toBeDefined();
+    fireEvent.click(hardwareTabBtn);
+
+    const iframe = screen.getByTitle("SinoFlow Hardware Dashboard");
+    expect(iframe).toBeDefined();
+    expect(iframe.getAttribute("src")).toContain(":3001/d/sinoflow-hardware");
   });
 });

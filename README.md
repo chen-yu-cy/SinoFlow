@@ -8,10 +8,12 @@ SinoFlow 是一个专为报社机构打造的高安全性、模块化在线中�
 - [x] **全栈框架**: 采用 Next.js 15 (App Router) + React 19，全面使用 Server Components 优化性能。
 - [x] **数据库层**: 集成 Prisma ORM，使用 Docker 容器化运行 PostgreSQL。
 - [x] **Service 层架构**: 引入类似 Spring Boot/Angular 的业务逻辑分层（Service Layer），实现 Action 与 DAO 逻辑解耦。
-- [x] **自动化测试**: 配置 Vitest 测试框架，实现 131 个核心业务逻辑与接口单元测试。
-- [x] **质量守卫 & CI/CD**: 集成 Husky + lint-staged 本地守卫，并配置 GitHub Actions 流水线（自动执行 TypeCheck、131 项单元测试、生产构建及 GHCR 镜像发布）。
+- [x] **自动化测试**: 配置 Vitest 测试框架，实现 196 个核心业务逻辑与接口单元测试。
+- [x] **质量守卫 & CI/CD**: 集成 Husky + lint-staged 本地守卫，并配置 GitHub Actions 流水线（自动执行 TypeCheck、196 项单元测试、生产构建及 GHCR 镜像发布）。
 - [x] **API 文档**: 自动化生成 Swagger/OpenAPI 交互式文档 (访问 `/api-docs`)。
 - [x] **代码文档**: 核心逻辑全量补全 JSDoc 标准注释。
+- [x] **可观测性与硬件监控**: 深度集成 **cAdvisor + Prometheus + Grafana**，在后台提供流量监控（Loki）与容器级硬件性能（CPU/Memory/Network）双大盘。
+- [x] **内网服务与专属固定域名**: 内置 **WireGuard VPN (`wg-easy`) + CoreDNS**，连入 VPN 即可直接通过语义化固定域名（如 `sinoflow.internal`、`grafana.sinoflow.internal`）免记 IP 访问所有服务。
 
 ### 2. 身份验证与权限 (Auth & RBAC)
 - [x] **安全登录**: 使用 Auth.js (NextAuth v5) 实现自定义 Email/Password 登录。
@@ -47,7 +49,7 @@ SinoFlow 是一个专为报社机构打造的高安全性、模块化在线中�
 
 ## 🐳 一键 Docker 全栈部署与生产运维 (One-Click Docker & AWS Deployment)
 
-本项目内置了完整的生产级容器化与自动化运维方案（涵盖 **Caddy 自动 HTTPS 反向代理 + Next.js 15 Standalone + PostgreSQL 15 + Loki/Promtail/Grafana 日志监控系统**）。
+本项目内置了完整的生产级容器化与自动化运维方案（涵盖 **Caddy 自动 HTTPS 反向代理 + Next.js 15 Standalone + PostgreSQL 15 + Redis + MinIO (S3) + Loki/Promtail/Prometheus/cAdvisor/Grafana 全景可观测系统 + WireGuard VPN + CoreDNS 内部域名服务**）。
 
 ### 方式一：使用 `deploy.sh` 一键全自动部署（推荐用于全新 AWS EC2 / Lightsail 裸机）
 
@@ -110,15 +112,31 @@ docker compose up -d --build
 
 ---
 
+### 🛡️ WireGuard 私网环境与固定内网域名 (Internal Domain via CoreDNS)
+
+本项目基于 **WireGuard (`wg-easy`) + CoreDNS** 实现了开箱即用的私网域名解析体系。客户端（Mac、Windows、手机）连入 VPN 隧道后，无需在本地手动修改任何 `/etc/hosts` 文件，即可直接使用语义化的固定域名访问全栈服务：
+
+| 场景 | 改造前 | 改造后（方案 4） |
+| :--- | :--- | :--- |
+| **SSH 登录服务器** | `ssh ubuntu@10.8.0.1` | **`ssh ubuntu@sinoflow.internal`** |
+| **Grafana 监控大盘** | `http://10.8.0.1:3001` | **`http://grafana.sinoflow.internal:3001`** (或 `http://grafana.sinoflow.internal`) |
+| **WireGuard 管理后台** | `http://10.8.0.1:51821` | **`http://vpn.sinoflow.internal:51821`** |
+| **多设备兼容性** | 换台手机或电脑就要重新记 IP | **连上 VPN 即自动生效，无需任何客户端配置** |
+
+---
+
 ### 🌐 服务访问端口与常用运维脚本
 
 | 服务 / 功能 | 访问地址 / 命令 | 说明 |
 | :--- | :--- | :--- |
 | **网站主入口 (Caddy)** | `http://localhost` (80) / `https://你的域名` (443) | 自动反向代理至 `app:3000`（支持最大 500MB 视频上传） |
+| **内网固定域名入口** | `http://sinoflow.internal` (80) | 连入 WireGuard 后直达主站，无需配置本地 hosts |
+| **SSH 快捷登录** | `ssh ubuntu@sinoflow.internal` | 连入 WireGuard 后直接通过固定域名 SSH 远程维护服务器 |
+| **Grafana 全景监控大盘** | `http://grafana.sinoflow.internal` (或 `:3001`) | 双大盘：`/d/sinoflow-traffic` (流量) 与 `/d/sinoflow-hardware` (硬件) |
+| **WireGuard 管理后台** | `http://vpn.sinoflow.internal:51821` (或 `:51821`) | 网页端一键添加/管理 VPN 客户端 Profile |
 | **Next.js 直连端口** | `http://localhost:3000` | 应用容器直连端口 |
 | **管理后台** | `http://localhost/admin` | 左下角实时显示当前运行版本号与 Git Commit SHA (如 `v0.1.0 (9525e32)`) |
 | **健康检查接口** | `http://localhost/api/health` | 返回数据库连接状态、系统版本号 `version` 与 `commitSha` |
-| **Grafana 日志监控台** | `http://localhost:3001` | 登录后进入 `Explore` -> 选择 `Loki` 即可实时检索全站容器日志 |
 | **手动备份数据库** | `npm run db:backup` (或 `./scripts/backup.sh`) | 导出并压缩数据库至 `backups/sinoflow_db_时间戳.sql.gz` |
 | **从备份恢复数据库** | `./scripts/backup.sh --restore backups/xxx.sql.gz` | 一键将指定的 `.sql.gz` 备份文件还原至 PostgreSQL |
 | **强制清空并重置演示数据** | `npm run db:reset` (或 `docker compose exec app npm run db:reset`) | ⚠️ 清空所有课程/课时/资料/订单并恢复为初始 2 门演示课程 |
