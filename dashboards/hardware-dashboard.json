@@ -197,7 +197,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "count(count by (name) (container_last_seen{name=~\"sinoflow.*|wg-easy\"}))",
+          "expr": "count((time() - max by (name) (container_last_seen{name=~\"sinoflow.*|wg-easy\"})) < 30)",
           "range": true,
           "refId": "A"
         }
@@ -298,7 +298,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "time() - container_last_seen{name=~\"sinoflow.*|wg-easy\"}",
+          "expr": "time() - max by (name) (container_last_seen{name=~\"sinoflow.*|wg-easy\"})",
           "legendFormat": "{{name}}",
           "instant": true,
           "range": false,
@@ -361,7 +361,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "time() - container_start_time_seconds{name=~\"sinoflow.*|wg-easy\"}",
+          "expr": "time() - max by (name) (container_start_time_seconds{name=~\"sinoflow.*|wg-easy\"})",
           "legendFormat": "{{name}}",
           "instant": true,
           "range": false,
@@ -496,7 +496,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "container_memory_working_set_bytes{name=~\"sinoflow.*|wg-easy\"}",
+          "expr": "sum by (name) (container_memory_working_set_bytes{name=~\"sinoflow.*|wg-easy\"})",
           "legendFormat": "{{name}}",
           "range": true,
           "refId": "A"
@@ -639,5 +639,5 @@
   "timezone": "browser",
   "title": "SinoFlow 系统硬件与容器性能监控",
   "uid": "sinoflow-hardware",
-  "version": 2
+  "version": 3
 }
