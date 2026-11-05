@@ -111,18 +111,18 @@ export const CourseService = {
   async getFeaturedCourses(limit: number = 4) {
     const cacheKey = `courses:featured:${limit}`;
     return await CacheService.getOrSet(cacheKey, 300, async () => {
-      const featured = await prisma.course.findMany({
+      const featured = (await prisma.course.findMany({
         where: { isFeatured: true },
         orderBy: { createdAt: "desc" },
         take: limit,
-      });
+      })) || [];
 
       if (featured.length < limit) {
-        const additional = await prisma.course.findMany({
+        const additional = (await prisma.course.findMany({
           where: { isFeatured: false },
           orderBy: { createdAt: "desc" },
           take: limit - featured.length,
-        });
+        })) || [];
         return [...featured, ...additional];
       }
 

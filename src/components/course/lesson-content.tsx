@@ -77,6 +77,7 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
   const [currentVideoTime, setCurrentVideoTime] = useState(0);
   const [seekToTime, setSeekToTime] = useState<number | null>(null);
   const [seekTrigger, setSeekTrigger] = useState(0);
+  const [jumpFeedback, setJumpFeedback] = useState<string | null>(null);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
 
   const currentLesson = course.lessons[currentLessonIndex];
@@ -84,6 +85,10 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
   const handleNoteJump = async (timestamp: number) => {
     setSeekToTime(timestamp);
     setSeekTrigger((prev) => prev + 1);
+    setJumpFeedback(`⏱️ 已定位到 ${formatTime(timestamp)} 继续播放`);
+    setTimeout(() => {
+      setJumpFeedback(null);
+    }, 2200);
     if (videoWrapperRef.current) {
       await scrollIntoViewAsync(videoWrapperRef.current, { behavior: "smooth", block: "center" });
     }
@@ -213,7 +218,31 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
     <div className="lesson-content-grid">
       {/* Main Content: Video and Description */}
       <section style={{ minInlineSize: 0 }}>
-        <div ref={videoWrapperRef} style={{ marginBottom: "2rem" }}>
+        <div ref={videoWrapperRef} style={{ marginBottom: "2rem", position: "relative" }}>
+          {jumpFeedback && (
+            <div style={{
+              position: "absolute",
+              top: "1rem",
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 35,
+              background: "rgba(18, 22, 28, 0.88)",
+              backdropFilter: "blur(8px)",
+              color: "#fff",
+              padding: "0.45rem 1.25rem",
+              borderRadius: "24px",
+              fontSize: "0.85rem",
+              fontWeight: "600",
+              boxShadow: "0 4px 16px rgba(0, 0, 0, 0.35)",
+              border: "1px solid rgba(255, 255, 255, 0.15)",
+              pointerEvents: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.4rem"
+            }}>
+              {jumpFeedback}
+            </div>
+          )}
           {canViewCurrentLesson ? (
             <VideoPlayer 
               url={currentLesson?.videoUrl || ""} 

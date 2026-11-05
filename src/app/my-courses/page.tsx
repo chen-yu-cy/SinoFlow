@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import CourseCard from "@/components/course/course-card";
 import { OrderStatus } from "@prisma/client";
+import { CourseService } from "@/lib/services/course.service";
 import { ProgressService } from "@/lib/services/progress.service";
 import { getTranslation } from "@/lib/i18n";
 import { Sparkles, Compass } from "lucide-react";
@@ -40,12 +41,9 @@ const MyCoursesPage = async () => {
   // 获取这些已购课程的学习进度
   const progressMap = await ProgressService.getCoursesProgress(session.user.id, courseIds);
 
-  // 若暂无已购课程，预取推荐课程转化流
+  // 若暂无已购课程，通过 CourseService 预取精选推荐流 (Redis 缓存 300s 高效提速)
   const rawRecommended = purchasedCourses.length === 0 
-    ? await prisma.course.findMany({
-        take: 3,
-        orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }]
-      })
+    ? await CourseService.getFeaturedCourses(3)
     : [];
   const recommendedCourses = rawRecommended || [];
 
