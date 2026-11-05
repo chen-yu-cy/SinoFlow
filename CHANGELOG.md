@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.4.0](https://github.com/chen-yu-cy/SinoFlow/compare/v0.3.0...v0.4.0) (2026-11-05)
+
+
+### Features
+
+* **admin:** display video url with copy, preview and manual edit in course form ([e6cdba7](https://github.com/chen-yu-cy/SinoFlow/commit/e6cdba760c109d9d1cb2b4e5631699b53bbfa3c6))
+* **infra:** add loki s3 log archive, danmaku collision avoidance, and admin notes moderation ([#9](https://github.com/chen-yu-cy/SinoFlow/issues/9)) ([ae9e92f](https://github.com/chen-yu-cy/SinoFlow/commit/ae9e92f9d1a3833997ba655e6b25eed01d037eaa))
+* **perf:** Redis 缓存加速与分布式滑动窗口 API 限流系统 ([#10](https://github.com/chen-yu-cy/SinoFlow/issues/10)) ([85177c7](https://github.com/chen-yu-cy/SinoFlow/commit/85177c722ad78d8b7777daad4b53893d7db151d8))
+* **storage:** enforce file format whitelist and size limits with client-server dual validation ([44249a0](https://github.com/chen-yu-cy/SinoFlow/commit/44249a0e630ed2c62b2ffce3d39ff4e77d4da936))
+* **storage:** implement S3-compatible MinIO presigned direct upload ([fefbc58](https://github.com/chen-yu-cy/SinoFlow/commit/fefbc588b5c12fed3d022566496e52956ac4390e))
+* **storage:** implement S3-compatible MinIO presigned direct upload with client-side canvas thumbnail extraction ([72ce038](https://github.com/chen-yu-cy/SinoFlow/commit/72ce038339c74c891a6642f00cc021c064de28a8))
+
+
+### Bug Fixes
+
+* **deploy:** set DOCKER_API_VERSION=1.44 for watchtower compatibility with modern docker engine ([f641494](https://github.com/chen-yu-cy/SinoFlow/commit/f641494eddadb4baacac147ca00b0ce13567718c))
+
+
+### Performance Improvements
+
+* **all:** add database indexes, caddy compression, and redis course list caching ([#11](https://github.com/chen-yu-cy/SinoFlow/issues/11)) ([0680b14](https://github.com/chen-yu-cy/SinoFlow/commit/0680b1414758cad0b35cf7b302e7800378465c6d))
+
 ## [0.3.0](https://github.com/chen-yu-cy/SinoFlow/compare/v0.2.0...v0.3.0) (2026-11-04)
 
 
