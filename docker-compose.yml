@@ -245,8 +245,8 @@ services:
       - WG_MTU=1420
       - WG_ALLOWED_IPS=0.0.0.0/0, ::/0
       - WG_PERSISTENT_KEEPALIVE=25
-      - WG_POST_UP=iptables-nft -t nat -A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE; iptables-nft -t nat -A PREROUTING -i wg0 -p tcp -d 10.8.0.1 ! --dport 51821 -j DNAT --to-destination 10.8.1.1; iptables-nft -A INPUT -p udp -m udp --dport 51820 -j ACCEPT; iptables-nft -A FORWARD -i wg0 -j ACCEPT; iptables-nft -A FORWARD -o wg0 -j ACCEPT;
-      - WG_POST_DOWN=iptables-nft -t nat -D POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE; iptables-nft -t nat -D PREROUTING -i wg0 -p tcp -d 10.8.0.1 ! --dport 51821 -j DNAT --to-destination 10.8.1.1; iptables-nft -D INPUT -p udp -m udp --dport 51820 -j ACCEPT; iptables-nft -D FORWARD -i wg0 -j ACCEPT; iptables-nft -D FORWARD -o wg0 -j ACCEPT;
+      - WG_POST_UP=iptables-nft -t nat -A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE; iptables-nft -t nat -A PREROUTING -i wg0 -p udp --dport 53 -j DNAT --to-destination 1.1.1.1:53; iptables-nft -t nat -A PREROUTING -i wg0 -p tcp --dport 53 -j DNAT --to-destination 1.1.1.1:53; iptables-nft -t nat -A PREROUTING -i wg0 -p tcp -d 10.8.0.1 ! --dport 51821 -j DNAT --to-destination 10.8.1.1; iptables-nft -A INPUT -p udp -m udp --dport 51820 -j ACCEPT; iptables-nft -A FORWARD -i wg0 -j ACCEPT; iptables-nft -A FORWARD -o wg0 -j ACCEPT;
+      - WG_POST_DOWN=iptables-nft -t nat -D POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE; iptables-nft -t nat -D PREROUTING -i wg0 -p udp --dport 53 -j DNAT --to-destination 1.1.1.1:53; iptables-nft -t nat -D PREROUTING -i wg0 -p tcp --dport 53 -j DNAT --to-destination 1.1.1.1:53; iptables-nft -t nat -D PREROUTING -i wg0 -p tcp -d 10.8.0.1 ! --dport 51821 -j DNAT --to-destination 10.8.1.1; iptables-nft -D INPUT -p udp -m udp --dport 51820 -j ACCEPT; iptables-nft -D FORWARD -i wg0 -j ACCEPT; iptables-nft -D FORWARD -o wg0 -j ACCEPT;
     volumes:
       - wireguard_data:/etc/wireguard
     ports:
