@@ -53,7 +53,21 @@
     "saveNote": "Guardar Nota",
     "noNotes": "¡Aún no hay notas para esta lección. Escribe tu primera nota arriba!",
     "instructorTitle": "Instructor Principal",
-    "instructorBadge": "Experto Senior de la Agencia de Noticias"
+    "instructorBadge": "Experto Senior de la Agencia de Noticias",
+    "notesFeatureTitle": "Función Exclusiva de Notas del Curso",
+    "notesFeatureDesc": "¡Inscribirse en este curso desbloquea notas interactivas con marca de tiempo! Capture notas en cualquier momento y haga clic en marcas de tiempo para saltar al instante.",
+    "unlockNotesBtn": "Comprar Ahora para Desbloquear Todas las Funciones",
+    "timestampTrack": "Marca de tiempo actual:",
+    "autoTrackHint": "(Rastreo automático de tiempo durante la reproducción)",
+    "noteInputPlaceholder": "Escriba aquí los puntos clave, reflexiones o dudas de esta lección...",
+    "noteJumpHint": "Haga clic para reproducir desde este tiempo en el video",
+    "jumpFeedback": "⏱️ Ubicado en {time} para continuar la reproducción"
+  },
+  "notFound": {
+    "title": "404 - Página no encontrada",
+    "subtitle": "Lo sentimos, la página que busca no existe o ha sido trasladada.",
+    "btnHome": "Volver al Inicio",
+    "btnCourses": "Explorar Cursos"
   },
   "courses": {
     "title": "Todos los cursos",
@@ -147,5 +161,39 @@
     "errMismatch": "Las nuevas contraseñas no coinciden.",
     "errRequired": "Todos los campos de contraseña son requeridos.",
     "successMessage": "¡Contraseña actualizada con éxito!"
+  },
+  "notesFeature": {
+    "badge": "Presentación de Función Destacada",
+    "title": "Notas con Marca de Tiempo Interactivas",
+    "subtitle": "Rompe la curva del olvido del aprendizaje en video. Disfrute de un repaso inmersivo con consulta y retorno en un solo clic.",
+    "demoHint": "💡 Pruébalo: Haz clic en cualquiera de las marcas de tiempo abajo",
+    "simulatorTitle": "Simulador Interactivo",
+    "chapterBadge": "Capítulo 1: Tonos y Ritmo en Chino",
+    "nowPlaying": "● Reproduciendo",
+    "notesListTitle": "Notas del Curso",
+    "jumpingTo": "Retrocediendo a este segmento",
+    "jumpToTooltip": "Saltar a {time}",
+    "features": {
+      "f1Title": "Localización Rápida en Video",
+      "f1Desc": "Notas profundamente vinculadas con el reproductor. Haz clic en la marca de tiempo para regresar directamente sin perder tiempo arrastrando.",
+      "f2Title": "Toma de Notas sin Interrupciones",
+      "f2Desc": "Barra de herramientas de vidrio esmerilado y pestañas limpias para capturar reflexiones en tiempo real sin cortar tu concentración.",
+      "f3Title": "Compañero Inteligente de Estudio",
+      "f3Desc": "Diseñado para las características del aprendizaje del chino (tonos, vocabulario, oraciones editoriales complejas) y la fluidez."
+    },
+    "cta": {
+      "title": "Únete a la Plataforma Oficial y Domina el Chino",
+      "desc": "Las notas con marca de tiempo están desbloqueadas para todos los estudiantes inscritos. Adquiere cualquier curso para disfrutar de acceso completo.",
+      "btnCourses": "Explorar Cursos",
+      "btnHome": "Volver al Inicio"
+    },
+    "mockNotes": {
+      "n1": "📝 Nota de tono: “bàn” es 4.º tono (descendente), pronunciado con fuerza.",
+      "n1Sub": "Explicación: Reglas de pinyin y pronunciación de cuatro tonos...",
+      "n2": "💡 Estructura clave: “快...了” expresa acción inminente en “我学汉语快半年了”.",
+      "n2Sub": "Profundización: Patrones de oraciones clásicas y adverbios de tiempo...",
+      "n3": "📰 Vocabulario de prensa: ‘流利’ (fluido) y ‘精通’ (dominio).",
+      "n3Sub": "Ampliación: Lectura de artículos de periódico con palabras frecuentes..."
+    }
   }
 }

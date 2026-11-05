@@ -53,7 +53,21 @@
     "saveNote": "Save Note",
     "noNotes": "No notes yet for this lesson. Write your first note above!",
     "instructorTitle": "Lead Instructor",
-    "instructorBadge": "National News Agency Senior Expert"
+    "instructorBadge": "National News Agency Senior Expert",
+    "notesFeatureTitle": "Exclusive Course Notes Feature",
+    "notesFeatureDesc": "Enrolling in this course unlocks interactive timestamped notes! Capture notes at any timecode, and click timestamps to seek the video instantly for optimal retention.",
+    "unlockNotesBtn": "Enroll Now to Unlock All Features",
+    "timestampTrack": "Current Timestamp:",
+    "autoTrackHint": "(Auto-tracks playback time during video playback)",
+    "noteInputPlaceholder": "Write your key learnings, insights, or questions here...",
+    "noteJumpHint": "Click to seek video to this timestamp",
+    "jumpFeedback": "⏱️ Seeked to {time} and resuming playback"
+  },
+  "notFound": {
+    "title": "404 - Page Not Found",
+    "subtitle": "Sorry, the page you are looking for does not exist or has been moved.",
+    "btnHome": "Return Home",
+    "btnCourses": "Browse All Courses"
   },
   "courses": {
     "title": "All Courses",
@@ -147,5 +161,39 @@
     "errMismatch": "New passwords do not match.",
     "errRequired": "All password fields are required.",
     "successMessage": "Password updated successfully!"
+  },
+  "notesFeature": {
+    "badge": "Core Feature Spotlight",
+    "title": "Interactive Timestamped Notes",
+    "subtitle": "Break the forgetting curve of video learning. Enjoy seamless, one-click recall tailored for effective language retention.",
+    "demoHint": "💡 Try it out: Click on any timestamped note below",
+    "simulatorTitle": "Interactive Simulator",
+    "chapterBadge": "Chapter 1: Tones & Rhythms in Chinese",
+    "nowPlaying": "● Now Playing",
+    "notesListTitle": "Course Notes",
+    "jumpingTo": "Recalling this segment",
+    "jumpToTooltip": "Jump to {time}",
+    "features": {
+      "f1Title": "Instant Video Seeking",
+      "f1Desc": "Notes are deeply integrated with the player. Click a timestamp to jump instantly back to that precise moment without tedious scrubbing.",
+      "f2Title": "Distraction-Free Note Taking",
+      "f2Desc": "Crafted with frosted-glass toolbars and clean tabs to capture thoughts in real time without pausing your learning momentum.",
+      "f3Title": "Smart Study Companion",
+      "f3Desc": "Designed specifically for Chinese learning (tones, vocabulary, editorial sentences) to build a solid foundation for fluency."
+    },
+    "cta": {
+      "title": "Join the Official Platform & Master Chinese",
+      "desc": "Timestamped notes are unlocked for all enrolled students. Enroll in any course to gain full access to notes and companion resources.",
+      "btnCourses": "Browse Courses",
+      "btnHome": "Return Home"
+    },
+    "mockNotes": {
+      "n1": "📝 Tone note: “bàn” is 4th tone (falling), pronounced sharply and firmly.",
+      "n1Sub": "Explaining: Pinyin rules and four tone pronunciation...",
+      "n2": "💡 Key pattern: “快...了” indicates an imminent action in “我学汉语快半年了”.",
+      "n2Sub": "In-depth: Classic sentence patterns and time adverbials...",
+      "n3": "📰 Newspaper vocabulary: ‘流利’ (fluent) and ‘精通’ (mastery).",
+      "n3Sub": "Extension: Reading press articles with curated high-frequency words..."
+    }
   }
 }

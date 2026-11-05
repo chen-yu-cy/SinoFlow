@@ -36,6 +36,14 @@ interface LessonContentProps {
     noNotes?: string;
     instructorTitle?: string;
     instructorBadge?: string;
+    notesFeatureTitle?: string;
+    notesFeatureDesc?: string;
+    unlockNotesBtn?: string;
+    timestampTrack?: string;
+    autoTrackHint?: string;
+    noteInputPlaceholder?: string;
+    noteJumpHint?: string;
+    jumpFeedback?: string;
   };
 }
 
@@ -63,7 +71,15 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
     saveNote: "保存笔记",
     noNotes: "暂无本节笔记，开始在上方写下你的第一条笔记吧！",
     instructorTitle: "特聘主讲名师",
-    instructorBadge: "国家级报业资深教学专家"
+    instructorBadge: "国家级报业资深教学专家",
+    notesFeatureTitle: "专属随堂笔记功能",
+    notesFeatureDesc: "购买该课程后即可解锁时间戳记笔记特权！支持在播放至任意时间一键截取记录，点击时间戳快速定位跳转视频，为您定制最高效的复习通路。",
+    unlockNotesBtn: "立即购买解锁完整特权",
+    timestampTrack: "记录时间戳:",
+    autoTrackHint: "(视频播放时会自动追踪当前时间点)",
+    noteInputPlaceholder: "在此记录本课时的知识点、心得或疑问...",
+    noteJumpHint: "点击跳转到对应视频时间点播放",
+    jumpFeedback: "⏱️ 已定位到 {time} 继续播放"
   };
 
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
@@ -99,7 +115,8 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
     if (jumpFeedbackTimerRef.current) {
       clearTimeout(jumpFeedbackTimerRef.current);
     }
-    setJumpFeedback(`⏱️ 已定位到 ${formatTime(timestamp)} 继续播放`);
+    const template = t.jumpFeedback || "⏱️ 已定位到 {time} 继续播放";
+    setJumpFeedback(template.replace("{time}", formatTime(timestamp)));
     jumpFeedbackTimerRef.current = setTimeout(() => {
       setJumpFeedback(null);
       jumpFeedbackTimerRef.current = null;
@@ -361,10 +378,10 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                   <Lock size={32} />
                 </div>
                 <h4 style={{ margin: "0 0 0.75rem 0", fontSize: "1.3rem", fontWeight: "800", color: "var(--foreground-rgb)" }}>
-                  专属随堂笔记功能
+                  {t.notesFeatureTitle || "专属随堂笔记功能"}
                 </h4>
                 <p style={{ margin: "0 0 1.5rem 0", color: "var(--text-muted)", fontSize: "0.95rem", maxWidth: "420px", lineHeight: "1.6" }}>
-                  购买该课程后即可解锁时间戳记笔记特权！支持在播放至任意时间一键截取记录，点击时间戳快速定位跳转视频，为您定制最高效的复习通路。
+                  {t.notesFeatureDesc || "购买该课程后即可解锁时间戳记笔记特权！支持在播放至任意时间一键截取记录，点击时间戳快速定位跳转视频，为您定制最高效的复习通路。"}
                 </p>
                 <button 
                   type="button"
@@ -381,7 +398,7 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                     cursor: "pointer"
                   }}
                 >
-                  立即购买解锁完整特权
+                  {t.unlockNotesBtn || "立即购买解锁完整特权"}
                 </button>
               </div>
             ) : (
@@ -394,14 +411,14 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                 <div style={{ background: "var(--surface-muted)", padding: "1.25rem", borderRadius: "8px", border: "1px solid var(--border-subtle)", marginBottom: "1.5rem" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
                     <span style={{ fontSize: "0.9rem", color: "var(--text-secondary)", fontWeight: "600" }}>
-                      记录时间戳: <span style={{ color: "var(--primary)", fontFamily: "monospace", fontSize: "1rem" }}>{formatTime(currentVideoTime)}</span>
+                      {t.timestampTrack || "记录时间戳:"} <span style={{ color: "var(--primary)", fontFamily: "monospace", fontSize: "1rem" }}>{formatTime(currentVideoTime)}</span>
                     </span>
                     <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
-                      (视频播放时会自动追踪当前时间点)
+                      {t.autoTrackHint || "(视频播放时会自动追踪当前时间点)"}
                     </span>
                   </div>
                   <textarea
-                    placeholder="在此记录本课时的知识点、心得或疑问..."
+                    placeholder={t.noteInputPlaceholder || "在此记录本课时的知识点、心得或疑问..."}
                     value={noteContent}
                     onChange={(e) => setNoteContent(e.target.value)}
                     style={{
@@ -459,7 +476,7 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                           e.currentTarget.style.borderColor = "var(--border-subtle)";
                           e.currentTarget.style.boxShadow = "none";
                         }}
-                        title="点击跳转到对应视频时间点播放"
+                        title={t.noteJumpHint || "点击跳转到对应视频时间点播放"}
                         style={{
                           padding: "1rem 1.25rem",
                           borderRadius: "8px",
