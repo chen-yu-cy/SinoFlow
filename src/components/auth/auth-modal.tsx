@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { X, Mail, Lock, User, AlertCircle, CheckCircle2 } from "lucide-react";
+import { X, Mail, Lock, User, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { registerUser } from "@/lib/actions/auth";
 
 interface AuthModalProps {
@@ -33,6 +33,7 @@ interface AuthModalProps {
 
 export const AuthModal = ({ initialMode, translations: t }: AuthModalProps) => {
   const [mode, setMode] = useState<"login" | "register">(initialMode);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -252,11 +253,11 @@ export const AuthModal = ({ initialMode, translations: t }: AuthModalProps) => {
               <Lock size={16} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
               <input 
                 name="password" 
-                type="password" 
+                type={showPassword ? "text" : "password"} 
                 placeholder={t.passwordPlaceholder}
                 style={{ 
                   width: "100%", 
-                  padding: "0.75rem 1rem 0.75rem 2.5rem", 
+                  padding: "0.75rem 2.5rem 0.75rem 2.5rem", 
                   borderRadius: "8px", 
                   border: "1px solid var(--input-border)",
                   fontSize: "0.95rem",
@@ -265,6 +266,28 @@ export const AuthModal = ({ initialMode, translations: t }: AuthModalProps) => {
                 }} 
                 required 
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                style={{
+                  position: "absolute",
+                  right: "0.75rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  padding: "0.25rem",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "var(--text-muted)",
+                  transition: "color 0.2s"
+                }}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
           </div>
 

@@ -13,7 +13,9 @@
     "featuredCourses": "Cursos destacados",
     "viewAll": "Ver todos",
     "authorityTitle": "Respaldo Autoritario",
-    "authorityDesc": "Materiales de cursos compilados por equipos profesionales de prensa a nivel nacional, garantizando la precisión y actualidad del uso del idioma."
+    "authorityDesc": "Materiales de cursos compilados por equipos profesionales de prensa a nivel nacional, garantizando la precisión y actualidad del uso del idioma.",
+    "timestampNotes": "⏱️ Conoce las Notas con Marca de Tiempo",
+    "scrollExplore": "Desplázate hacia abajo para explorar"
   },
   "courseCard": {
     "priceLabel": "Precio del curso",
@@ -46,7 +48,12 @@
     "subscribersOnly": "Este contenido es exclusivo para estudiantes suscritos",
     "unlockDescription": "Únase a nuestro plan de aprendizaje para desbloquear los videos completos de cursos cifrados con HLS y obtener libros de texto profesionales preparados por la prensa autorizada.",
     "unlockAll": "Desbloquear todo el contenido ahora",
-    "paymentSupport": "Soporta WeChat Pay / Alipay"
+    "paymentSupport": "Soporta WeChat Pay / Alipay",
+    "notesTitle": "Mis Notas",
+    "saveNote": "Guardar Nota",
+    "noNotes": "¡Aún no hay notas para esta lección. Escribe tu primera nota arriba!",
+    "instructorTitle": "Instructor Principal",
+    "instructorBadge": "Experto Senior de la Agencia de Noticias"
   },
   "courses": {
     "title": "Todos los cursos",

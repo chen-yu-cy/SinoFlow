@@ -81,6 +81,84 @@ const CourseCard = ({ id, title, description, price, level, duration, isFree, th
 
   const { bg: levelBg, color: levelColor } = getLevelStyles();
 
+  const getTitleInitial = (text: string) => {
+    if (!text) return "汉";
+    const clean = text.replace(/^[^\w\u4e00-\u9fa5]+/, "");
+    if (/^[a-zA-Z]/.test(clean)) {
+      const match = clean.match(/^[a-zA-Z0-9]+/);
+      return match ? match[0].slice(0, 3).toUpperCase() : clean.slice(0, 2);
+    }
+    return clean.slice(0, 2);
+  };
+
+  const stampText = getTitleInitial(title);
+
+  const renderArtworkCover = (isCompact = false) => (
+    <div style={{
+      width: "100%",
+      height: "100%",
+      background: "radial-gradient(circle at 75% 25%, var(--primary-light) 0%, transparent 65%), linear-gradient(135deg, var(--thumb-bg-start) 0%, var(--thumb-bg-end) 100%)",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      position: "relative",
+      userSelect: "none",
+      overflow: "hidden"
+    }}>
+      {/* 水墨暗纹大字背景 */}
+      <div style={{
+        position: "absolute",
+        right: "-5%",
+        bottom: "-15%",
+        fontSize: isCompact ? "4rem" : "6.5rem",
+        fontWeight: "900",
+        fontFamily: "'Noto Serif SC', 'Songti SC', 'SimSun', serif",
+        color: "var(--border-color)",
+        opacity: 0.35,
+        pointerEvents: "none",
+        lineHeight: 1
+      }}>
+        {stampText.charAt(0)}
+      </div>
+
+      {/* 国风朱文印章徽标 */}
+      <div style={{
+        padding: isCompact ? "0.3rem 0.55rem" : "0.5rem 0.85rem",
+        border: "2px solid var(--primary)",
+        borderRadius: "6px",
+        background: "var(--surface-card)",
+        boxShadow: "0 4px 12px rgba(200, 16, 46, 0.12)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1
+      }}>
+        <span style={{
+          fontSize: isCompact ? "1.1rem" : "1.5rem",
+          fontWeight: "900",
+          fontFamily: "'Noto Serif SC', 'Songti SC', 'SimSun', serif",
+          color: "var(--primary)",
+          letterSpacing: "2px",
+          lineHeight: 1.1
+        }}>
+          {stampText}
+        </span>
+        <span style={{
+          fontSize: "0.55rem",
+          fontWeight: "700",
+          color: "var(--text-muted)",
+          letterSpacing: "1.5px",
+          textTransform: "uppercase",
+          marginTop: "2px"
+        }}>
+          SinoFlow
+        </span>
+      </div>
+    </div>
+  );
+
   if (layout === "list") {
     return (
       <div className="course-card course-card-list">
@@ -103,10 +181,7 @@ const CourseCard = ({ id, title, description, price, level, duration, isFree, th
                 style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
               />
             ) : (
-              <>
-                <BookOpen size={32} strokeWidth={1} style={{ marginBottom: "0.5rem" }} />
-                <div>{t.noThumbnail}</div>
-              </>
+              renderArtworkCover(true)
             )}
           </div>
         </Link>
@@ -186,10 +261,7 @@ const CourseCard = ({ id, title, description, price, level, duration, isFree, th
               className="card-image"
             />
           ) : (
-            <>
-              <BookOpen size={40} strokeWidth={1} style={{ marginBottom: "0.5rem" }} />
-              <div>{t.noThumbnail}</div>
-            </>
+            renderArtworkCover(false)
           )}
         </div>
       </Link>

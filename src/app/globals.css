@@ -455,9 +455,9 @@ input:focus, select:focus, textarea:focus {
   background-image: radial-gradient(var(--border-color) 1px, transparent 0);
   background-size: 16px 16px;
   border: 1px solid var(--border-color);
-  border-radius: 24px;
-  padding: 2.5rem 2rem 1.5rem 2rem;
-  margin-top: 1rem;
+  border-radius: 20px;
+  padding: 2.2rem 2rem 1.25rem 2rem;
+  margin-top: 0.75rem;
   margin-bottom: 2rem;
   box-shadow: var(--card-shadow);
 }

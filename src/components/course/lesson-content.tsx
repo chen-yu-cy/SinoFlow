@@ -31,6 +31,11 @@ interface LessonContentProps {
     unlockDescription?: string;
     unlockAll?: string;
     paymentSupport?: string;
+    notesTitle?: string;
+    saveNote?: string;
+    noNotes?: string;
+    instructorTitle?: string;
+    instructorBadge?: string;
   };
 }
 
@@ -53,7 +58,12 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
     subscribersOnly: "此内容仅限订阅学员观看",
     unlockDescription: "加入我们的学习计划，解锁完整的 HLS 加密课程视频，获得权威报社为您准备的专业教材。",
     unlockAll: "立即解锁全部内容",
-    paymentSupport: "支持微信支付 / 支付宝"
+    paymentSupport: "支持微信支付 / 支付宝",
+    notesTitle: "我的笔记",
+    saveNote: "保存笔记",
+    noNotes: "暂无本节笔记，开始在上方写下你的第一条笔记吧！",
+    instructorTitle: "特聘主讲名师",
+    instructorBadge: "国家级报业资深教学专家"
   };
 
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
@@ -277,7 +287,7 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
             }}
           >
             <span style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}>
-              <PenTool size={18} /> 我的笔记 {!hasFullAccess ? "🔒" : `(${notes.length})`}
+              <PenTool size={18} /> {t.notesTitle || "我的笔记"} {!hasFullAccess ? "🔒" : `(${notes.length})`}
             </span>
           </button>
         </div>
@@ -332,7 +342,7 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
             ) : (
               <>
                 <h3 style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem", marginTop: 0 }}>
-                  <PenTool size={20} color="var(--primary)" /> 学习笔记
+                  <PenTool size={20} color="var(--primary)" /> {t.notesTitle || "学习笔记"}
                 </h3>
                 
                 {/* 笔记编辑卡片 */}
@@ -378,7 +388,7 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                         transition: "all 0.2s"
                       }}
                     >
-                      保存笔记
+                      {t.saveNote || "保存笔记"}
                     </button>
                   </div>
                 </div>
@@ -386,7 +396,7 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                 {/* 笔记列表展示 */}
                 {notes.length === 0 ? (
                   <p style={{ textAlign: "center", color: "var(--text-muted)", fontStyle: "italic", margin: "2rem 0" }}>
-                    暂无本节笔记，开始在上方写下你的第一条笔记吧！
+                    {t.noNotes || "暂无本节笔记，开始在上方写下你的第一条笔记吧！"}
                   </p>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -597,6 +607,55 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
             })}
           </ul>
 
+          {/* 讲师专业背书卡片 */}
+          <div style={{
+            margin: "1rem 1.25rem",
+            padding: "1rem 1.25rem",
+            borderRadius: "10px",
+            background: "var(--surface-muted)",
+            border: "1px solid var(--border-subtle)",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.85rem"
+          }}>
+            <div style={{
+              width: "40px",
+              height: "40px",
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, var(--primary) 0%, #8e0b1e 100%)",
+              color: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "1rem",
+              fontWeight: "700",
+              boxShadow: "0 2px 8px rgba(200, 16, 46, 0.25)",
+              flexShrink: 0
+            }}>
+              师
+            </div>
+            <div style={{ overflow: "hidden" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                <span style={{ fontSize: "0.9rem", fontWeight: "700", color: "var(--foreground-rgb)" }}>
+                  {t.instructorTitle || "特聘主讲名师"}
+                </span>
+                <span style={{
+                  fontSize: "0.6rem",
+                  padding: "1px 5px",
+                  borderRadius: "4px",
+                  background: "rgba(200, 16, 46, 0.1)",
+                  color: "var(--primary)",
+                  fontWeight: "700"
+                }}>
+                  OFFICIAL
+                </span>
+              </div>
+              <p style={{ margin: "0.2rem 0 0 0", fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.4 }}>
+                {t.instructorBadge || "国家级报业资深教学专家"}
+              </p>
+            </div>
+          </div>
+
           {/* 配套学习资料 (Resources) 区域 */}
           <div style={{ padding: '1.5rem', background: 'var(--surface-muted)', borderTop: '1px solid var(--border-color)' }}>
             <h3 style={{ margin: "0 0 1rem 0", display: "flex", alignItems: "center", gap: "0.6rem", fontSize: "1.1rem", fontWeight: "700", color: "var(--foreground-rgb)" }}>
@@ -611,6 +670,7 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
               <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                 {course.resources.map((res) => {
                   const downloadUrl = `/api/courses/${course.id}/resources/${res.id}`;
+                  const fileExt = (res.fileUrl.split('.').pop() || 'FILE').split('?')[0].toUpperCase();
                   
                   return (
                     <li 
@@ -650,11 +710,26 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", overflow: "hidden", flex: 1 }}>
-                        <FileText size={20} color={hasFullAccess ? "var(--primary)" : "var(--text-muted)"} style={{ flexShrink: 0 }} />
+                        <div style={{ position: "relative", display: "inline-flex", alignItems: "center", flexShrink: 0 }}>
+                          <FileText size={20} color={hasFullAccess ? "var(--primary)" : "var(--text-muted)"} />
+                        </div>
                         <div style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
-                          <span style={{ fontSize: "0.9rem", fontWeight: "600", color: "var(--foreground-rgb)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                            {res.title}
-                          </span>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                            <span style={{ fontSize: "0.9rem", fontWeight: "600", color: "var(--foreground-rgb)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {res.title}
+                            </span>
+                            <span style={{
+                              fontSize: "0.62rem",
+                              fontWeight: "700",
+                              padding: "1px 5px",
+                              borderRadius: "4px",
+                              background: hasFullAccess ? "rgba(200, 16, 46, 0.1)" : "var(--border-subtle)",
+                              color: hasFullAccess ? "var(--primary)" : "var(--text-muted)",
+                              flexShrink: 0
+                            }}>
+                              {fileExt}
+                            </span>
+                          </div>
                           {res.fileSize && (
                             <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "0.15rem" }}>
                               {res.fileSize}

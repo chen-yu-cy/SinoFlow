@@ -42,4 +42,10 @@ describe('CourseCard Component - Visual Logic', () => {
     render(<CourseCard {...defaultProps} level="入门级" isAdmin={true} />)
     expect(screen.getByTitle('快速编辑')).toBeDefined()
   })
+
+  it('当没有提供 thumbnailUrl 时应渲染典雅印章艺术背景与标题首字印章', () => {
+    render(<CourseCard {...defaultProps} title="商务汉语精读" />)
+    expect(screen.getByText('商务')).toBeDefined()
+    expect(screen.getByText('SinoFlow')).toBeDefined()
+  })
 })
