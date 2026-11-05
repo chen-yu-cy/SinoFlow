@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { LayoutDashboard, BookOpen, Users, Settings, LogOut, ShoppingCart, LifeBuoy, Activity, MessageSquare } from "lucide-react";
 import { getAppVersionInfo } from "@/lib/version";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 
 export const dynamic = "force-dynamic";
 
@@ -33,19 +34,21 @@ export default async function AdminLayout({
       width: "100vw", 
       height: "100vh", 
       zIndex: 5000, 
-      background: "#f8f9fa",
+      background: "var(--background-paper, #f8f9fa)",
+      color: "var(--foreground-rgb, #212529)",
       overflow: "hidden", // 内部自己处理滚动
       display: "flex"
     }}>
       {/* Admin Sidebar */}
       <aside style={{ 
         width: "260px", 
-        background: "#212529", 
+        background: "var(--surface-card, #212529)", 
         color: "#fff", 
         display: "flex", 
         flexDirection: "column",
         height: "100vh",
         flexShrink: 0,
+        borderRight: "1px solid var(--border-color, rgba(255,255,255,0.08))",
         boxShadow: "4px 0 10px rgba(0,0,0,0.05)"
       }}>
         <div style={{ padding: "2rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
@@ -144,17 +147,18 @@ export default async function AdminLayout({
           alignItems: "center",
           position: "sticky",
           top: 0,
-          background: "rgba(248, 249, 250, 0.98)", // 几乎不透明，防止透视
+          background: "var(--header-bg, rgba(248, 249, 250, 0.98))",
           backdropFilter: "blur(10px)",
           padding: "1.5rem 2.5rem",
           zIndex: 100, // 高于主体内容
-          borderBottom: "1px solid #eee"
+          borderBottom: "1px solid var(--border-color, #eee)"
         }}>
-          <h2 style={{ margin: 0, fontSize: "1.25rem", fontWeight: "700" }}>管理系统 / Overview</h2>
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <h2 style={{ margin: 0, fontSize: "1.25rem", fontWeight: "700", color: "var(--foreground-rgb, #212529)" }}>管理系统 / Overview</h2>
+          <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+            <ThemeToggle />
             <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: "0.85rem", fontWeight: "700" }}>{session.user.name}</div>
-              <div style={{ fontSize: "0.75rem", color: "#adb5bd" }}>{session.user.email}</div>
+              <div style={{ fontSize: "0.85rem", fontWeight: "700", color: "var(--foreground-rgb, #212529)" }}>{session.user.name}</div>
+              <div style={{ fontSize: "0.75rem", color: "var(--text-muted, #adb5bd)" }}>{session.user.email}</div>
             </div>
           </div>
         </header>

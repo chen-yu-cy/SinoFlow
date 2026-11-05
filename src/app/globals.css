@@ -53,6 +53,7 @@
   /* Default (Light) Semantic Tokens */
   --color-scheme: light;
   --foreground-rgb: var(--fg-light);
+  --text-main: var(--foreground-rgb);
   --background-paper: var(--bg-paper-light);
   --surface-card: var(--surface-card-light);
   --surface-muted: var(--surface-muted-light);
