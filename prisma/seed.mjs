@@ -71,8 +71,8 @@ async function main() {
       price: 199.00,
       lessons: {
         create: [
-          { title: '你好与自我介绍', videoUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', order: 1 },
-          { title: '数字与日期', videoUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', order: 2 }
+          { title: '你好与自我介绍', videoUrl: '/uploads/videos/demo/index.m3u8', order: 1 },
+          { title: '数字与日期', videoUrl: '/uploads/videos/demo/index.m3u8', order: 2 }
         ]
       },
       resources: {
@@ -92,7 +92,7 @@ async function main() {
       price: 399.00,
       lessons: {
         create: [
-          { title: '商务礼仪概论', videoUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', order: 1 }
+          { title: '商务礼仪概论', videoUrl: '/uploads/videos/demo/index.m3u8', order: 1 }
         ]
       },
       resources: {

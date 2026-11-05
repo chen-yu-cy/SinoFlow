@@ -16,7 +16,7 @@ vi.mock('hls.js', () => {
   // @ts-ignore
   MockHls.isSupported = vi.fn().mockReturnValue(true)
   // @ts-ignore
-  MockHls.Events = { MANIFEST_PARSED: 'hlsManifestParsed' }
+  MockHls.Events = { MANIFEST_PARSED: 'hlsManifestParsed', FRAG_LOADED: 'hlsFragLoaded' }
   return { default: MockHls }
 })
 
@@ -170,6 +170,48 @@ describe('VideoPlayer Component', () => {
     expect(scrollSpy).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' })
 
     document.body.removeChild(purchaseSection)
+  })
+
+  it('当切片加载完成且触发卸载时应上报流量与切片埋点', () => {
+    (Hls.isSupported as ReturnType<typeof vi.fn>).mockReturnValue(true)
+    let fragLoadedCallback: ((event: string, data: unknown) => void) | null = null
+    const mockHlsInstance = {
+      loadSource: vi.fn(),
+      attachMedia: vi.fn(),
+      on: vi.fn((event, cb) => {
+        if (event === 'hlsFragLoaded') {
+          fragLoadedCallback = cb
+        }
+      }),
+      destroy: vi.fn(),
+    };
+    (Hls as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => mockHlsInstance)
+
+    const sendBeaconMock = vi.fn().mockReturnValue(true)
+    Object.defineProperty(navigator, 'sendBeacon', {
+      value: sendBeaconMock,
+      writable: true,
+      configurable: true,
+    })
+
+    const { unmount } = render(
+      <VideoPlayer url={mockUrl} courseId="course-test" lessonId="lesson-test" />
+    )
+
+    // 模拟触发切片下载完成事件
+    expect(fragLoadedCallback).toBeDefined()
+    act(() => {
+      fragLoadedCallback?.('hlsFragLoaded', { payload: { byteLength: 300000 } })
+      fragLoadedCallback?.('hlsFragLoaded', { payload: { byteLength: 250000 } })
+    })
+
+    // 卸载触发 flushTelemetry
+    unmount()
+
+    expect(sendBeaconMock).toHaveBeenCalledWith(
+      '/api/telemetry/video',
+      expect.any(Blob)
+    )
   })
 })
 

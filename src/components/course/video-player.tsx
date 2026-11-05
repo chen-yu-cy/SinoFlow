@@ -34,6 +34,8 @@ interface VideoPlayerProps {
   onSeekProcessed?: () => void;
   onTimeUpdate?: (time: number) => void;
   notes?: VideoNoteMarker[];
+  courseId?: string;
+  lessonId?: string;
 }
 
 const VideoPlayer = ({ 
@@ -46,11 +48,17 @@ const VideoPlayer = ({
   seekTrigger = 0,
   onSeekProcessed,
   onTimeUpdate,
-  notes = []
+  notes = [],
+  courseId,
+  lessonId,
 }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 流媒体切片下载累积打点（低频批量上报，不阻塞主线程）
+  const accumulatedBytesRef = useRef(0);
+  const accumulatedFragsRef = useRef(0);
 
   // 播放状态管理
   const [isPlaying, setIsPlaying] = useState(false);
@@ -65,6 +73,35 @@ const VideoPlayer = ({
   const [previewFinished, setPreviewFinished] = useState(false);
   const [showNoteOverlay, setShowNoteOverlay] = useState(true);
   const [hoveredNoteId, setHoveredNoteId] = useState<string | null>(null);
+
+  const flushTelemetry = React.useCallback(() => {
+    const bytes = accumulatedBytesRef.current;
+    const frags = accumulatedFragsRef.current;
+    if (bytes <= 0 && frags <= 0) return;
+
+    accumulatedBytesRef.current = 0;
+    accumulatedFragsRef.current = 0;
+
+    const payload = JSON.stringify({
+      courseId,
+      lessonId,
+      bytesLoaded: bytes,
+      fragmentsCount: frags,
+      sourceUrl: url,
+    });
+
+    if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+      const blob = new Blob([payload], { type: "application/json" });
+      navigator.sendBeacon("/api/telemetry/video", blob);
+    } else if (typeof fetch === "function") {
+      fetch("/api/telemetry/video", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+        keepalive: true,
+      }).catch(() => {});
+    }
+  }, [courseId, lessonId, url]);
 
   // 视频源加载逻辑 (兼容 HLS 与 MP4)
   useEffect(() => {
@@ -92,11 +129,38 @@ const VideoPlayer = ({
         hls.loadSource(url);
         hls.attachMedia(video);
         hls.on(Hls.Events.MANIFEST_PARSED, handlePlay);
+        hls.on(Hls.Events.FRAG_LOADED, (_event, data) => {
+          const loadedBytes = data?.payload?.byteLength ?? data?.frag?.stats?.total ?? 0;
+          if (loadedBytes > 0) {
+            accumulatedBytesRef.current += loadedBytes;
+            accumulatedFragsRef.current += 1;
+          }
+        });
       } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
         video.src = url;
         video.addEventListener("loadedmetadata", handlePlay, { once: true });
       }
+
+      // 定期（每 15 秒）批量上报聚合切片打点
+      const reportInterval = setInterval(flushTelemetry, 15000);
+      const handleBeforeUnload = () => flushTelemetry();
+      const handlePauseOrEnd = () => flushTelemetry();
+
+      video.addEventListener("pause", handlePauseOrEnd);
+      video.addEventListener("ended", handlePauseOrEnd);
+
+      if (typeof window !== "undefined") {
+        window.addEventListener("beforeunload", handleBeforeUnload);
+      }
+
       return () => {
+        clearInterval(reportInterval);
+        if (typeof window !== "undefined") {
+          window.removeEventListener("beforeunload", handleBeforeUnload);
+        }
+        video.removeEventListener("pause", handlePauseOrEnd);
+        video.removeEventListener("ended", handlePauseOrEnd);
+        flushTelemetry();
         if (hls) hls.destroy();
         video.removeEventListener("loadedmetadata", handlePlay);
       };
@@ -107,7 +171,7 @@ const VideoPlayer = ({
         video.removeEventListener("loadedmetadata", handlePlay);
       };
     }
-  }, [url, autoPlay]);
+  }, [url, autoPlay, flushTelemetry]);
 
   // 外部 Seek 跳转控制监听
   useEffect(() => {
