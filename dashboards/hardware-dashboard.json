@@ -213,6 +213,172 @@
         "x": 0,
         "y": 5
       },
+      "id": 200,
+      "title": "🩺 全栈微服务健康状态看板 (Service Health & Status Wall)",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "from": 0,
+                "to": 30,
+                "result": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "🟢 UP"
+                }
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 30.0001,
+                "to": 999999999,
+                "result": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "🔴 DOWN"
+                }
+              },
+              "type": "range"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 30
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "id": 20,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "time() - container_last_seen{name=~\"sinoflow.*|wg-easy\"}",
+          "legendFormat": "{{name}}",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "🚦 13 项核心容器服务实时健康探针 (Green = Up, Red = Down)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "id": 21,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "time() - container_start_time_seconds{name=~\"sinoflow.*|wg-easy\"}",
+          "legendFormat": "{{name}}",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "⏱️ 各服务持续稳定运行时间 (Container Uptime)",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
       "id": 101,
       "title": "📈 各容器 CPU 占用实时走势 (CPU % Per Container)",
       "type": "row"
@@ -241,7 +407,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 15
       },
       "id": 4,
       "options": {
@@ -278,7 +444,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 23
       },
       "id": 102,
       "title": "💾 各容器物理内存占用走势 (Memory Usage Per Container)",
@@ -308,7 +474,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 24
       },
       "id": 5,
       "options": {
@@ -345,7 +511,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 32
       },
       "id": 103,
       "title": "🌐 容器网络吞吐走势 (Container Network I/O Rate)",
@@ -374,7 +540,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 24
+        "y": 33
       },
       "id": 6,
       "options": {
@@ -428,7 +594,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 24
+        "y": 33
       },
       "id": 7,
       "options": {
@@ -473,5 +639,5 @@
   "timezone": "browser",
   "title": "SinoFlow 系统硬件与容器性能监控",
   "uid": "sinoflow-hardware",
-  "version": 1
+  "version": 2
 }
