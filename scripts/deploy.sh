@@ -69,6 +69,10 @@ if [ ! -f .env ]; then
     GENERATED_AUTH_SECRET="R5vh0RA9bh9lTjZb8S2hpAtsHLCOY4kScJGKarxnahQ="
   fi
 
+  # 自动探测当前主机公网 IP，用于 WireGuard 客户端连接端点
+  DETECTED_PUBLIC_IP=$(curl -s --max-time 2 http://checkip.amazonaws.com || true)
+  AUTODETECT_HOST="${DETECTED_PUBLIC_IP:-localhost}"
+
   cat <<EOF > .env
 # ==============================================================================
 # SinoFlow 全局环境变量与预设凭证配置 (由 scripts/deploy.sh 自动生成)
@@ -99,6 +103,10 @@ LOG_LEVEL="info"
 
 # 6. Caddy 域名与自动 HTTPS 配置 (默认 :80 支持 IP 直接访问；绑定域名后改为如 sinoflow.com 即可自动开启 HTTPS)
 DOMAIN_NAME=":80"
+
+# 7. WireGuard VPN 配置 (动态自适应当前主机公网 IP)
+WG_HOST="${AUTODETECT_HOST}"
+WG_PASSWORD_HASH="$$2a$$12$$8VU6tb.rAOeSQUAzm6OxsOerQFYcnFbuEkl4mC9v.YivaqPbtEUgC"
 EOF
 
   echo "✅ 已自动创建 .env 配置文件（并生成了随机 AUTH_SECRET）！"
