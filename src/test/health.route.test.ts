@@ -119,4 +119,40 @@ describe("Health Check API Route (/api/health)", () => {
     expect(response.status).toBe(200); // 整体由 DB 主导，但 redis 为 0
     expect(text).toContain("sinoflow_redis_healthy 0");
   });
+
+  it("当浏览器请求 Accept: text/html 时应返回精致的 HTML 监控页面与 GitHub 仓库/Commit 链接", async () => {
+    (prisma.$queryRaw as ReturnType<typeof vi.fn>).mockResolvedValueOnce([{ "?column?": 1 }]);
+    process.env.GIT_SHA = "a1b2c3d4e5f6";
+
+    const req = new Request("http://localhost:3000/api/health", {
+      headers: { accept: "text/html,application/xhtml+xml" },
+    });
+    const response = await GET(req);
+    const html = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toContain("text/html");
+    expect(html).toContain("SinoFlow Health");
+    expect(html).toContain("ALL SYSTEMS OPERATIONAL");
+    expect(html).toContain("https://github.com/chen-yu-cy/SinoFlow/commit/a1b2c3d4e5f6");
+    expect(html).toContain("PostgreSQL Database");
+    expect(html).toContain("Redis Cache");
+
+    delete process.env.GIT_SHA;
+  });
+
+  it("当通过 ?format=json 显式请求时应强制返回 JSON 即使带了 text/html Accept 头", async () => {
+    (prisma.$queryRaw as ReturnType<typeof vi.fn>).mockResolvedValueOnce([{ "?column?": 1 }]);
+
+    const req = new Request("http://localhost:3000/api/health?format=json", {
+      headers: { accept: "text/html" },
+    });
+    const response = await GET(req);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.success).toBe(true);
+    expect(body.services.system.nodeVersion).toBeDefined();
+    expect(body.serviceDetails.database.status).toBe("ok");
+  });
 });
