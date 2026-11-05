@@ -78,17 +78,33 @@ const LessonContent = ({ course, hasFullAccess, initialCompletedLessonIds = [], 
   const [seekToTime, setSeekToTime] = useState<number | null>(null);
   const [seekTrigger, setSeekTrigger] = useState(0);
   const [jumpFeedback, setJumpFeedback] = useState<string | null>(null);
+  const jumpFeedbackTimerRef = useRef<NodeJS.Timeout | null>(null);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
+
+  // 清理跳转提示定时器
+  useEffect(() => {
+    return () => {
+      if (jumpFeedbackTimerRef.current) {
+        clearTimeout(jumpFeedbackTimerRef.current);
+      }
+    };
+  }, []);
 
   const currentLesson = course.lessons[currentLessonIndex];
 
   const handleNoteJump = async (timestamp: number) => {
     setSeekToTime(timestamp);
     setSeekTrigger((prev) => prev + 1);
+
+    if (jumpFeedbackTimerRef.current) {
+      clearTimeout(jumpFeedbackTimerRef.current);
+    }
     setJumpFeedback(`⏱️ 已定位到 ${formatTime(timestamp)} 继续播放`);
-    setTimeout(() => {
+    jumpFeedbackTimerRef.current = setTimeout(() => {
       setJumpFeedback(null);
+      jumpFeedbackTimerRef.current = null;
     }, 2200);
+
     if (videoWrapperRef.current) {
       await scrollIntoViewAsync(videoWrapperRef.current, { behavior: "smooth", block: "center" });
     }
