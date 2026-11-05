@@ -1,0 +1,14 @@
+# FILE: Corefile
+.:53 {
+    hosts {
+        10.8.0.1 sinoflow.internal
+        10.8.0.1 grafana.sinoflow.internal
+        10.8.0.1 vpn.sinoflow.internal
+        fallthrough
+    }
+    forward . 1.1.1.1 8.8.8.8
+    cache 30
+    reload
+    log
+    errors
+}
