@@ -1,6 +1,7 @@
 // FILE: src/test/video-telemetry.route.test.ts
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { POST, OPTIONS, MAX_BYTES_PER_REPORT, MAX_FRAGMENTS_PER_REPORT } from "@/app/api/telemetry/video/route";
+import { POST, OPTIONS } from "@/app/api/telemetry/video/route";
+import { MAX_BYTES_PER_REPORT, MAX_FRAGMENTS_PER_REPORT } from "@/lib/telemetry/video";
 import { logger } from "@/lib/logger";
 import { enforceRateLimit } from "@/lib/security/rate-limit-guard";
 import { NextResponse } from "next/server";

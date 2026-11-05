@@ -2,19 +2,11 @@
 import { NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
 import { enforceRateLimit } from "@/lib/security/rate-limit-guard";
-
-export interface VideoTelemetryPayload {
-  courseId?: string;
-  lessonId?: string;
-  bytesLoaded: number;
-  fragmentsCount: number;
-  durationSeconds?: number;
-  sourceUrl?: string;
-}
-
-// 单次上报上限熔断：防伪造巨量数据冲击大盘（15秒内单次上限 100MB 与 100 切片）
-export const MAX_BYTES_PER_REPORT = 100 * 1024 * 1024;
-export const MAX_FRAGMENTS_PER_REPORT = 100;
+import {
+  type VideoTelemetryPayload,
+  MAX_BYTES_PER_REPORT,
+  MAX_FRAGMENTS_PER_REPORT,
+} from "@/lib/telemetry/video";
 
 export async function POST(req: Request): Promise<NextResponse> {
   // 1. IP 频控防刷拦截（普通 API 限流：120 次/分钟）
