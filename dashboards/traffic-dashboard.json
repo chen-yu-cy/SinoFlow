@@ -44,6 +44,7 @@
             "mode": "thresholds"
           },
           "mappings": [],
+          "noValue": "0 B",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -94,7 +95,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "sum_over_time({container=~\".*caddy.*\"} | json | request_uri =~ \".*(uploads|\\\\.mp4|\\\\.m3u8|\\\\.ts).*\" | unwrap size [$__range])",
+          "expr": "sum(sum_over_time({container=~\".*caddy.*\"} | json | request_uri =~ \".*(uploads|\\\\.mp4|\\\\.m3u8|\\\\.ts).*\" | unwrap size [$__range])) or vector(0)",
           "queryType": "range",
           "refId": "A"
         }
@@ -113,6 +114,7 @@
             "mode": "thresholds"
           },
           "mappings": [],
+          "noValue": "0 B",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -159,7 +161,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "sum_over_time({container=~\".*caddy.*\"} | json | unwrap size [$__range])",
+          "expr": "sum(sum_over_time({container=~\".*caddy.*\"} | json | unwrap size [$__range])) or vector(0)",
           "queryType": "range",
           "refId": "A"
         }
@@ -178,6 +180,7 @@
             "mode": "thresholds"
           },
           "mappings": [],
+          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -224,7 +227,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "count_over_time({container=~\".*caddy.*\"} | json | status < 400 | request_uri !~ \".*(_next|favicon|uploads|api|static).*\" [$__range])",
+          "expr": "sum(count_over_time({container=~\".*caddy.*\"} | json | status < 400 | request_uri !~ \".*(_next|favicon|uploads|api|static).*\" [$__range])) or vector(0)",
           "queryType": "range",
           "refId": "A"
         }
@@ -243,6 +246,7 @@
             "mode": "thresholds"
           },
           "mappings": [],
+          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -289,7 +293,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "count_over_time({container=~\".*caddy.*\"} | json | request_uri =~ \".*(uploads|\\\\.mp4|\\\\.m3u8|\\\\.ts).*\" [$__range])",
+          "expr": "sum(count_over_time({container=~\".*caddy.*\"} | json | request_uri =~ \".*(uploads|\\\\.mp4|\\\\.m3u8|\\\\.ts).*\" [$__range])) or vector(0)",
           "queryType": "range",
           "refId": "A"
         }
@@ -544,6 +548,6 @@
   "timezone": "browser",
   "title": "SinoFlow 视频流量与全站访问监控",
   "uid": "sinoflow-traffic",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
