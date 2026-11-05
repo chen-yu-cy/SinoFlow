@@ -44,6 +44,8 @@ model Course {
   lessons     Lesson[]
   orders      Order[]
   resources   Resource[]
+
+  @@index([isFeatured, createdAt])
 }
 
 model Lesson {
@@ -60,6 +62,8 @@ model Lesson {
   course    Course       @relation(fields: [courseId], references: [id])
   progresses LessonProgress[]
   notes     Note[]
+
+  @@index([courseId, order])
 }
 
 enum LessonStatus {
@@ -80,6 +84,11 @@ model Order {
   updatedAt DateTime    @updatedAt
   course    Course      @relation(fields: [courseId], references: [id])
   user      User        @relation(fields: [userId], references: [id])
+
+  @@index([userId, status])
+  @@index([userId, courseId, status])
+  @@index([status])
+  @@index([courseId])
 }
 
 enum OrderStatus {
@@ -113,6 +122,8 @@ model Resource {
   updatedAt DateTime @updatedAt
 
   course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
 }
 
 model Note {

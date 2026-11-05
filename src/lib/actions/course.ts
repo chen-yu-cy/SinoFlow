@@ -106,6 +106,9 @@ export async function toggleCourseFeaturedAction(courseId: string, isFeatured: b
       data: { isFeatured },
     });
 
+    // 联动清除课程详情与列表聚合缓存
+    await CourseService.invalidateCourseCache(courseId);
+
     logger.info({ courseId, isFeatured }, "[Course Action] 切换课程精选状态成功");
 
     revalidatePath("/");
