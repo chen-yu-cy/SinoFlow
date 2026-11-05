@@ -1,0 +1,136 @@
+# FILE: .github/workflows/deploy.yml
+name: SinoFlow Target Version Deploy (Zero-Secret)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_ref:
+        description: "Target version to deploy (commit hash e.g. 39b1ad3, release tag e.g. v0.4.0, or branch e.g. main)"
+        required: true
+        default: "main"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  deploy:
+    name: Promote & Deploy Version
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry (ghcr.io)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve Target Git Ref and GHCR Image
+        id: resolve
+        run: |
+          INPUT="${{ github.event.inputs.target_ref }}"
+          INPUT="$(echo "$INPUT" | xargs)"
+          REGISTRY="ghcr.io/${{ github.repository }}"
+
+          echo "Target input: '$INPUT'"
+
+          # 1. 解析目标 Git 提交信息
+          if git rev-parse --verify "$INPUT^{commit}" >/dev/null 2>&1; then
+            COMMIT_SHA="$(git rev-parse "$INPUT^{commit}")"
+            SHORT_SHA="$(git rev-parse --short=7 "$INPUT^{commit}")"
+            COMMIT_MSG="$(git log -1 --pretty=%s "$COMMIT_SHA")"
+            COMMIT_AUTHOR="$(git log -1 --pretty=%an "$COMMIT_SHA")"
+          else
+            echo "::error::Specified ref '$INPUT' is not a valid git branch, tag, or commit hash."
+            exit 1
+          fi
+
+          echo "Resolved Commit: $SHORT_SHA ($COMMIT_SHA)"
+          echo "Commit Message: $COMMIT_MSG"
+          echo "Commit Author: $COMMIT_AUTHOR"
+
+          echo "commit_sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "commit_msg=$COMMIT_MSG" >> $GITHUB_OUTPUT
+          echo "commit_author=$COMMIT_AUTHOR" >> $GITHUB_OUTPUT
+
+          # 2. 依次探查 GHCR 中是否已存在匹配的预构建镜像
+          # 候选标签优先级：输入的原始 tag (如 v0.4.0) -> sha-<short_sha> -> 原始输入
+          CANDIDATES=()
+          if [[ "$INPUT" =~ ^v[0-9] ]]; then
+            CANDIDATES+=("$INPUT")
+          fi
+          CANDIDATES+=("sha-${SHORT_SHA}")
+          CANDIDATES+=("$INPUT")
+
+          FOUND_TAG=""
+          for tag in "${CANDIDATES[@]}"; do
+            echo "Checking if $REGISTRY:$tag exists in GHCR..."
+            if docker buildx imagetools inspect "$REGISTRY:$tag" >/dev/null 2>&1; then
+              FOUND_TAG="$tag"
+              echo "✓ Found existing image in GHCR: $REGISTRY:$FOUND_TAG"
+              break
+            fi
+          done
+
+          echo "existing_tag=$FOUND_TAG" >> $GITHUB_OUTPUT
+
+      - name: Promote Existing Image (Instant 0-Bandwidth Retag)
+        if: steps.resolve.outputs.existing_tag != ''
+        run: |
+          REGISTRY="ghcr.io/${{ github.repository }}"
+          SOURCE_TAG="${{ steps.resolve.outputs.existing_tag }}"
+          
+          echo "Promoting $REGISTRY:$SOURCE_TAG to $REGISTRY:latest..."
+          docker buildx imagetools create \
+            --tag "$REGISTRY:latest" \
+            "$REGISTRY:$SOURCE_TAG"
+
+          echo "✓ Successfully promoted $SOURCE_TAG to latest in GHCR!"
+
+      - name: Build & Push on Demand (Fallback when image not found in GHCR)
+        if: steps.resolve.outputs.existing_tag == ''
+        run: |
+          REGISTRY="ghcr.io/${{ github.repository }}"
+          COMMIT_SHA="${{ steps.resolve.outputs.commit_sha }}"
+          SHORT_SHA="${{ steps.resolve.outputs.short_sha }}"
+
+          echo "No pre-built image found in GHCR. Checking out $COMMIT_SHA and building..."
+          git checkout "$COMMIT_SHA"
+
+          docker buildx build \
+            --context . \
+            --file Dockerfile \
+            --build-arg GIT_SHA="$COMMIT_SHA" \
+            --tag "$REGISTRY:latest" \
+            --tag "$REGISTRY:sha-$SHORT_SHA" \
+            --push
+
+          echo "✓ Successfully built and published $COMMIT_SHA as latest and sha-$SHORT_SHA!"
+
+      - name: Generate Deployment Step Summary
+        run: |
+          cat << 'EOF' >> $GITHUB_STEP_SUMMARY
+          ## 🚀 SinoFlow 版本部署已分发至 GHCR
+
+          | 配置项 | 详细信息 |
+          | :--- | :--- |
+          | **目标版本 (Input)** | `${{ github.event.inputs.target_ref }}` |
+          | **关联 Git 提交** | `${{ steps.resolve.outputs.short_sha }}` (`${{ steps.resolve.outputs.commit_sha }}`) |
+          | **提交信息** | `${{ steps.resolve.outputs.commit_msg }}` |
+          | **提交作者** | `${{ steps.resolve.outputs.commit_author }}` |
+          | **GHCR 镜像标签** | `ghcr.io/${{ github.repository }}:latest` |
+          | **部署方式** | `${{ steps.resolve.outputs.existing_tag != '' && '⚡️ 秒级指针晋级 (0带宽拉取)' || '🔨 按需构建并推送' }}` |
+          | **Watchtower 状态** | 📡 生产服务器 Watchtower 将在 **60 秒内**检测到新 Digest 并自动无缝平滑拉起容器 |
+
+          > 💡 **0 私钥安全保障**：本流水线完全通过 GitHub Token 操作容器注册表（GHCR），未向任何外部服务器暴露私钥或端口，由服务器 Watchtower 主动拉取。
+          EOF

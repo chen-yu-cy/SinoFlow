@@ -74,6 +74,9 @@ src/
     2. **前端体验**: 管理员后台上传视频时，利用 HTML5 `<video>` + `<canvas>` 本地秒级提取第一帧封面与时长，并通过预签名 URL 直接推送到云端存储桶，配备 0%~100% 真实上传进度条。
     3. **播放鉴权**: 在 Next.js 播放端校验登录与课程购买状态，使用共享私钥实时生成带有时效性签名参数 (如 `auth_key`) 的视频播放链接，由 CDN 边缘节点验证合法性并完成内容分发。
   - *价值*: 极大降低服务器磁盘与带宽压力（Next.js 服务器 0 带宽消耗），支持超大文件稳定上传与进度展示，并有效防止音视频资源被非法抓包和盗刷。
+- [x] **运维与部署**: 实现零私钥按需版本分发 Pipeline (`.github/workflows/deploy.yml`)。
+  - *目标*: 彻底摆脱服务器 SSH 私钥在 CI 上的凭据暴露风险，通过 GHCR 镜像标签指针晋级与 Watchtower 轮询，支持随时回滚或部署任意 Git Commit Hash、Release Tag 或分支。
+  - *价值*: 0 私钥托管、0 端口开放、秒级指针晋级（无需重复下载镜像层），与 Watchtower 自动部署 100% 深度协同。
 - [ ] **运维与通知**: Watchtower 自动部署集成 Telegram 通知。
   - *目标*: 当 Watchtower 检测到 GHCR 新镜像并完成自动更新重启后，通过 Shoutrrr 自动向指定的 Telegram 机器人/群组发送部署通知。
   - *配置项*: 在 `docker-compose.yml` 中支持 `WATCHTOWER_NOTIFICATIONS=shoutrrr` 与 `WATCHTOWER_NOTIFICATION_URL=telegram://<bot-token>@telegram/?channels=<chat-id>`。
