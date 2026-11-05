@@ -125,7 +125,9 @@ export const OrderTable = ({ initialOrders }: OrderTableProps) => {
               width: "100%",
               padding: "0.75rem 1rem 0.75rem 2.5rem",
               borderRadius: "8px",
-              border: "1px solid #dee2e6",
+              border: "1px solid var(--border-color)",
+              background: "var(--surface-card)",
+              color: "var(--foreground-rgb)",
               fontSize: "0.9rem",
               outline: "none",
               transition: "border-color 0.2s"
@@ -140,8 +142,9 @@ export const OrderTable = ({ initialOrders }: OrderTableProps) => {
           style={{
             padding: "0.75rem 1.5rem",
             borderRadius: "8px",
-            border: "1px solid #dee2e6",
-            background: "#fff",
+            border: "1px solid var(--border-color)",
+            background: "var(--surface-card)",
+            color: "var(--foreground-rgb)",
             fontSize: "0.9rem",
             outline: "none",
             cursor: "pointer"
@@ -156,18 +159,18 @@ export const OrderTable = ({ initialOrders }: OrderTableProps) => {
       </div>
 
       {/* 订单列表表格 */}
-      <div style={{ background: "#fff", borderRadius: "12px", boxShadow: "var(--card-shadow)", overflow: "hidden" }}>
+      <div style={{ background: "var(--surface-card)", borderRadius: "12px", border: "1px solid var(--border-color)", boxShadow: "var(--card-shadow)", overflow: "hidden" }}>
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
             <thead>
-              <tr style={{ background: "#f8f9fa", borderBottom: "1px solid #dee2e6" }}>
-                <th style={{ padding: "1rem 1.5rem", color: "#495057", fontWeight: "600" }}>订单编号</th>
-                <th style={{ padding: "1rem 1.5rem", color: "#495057", fontWeight: "600" }}>购买学员</th>
-                <th style={{ padding: "1rem 1.5rem", color: "#495057", fontWeight: "600" }}>课程内容</th>
-                <th style={{ padding: "1rem 1.5rem", color: "#495057", fontWeight: "600" }}>实付金额</th>
-                <th style={{ padding: "1rem 1.5rem", color: "#495057", fontWeight: "600" }}>订单状态</th>
-                <th style={{ padding: "1rem 1.5rem", color: "#495057", fontWeight: "600" }}>创建时间</th>
-                <th style={{ padding: "1rem 1.5rem", textAlign: "right", color: "#495057", fontWeight: "600" }}>管理操作</th>
+              <tr style={{ background: "var(--surface-muted)", borderBottom: "1px solid var(--border-color)" }}>
+                <th style={{ padding: "1rem 1.5rem", color: "var(--text-secondary)", fontWeight: "600" }}>订单编号</th>
+                <th style={{ padding: "1rem 1.5rem", color: "var(--text-secondary)", fontWeight: "600" }}>购买学员</th>
+                <th style={{ padding: "1rem 1.5rem", color: "var(--text-secondary)", fontWeight: "600" }}>课程内容</th>
+                <th style={{ padding: "1rem 1.5rem", color: "var(--text-secondary)", fontWeight: "600" }}>实付金额</th>
+                <th style={{ padding: "1rem 1.5rem", color: "var(--text-secondary)", fontWeight: "600" }}>订单状态</th>
+                <th style={{ padding: "1rem 1.5rem", color: "var(--text-secondary)", fontWeight: "600" }}>创建时间</th>
+                <th style={{ padding: "1rem 1.5rem", textAlign: "right", color: "var(--text-secondary)", fontWeight: "600" }}>管理操作</th>
               </tr>
             </thead>
             <tbody>

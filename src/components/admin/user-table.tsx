@@ -113,31 +113,31 @@ export const UserTable = ({ initialUsers, currentUserId }: UserTableProps) => {
   return (
     <div>
       {/* 用户列表 */}
-      <div style={{ background: "#fff", borderRadius: "12px", boxShadow: "var(--card-shadow)", overflow: "hidden" }}>
+      <div style={{ background: "var(--surface-card)", borderRadius: "12px", border: "1px solid var(--border-color)", boxShadow: "var(--card-shadow)", overflow: "hidden" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
           <thead>
-            <tr style={{ background: "#f8f9fa", borderBottom: "1px solid #dee2e6" }}>
-              <th style={{ padding: "1rem 1.5rem", color: "#495057", fontWeight: "600" }}>用户信息</th>
-              <th style={{ padding: "1rem 1.5rem", color: "#495057", fontWeight: "600" }}>身份角色</th>
-              <th style={{ padding: "1rem 1.5rem", color: "#495057", fontWeight: "600" }}>已购课程</th>
-              <th style={{ padding: "1rem 1.5rem", color: "#495057", fontWeight: "600" }}>注册时间</th>
-              <th style={{ padding: "1rem 1.5rem", textAlign: "right", color: "#495057", fontWeight: "600" }}>管理操作</th>
+            <tr style={{ background: "var(--surface-muted)", borderBottom: "1px solid var(--border-color)" }}>
+              <th style={{ padding: "1rem 1.5rem", color: "var(--text-secondary)", fontWeight: "600" }}>用户信息</th>
+              <th style={{ padding: "1rem 1.5rem", color: "var(--text-secondary)", fontWeight: "600" }}>身份角色</th>
+              <th style={{ padding: "1rem 1.5rem", color: "var(--text-secondary)", fontWeight: "600" }}>已购课程</th>
+              <th style={{ padding: "1rem 1.5rem", color: "var(--text-secondary)", fontWeight: "600" }}>注册时间</th>
+              <th style={{ padding: "1rem 1.5rem", textAlign: "right", color: "var(--text-secondary)", fontWeight: "600" }}>管理操作</th>
             </tr>
           </thead>
           <tbody>
             {sortedUsers.map((user) => (
-              <tr key={user.id} style={{ borderBottom: "1px solid #f1f3f5", transition: "background 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.background = "#fafbfc"} onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>
+              <tr key={user.id} style={{ borderBottom: "1px solid var(--border-subtle, var(--border-color))", transition: "background 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.background = "var(--surface-muted)"} onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>
                 <td style={{ padding: "1.25rem 1.5rem" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                    <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: user.role === 'ADMIN' ? '#fbebed' : '#f1f3f5', display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      {user.role === 'ADMIN' ? <Crown size={18} color="var(--primary)" /> : <User size={18} color="#adb5bd" />}
+                    <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: user.role === 'ADMIN' ? 'var(--primary-light)' : 'var(--surface-subtle)', display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {user.role === 'ADMIN' ? <Crown size={18} color="var(--primary)" /> : <User size={18} color="var(--text-muted)" />}
                     </div>
                     <div>
-                      <div style={{ fontWeight: "600", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                      <div style={{ fontWeight: "600", display: "flex", alignItems: "center", gap: "0.4rem", color: "var(--foreground-rgb)" }}>
                         {user.name || "未命名学员"}
-                        {user.id === currentUserId && <span style={{ fontSize: "0.7rem", background: "#e6f4ea", color: "#28a745", padding: "0.1rem 0.4rem", borderRadius: "4px" }}>我自己</span>}
+                        {user.id === currentUserId && <span style={{ fontSize: "0.7rem", background: "var(--success-light)", color: "var(--success)", padding: "0.1rem 0.4rem", borderRadius: "4px" }}>我自己</span>}
                       </div>
-                      <div style={{ fontSize: "0.8rem", color: "#adb5bd", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                      <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "0.3rem" }}>
                         <Mail size={12} /> {user.email}
                       </div>
                     </div>

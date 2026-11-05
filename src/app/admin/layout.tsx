@@ -39,24 +39,24 @@ export default async function AdminLayout({
       overflow: "hidden", // 内部自己处理滚动
       display: "flex"
     }}>
-      {/* Admin Sidebar */}
+      {/* Admin Sidebar - 方案A：工业级 SaaS 规范，无论主题如何均保持固定深色 */}
       <aside style={{ 
         width: "260px", 
-        background: "var(--surface-card, #212529)", 
+        background: "#181e26", 
         color: "#fff", 
         display: "flex", 
         flexDirection: "column",
         height: "100vh",
         flexShrink: 0,
-        borderRight: "1px solid var(--border-color, rgba(255,255,255,0.08))",
-        boxShadow: "4px 0 10px rgba(0,0,0,0.05)"
+        borderRight: "1px solid rgba(255, 255, 255, 0.08)",
+        boxShadow: "4px 0 10px rgba(0,0,0,0.15)"
       }}>
-        <div style={{ padding: "2rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+        <div style={{ padding: "2rem", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
           <Link href="/" style={{ textDecoration: "none", color: "#fff", display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <div style={{ width: "28px", height: "28px", background: "var(--primary)", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ fontWeight: "900" }}>S</span>
+              <span style={{ fontWeight: "900", color: "#fff" }}>S</span>
             </div>
-            <span style={{ fontWeight: "800", fontSize: "1.2rem" }}>SinoFlow Admin</span>
+            <span style={{ fontWeight: "800", fontSize: "1.2rem", color: "#fff" }}>SinoFlow Admin</span>
           </Link>
         </div>
 
@@ -127,12 +127,12 @@ export default async function AdminLayout({
           </ul>
         </nav>
 
-        <div style={{ padding: "1.5rem 2rem", borderTop: "1px solid rgba(255,255,255,0.1)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", color: "#6c757d", fontSize: "0.85rem" }}>
-            <div style={{ width: "8px", height: "8px", background: "#28a745", borderRadius: "50%" }}></div>
-            管理员在线
+        <div style={{ padding: "1.25rem 1.5rem", borderTop: "1px solid rgba(255,255,255,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.5rem", whiteSpace: "nowrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#adb5bd", fontSize: "0.8rem", flexShrink: 0 }}>
+            <div style={{ width: "8px", height: "8px", background: "#40c057", borderRadius: "50%", flexShrink: 0 }}></div>
+            在线
           </div>
-          <span style={{ fontSize: "0.75rem", color: "#868e96", fontFamily: "monospace", background: "rgba(255,255,255,0.06)", padding: "0.2rem 0.5rem", borderRadius: "4px" }} title="当前系统版本与构建 Commit">
+          <span style={{ fontSize: "0.72rem", color: "#949fa8", fontFamily: "monospace", background: "rgba(255,255,255,0.08)", padding: "0.2rem 0.5rem", borderRadius: "4px", flexShrink: 0 }} title="当前系统版本与构建 Commit">
             {displayVersion}
           </span>
         </div>
